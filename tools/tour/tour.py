@@ -3,13 +3,12 @@
 
     python3 -I tools/tour/tour.py run                 # 40 and 80 col, render, build the site
     python3 -I tools/tour/tour.py run --modes 80 --only home,convlist --no-site
-    python3 -I tools/tour/tour.py run --splash-anim   # also record the welcome page animation
-    python3 -I tools/tour/tour.py simulate            # offline: a fake device, sample dumps
-    python3 -I tools/tour/tour.py placeholders        # gallery from the existing sample dumps
+    python3 -I tools/tour/tour.py simulate            # offline test against a fake device
+    python3 -I tools/tour/tour.py import x.dump       # add a real dump taken by hand
     python3 -I tools/tour/tour.py render              # render the manifest's missing images
 
 `run` drives the companion firmware's USB local CLI (115200 baud, CR line ends) with
-`ui reset`, `type`, `key`, `wait idle`, `ui state`, `screen` and `splash scene`. For each
+`ui reset`, `type`, `key`, `wait idle`, `ui state`, `screen`, `screen watch` and `splash scene`. For each
 mode (Réglages 10 switches 40/80 columns) it walks the pages below from the Sommaire,
 saves each `screen` dump to gallery/dumps/<mode>/<shot>.dump, writes gallery/manifest.json
 (page, mode, title, description), renders each dump with tools/screenshot/minitel_render.py
@@ -22,8 +21,14 @@ Safety: the tour only VISITS pages.
     no channel or contact removal. Every ENVOI is checked against `ui state` first (page,
     open question, typed text) and an allow-list of pure navigation choices; anything else
     stops the tour (SafetyStop) and returns to the Sommaire.
+  - A conversation's Actions page is opened with ENVOI on the EMPTY input line, only after
+    `ui state` shows page=conv, no question, input=- and nothing pending. On that page only
+    "Détails" (a page) and "Rechercher un mot" (a question, closed by SOMMAIRE) are chosen,
+    found by their label on the screen; never Répondre, Renvoyer, Effacer, Silence, Tout
+    marquer lu or Supprimer. The arrow key is only pressed in a conversation (it picks a
+    message).
   - Only these CLI commands are ever sent: ui reset, ui state, type <1-2 letters or
-    digits>, key <navigation key>, wait idle, screen, splash scene.
+    digits>, key <navigation key>, wait idle, screen, screen watch, splash scene.
   - It never opens /dev/ttyUSB* (a repeater on a ttyUSB resets when its tty is opened):
     the XIAO is found as /dev/serial/by-id/*3C0B547619DCA64A* and the resolved device must
     not be a ttyUSB.
@@ -100,106 +105,123 @@ G_SETTINGS = "Réglages"
 G_GRAPHS = "Graphiques"
 
 GRAPHS = [
-    "SNR of received packets: min-max bar and mean per minute, 2 h",
-    "RSSI of received packets: min-max bar and mean per minute, 2 h",
-    "Noise floor, per minute, 2 h",
-    "Radio traffic: packets received per minute (bars) and sent, 2 h",
-    "TX airtime: duty cycle per 10 min, with the sub-band limit dotted",
-    "Battery voltage, every 5 min, 10 h",
-    "Les mieux entendus: stations heard directly, by the SNR of their last advert",
-    "Hop counts of received flood packets since boot",
-    "Messages per channel since boot",
+    "SNR des paquets reçus : barre min–max et moyenne par minute, sur 2 h.",
+    "RSSI des paquets reçus : barre min–max et moyenne par minute, sur 2 h.",
+    "Bruit de fond, minute par minute, sur 2 h.",
+    "Trafic radio : paquets reçus par minute (barres) et émis, sur 2 h.",
+    "Temps d'émission par tranche de 10 min, avec la limite de la sous-bande en pointillé.",
+    "Tension de la batterie, toutes les 5 min, sur 10 h.",
+    "Les mieux entendus : les stations reçues en direct, classées par le SNR de leur dernière annonce.",
+    "Nombre de sauts des paquets reçus en diffusion depuis le démarrage.",
+    "Messages reçus par canal depuis le démarrage.",
 ]
 GRAPH_TITLES = ["SNR", "RSSI", "Bruit de fond", "Trafic radio", "Temps d'émission", "Batterie",
                 "Les mieux entendus", "Nombre de sauts", "Messages par canal"]
 
 SHOTS = [
-    Shot("splash-1", G_SPLASH, "Accueil 1/4: the mesh logo",
-         "The animated welcome page, scene 1: the mesh logo, nodes then links, then 3615 MESHCORE.",
+    Shot("splash-1", G_SPLASH, "Accueil 1/4 : le logo",
+         "La page d'accueil animée, scène 1 : le maillage se dessine, nœuds puis liens, puis 3615 MESHCORE.",
          [Step("splash", 0)], "splash"),
-    Shot("splash-2", G_SPLASH, "Accueil 2/4: radio",
-         "Scene 2: antenna and waves, frequency, BW/SF/CR, TX power, noise floor, mean SNR, packet counts.",
+    Shot("splash-2", G_SPLASH, "Accueil 2/4 : la radio",
+         "Scène 2 : l'antenne et ses ondes, fréquence, BW/SF/CR, puissance, bruit de fond, SNR moyen, paquets.",
          [Step("splash", 1)], "splash"),
-    Shot("splash-3", G_SPLASH, "Accueil 3/4: identité",
-         "Scene 3: node name, public key prefix, position, département and région, Bluetooth, battery.",
+    Shot("splash-3", G_SPLASH, "Accueil 3/4 : l'identité",
+         "Scène 3 : nom du nœud, début de la clé publique, position, département et région, Bluetooth, batterie.",
          [Step("splash", 2)], "splash"),
-    Shot("splash-4", G_SPLASH, "Accueil 4/4: réseau",
-         "Scene 4: contacts, heard stations, conversations and unread counters, the newest message.",
+    Shot("splash-4", G_SPLASH, "Accueil 4/4 : le réseau",
+         "Scène 4 : contacts, stations entendues, conversations et non-lus qui défilent, le dernier message.",
          [Step("splash", 3)], "splash"),
     Shot("home", G_HOME, "Sommaire",
-         "The main menu: node, battery, Bluetooth, the eight services, the last key and the Minitel link.",
+         "Le menu principal : nœud, batterie, Bluetooth, les huit rubriques, la dernière touche et l'état de la liaison.",
          [], "home"),
     Shot("home-guide", G_HOME, "Guide",
-         "GUIDE pressed twice: the Guide screen for the page, its keys, and how to type accents in this mode.",
+         "GUIDE pressé deux fois : l'écran d'aide de la page, ses touches et la saisie des accents dans ce mode.",
          [K("guide"), K("guide")], "home", guide=True),
     Shot("convlist", G_CONV, "Conversations",
-         "Sommaire 1. Channels, direct messages and rooms, newest activity first, with unread counts.",
+         "Sommaire 1. Canaux, messages privés et salons, les plus récents en tête, avec les non-lus.",
          [M("1")], "convlist"),
-    Shot("conv-channel", G_CONV, "A channel conversation",
-         "A channel's history, newest at the bottom; the compose line on row 24 (never sent by the tour).",
+    Shot("conv-channel", G_CONV, "Une conversation de canal",
+         "L'historique d'un canal, le plus récent en bas, avec les répétitions entendues de vos messages ; "
+         "la ligne de saisie en rangée 24.",
          [M("1"), Step("pick_conv", "channel")], "conv"),
-    Shot("conv-dm", G_CONV, "A direct conversation",
-         "A direct-message conversation, with delivery marks on sent messages.",
+    Shot("conv-actions", G_CONV, "Actions",
+         "ENVOI sur une ligne vide, après avoir choisi un message avec la flèche : répondre, effacer, détails, "
+         "rechercher, réponses rapides, silence, fiche, suppression.",
+         [M("1"), Step("pick_conv", "channel"), K("haut"), Step("actions")], "actions"),
+    Shot("msginfo", G_CONV, "Détails d'un message",
+         "Tout ce qui est gardé d'un message : sens, auteur, date à la seconde, sauts et SNR, accusé, "
+         "répétitions entendues, taille, texte entier.",
+         [M("1"), Step("pick_conv", "channel"), K("haut"), Step("actions"), Step("pick_action", "Détails")], "msginfo"),
+    Shot("conv-search", G_CONV, "Rechercher un mot",
+         "Actions, Rechercher un mot : la question s'affiche en bas de page.",
+         [M("1"), Step("pick_conv", "channel"), Step("actions"), Step("pick_action", "Rechercher")], "actions"),
+    Shot("conv-dm", G_CONV, "Une conversation privée",
+         "Un échange en message privé, avec les marques de remise : (...), (reçu), (échec ?).",
          [M("1"), Step("pick_conv", "dm")], "conv"),
     Shot("news", G_CONV, "Dernières nouvelles",
-         "Sommaire 2. The newest messages of every conversation, merged by time; unread entries blink.",
+         "Sommaire 2. Les derniers messages de toutes les conversations, fusionnés par heure ; les non-lus clignotent.",
          [M("2")], "news"),
     Shot("contacts", G_CONTACTS, "Contacts",
-         "Sommaire 3. Contacts by last advert: type, name, hops, last advert, key prefix.",
+         "Sommaire 3. Les contacts par dernière annonce : type, nom, sauts, dernière annonce, début de clé ; "
+         "les favoris en tête.",
          [M("3")], "contacts"),
     Shot("heard", G_CONTACTS, "Stations entendues",
-         "Contacts, then E: every station heard since boot, contact or not.",
+         "Contacts, puis E : toutes les stations entendues depuis le démarrage, contacts ou non.",
          [M("3"), M("E")], "contacts"),
     Shot("nearby", G_CONTACTS, "Stations proches",
-         "Contacts, then P: stations announcing a position, nearest first, with distance and bearing.",
+         "Contacts, puis P : les stations qui annoncent une position, la plus proche en tête, avec distance et cap.",
          [M("3"), M("P")], "nearby"),
     Shot("contact", G_CONTACTS, "Fiche contact",
-         "A contact sheet: name, key, path, last advert, position, SNR sparkline and the actions.",
+         "Une fiche : nom, clé, chemin, dernière annonce, position, courbe du SNR, et les actions.",
          [M("3"), Step("pick_contact", "any")], "contact"),
-    Shot("admin", G_CONTACTS, "Administration",
-         "Sheet action 7 on a repeater: login, status, neighbours, telemetry, remote console (not used here).",
+    Shot("admin", G_CONTACTS, "Administration d'un relais",
+         "Fiche, action 7, sur un relais : connexion, état, voisins, télémesure, console à distance "
+         "(rien n'est envoyé ici).",
          [M("3"), Step("pick_contact", "repeater"), M("7")], "admin"),
     Shot("advert", G_CONTACTS, "Envoyer une annonce",
-         "Sommaire 5. Zero-hop or flood advert, and when the last one went out (the tour only looks).",
+         "Sommaire 5. Annonce locale ou à tout le réseau, et l'heure de la dernière (simple visite).",
          [M("5")], "advert"),
     Shot("settings", G_SETTINGS, "Réglages et identité",
-         "Sommaire 4. Name, position, clock, channels, regions, auto-add, repeat, bell, 40/80, status...",
+         "Sommaire 4. Les quinze réglages : nom, position, heure, canaux, régions, ajout des contacts, "
+         "répétition, sonnerie, 40/80 colonnes...",
          [M("4")], "settings"),
     Shot("channels", G_SETTINGS, "Canaux",
-         "Réglages 4. Each channel with its index and send region; H and P add channels.",
+         "Réglages 4. Chaque canal avec son numéro et sa région d'envoi ; H et P en ajoutent.",
          [M("4"), M("4")], "channels"),
     Shot("channel", G_SETTINGS, "Fiche canal (Public)",
-         "A channel sheet: region choices, hide from the news, and the key in hex and base64.",
+         "La fiche d'un canal : région d'envoi, masquage dans les nouvelles, clé en hexadécimal et en base64.",
          [M("4"), M("4"), Step("pick_public")], "channel"),
-    Shot("regionpick", G_SETTINGS, "Choix de région",
-         "Réglages 5. The region picker: eu, fr, the régions, then their départements (Gaulix naming).",
+    Shot("regionpick", G_SETTINGS, "Choix de la région",
+         "Réglages 5. eu, fr, les régions puis leurs départements, selon le nommage Gaulix.",
          [M("4"), M("5")], "regionpick"),
     Shot("autoreg", G_SETTINGS, "Régions automatiques",
-         "Réglages 6. Suggested default region from the position or the typed département, and a region per channel.",
+         "Réglages 6. La région suggérée d'après la position ou le département saisi, et une région par canal.",
          [M("4"), M("6")], "autoreg"),
     Shot("autoadd", G_SETTINGS, "Ajout automatique des contacts",
-         "Réglages 7. The app's own auto-add settings: types, overwrite oldest, maximum distance.",
+         "Réglages 7. Les réglages d'ajout de l'appli, et qui peut lire la télémesure du nœud.",
          [M("4"), M("7")], "autoadd"),
     Shot("status", G_SETTINGS, "État et statistiques",
-         "Réglages 11. Battery, radio, packet counters, storage, link state, stack and heap, last restart.",
+         "Réglages 11. Batterie, radio, compteurs de paquets, stockage, liaison, pile et tas, dernier redémarrage.",
          [M("4"), M("11")], "status"),
     Shot("quick", G_SETTINGS, "Réponses rapides",
-         "Réglages 12. Ten editable quick replies, used with /q in a conversation.",
+         "Réglages 12. Dix textes modifiables, à insérer depuis la page Actions d'une conversation.",
          [M("4"), M("12")], "quick"),
     Shot("mykey", G_SETTINGS, "Mon identité",
-         "Réglages 13. The name and public key to give to correspondents.",
+         "Réglages 13. Le nom et la clé publique à donner à vos correspondants.",
          [M("4"), M("13")], "mykey"),
     Shot("device", G_SETTINGS, "Bluetooth et alimentation",
-         "Réglages 15. Bluetooth state, the pairing code, the battery; Bluetooth off, reboot and power off (never used by the tour).",
+         "Réglages 15. État du Bluetooth, code d'appairage, batterie ; couper le Bluetooth, redémarrer, éteindre "
+         "(jamais pressé par la visite).",
          [M("4"), M("15")], "device"),
     Shot("clock", G_SETTINGS, "Date et heure",
-         "Sommaire 6. Device time in the local zone, set by hand, by the app, by USB or by agreeing nodes.",
+         "Sommaire 6. L'heure locale, réglée à la main, par l'appli, par USB ou par l'accord de deux nœuds ; "
+         "le fuseau horaire.",
          [M("6")], "clock"),
     Shot("graphs", G_GRAPHS, "Graphiques",
-         "Sommaire 8. Radio statistics kept in RAM since boot.",
+         "Sommaire 8. Les statistiques radio gardées en mémoire depuis le démarrage.",
          [M("8")], "graphs"),
 ] + [
-    Shot(f"graph-{n}", G_GRAPHS, f"Graphique {n}: {GRAPH_TITLES[n - 1]}", GRAPHS[n - 1],
+    Shot(f"graph-{n}", G_GRAPHS, f"Graphique {n} : {GRAPH_TITLES[n - 1]}", GRAPHS[n - 1],
          [M("8"), M(str(n))], "graph")
     for n in range(1, 10)
 ]
@@ -207,7 +229,11 @@ SHOT_IDS = [s.id for s in SHOTS]
 
 # ------------------------------------------------------------------ safety rules
 
-NAV_KEYS = {"retour", "sommaire", "guide", "suite", "connexion", "annulation", "correction", "repetition"}
+NAV_KEYS = {"retour", "sommaire", "guide", "suite", "connexion", "annulation", "correction", "repetition", "haut"}
+ARROW_OK = {"conv"}   # "haut" only picks a message in a conversation
+# entries of a conversation's Actions page the tour may open: Détails is a page, Rechercher
+# a question (closed by SOMMAIRE). Never Répondre/Renvoyer/Effacer/Silence/Supprimer...
+ACTION_OK = ("Détails", "Rechercher")
 # ENVOI is only ever pressed on these pages, with these inputs (pure navigation)
 ENVOI_OK = {
     "home": {str(n) for n in range(1, 9)},                    # the 8 services (5 = advert PAGE)
@@ -217,6 +243,7 @@ ENVOI_OK = {
     "graphs": {str(n) for n in range(1, 10)},
     "channels": set(),                                        # + "0" once checked to be Public
     "convlist": set(),                                        # + a number checked not to be a room
+    "actions": set(),                                         # + Détails / Rechercher, read on the screen
     # "settings" + "10" (the 40/80 switch) only from set_mode()
 }
 SUITE_OK = {"convlist", "conv", "news", "contacts", "graph", "nearby", "autoreg", "quick", "regionpick"}
@@ -278,6 +305,15 @@ def pick_contact(scr, kind):
     for n, tok, _ in list_rows(scr):
         if kind == "any" or tok in CONTACT_TYPES[kind]:
             return n
+    return None
+
+
+def pick_action(scr, label):
+    """Number of the Actions entry whose label starts with `label` (from the screen)."""
+    for r in range(3, min(22, scr.rows)):
+        m = re.match(r"^\s*(\d+)\s+(\S.*)$", scr.row_text(r))
+        if m and m.group(2).startswith(label):
+            return int(m.group(1))
     return None
 
 
@@ -384,6 +420,10 @@ class Tour:
             st = st or self.state()
             if st.get("page") not in SUITE_OK:
                 raise SafetyStop(f"SUITE not allowed on page {st.get('page')}")
+        if name == "haut":
+            st = st or self.state()
+            if st.get("page") not in ARROW_OK or st.get("prompt") != "none":
+                raise SafetyStop(f"arrow not allowed on page {st.get('page')}")
         self.send(f"key {name}")
         self.idle()
 
@@ -423,6 +463,24 @@ class Tour:
             raise SafetyStop(why)
         self.dev.cmd("key envoi")   # the only ENVOI, checked just above
         self.idle()
+
+    def actions(self):
+        """ENVOI on an EMPTY conversation line opens the Actions page; with text it would send.
+        Checked with `ui state` just before: page conv, no question, empty input, nothing pending."""
+        st = self.state()
+        if st.get("page") != "conv":
+            raise SafetyStop(f"Actions only from a conversation, not {st.get('page')}")
+        if st.get("prompt") != "none":
+            raise SafetyStop(f"a question is open ({st.get('prompt')})")
+        if st.get("input") != "-" or st.get("text"):
+            raise SafetyStop("the conversation line is not empty: ENVOI would send it")
+        if st.get("pending", "-") != "-":
+            raise SafetyStop("an accent sequence is pending on the line")
+        self.dev.cmd("key envoi")   # empty line: opens Actions, sends nothing
+        self.idle()
+        st = self.state()
+        if st.get("page") != "actions":
+            raise TourError(f"ENVOI on the empty line led to {st.get('page')}, not actions")
 
     def reset(self):
         self.send("ui reset")
@@ -469,6 +527,16 @@ class Tour:
             if n is None:
                 raise TourError(f"no {step.arg} contact in the list")
             self.menu(str(n), also=("contacts", str(n)))
+        elif step.kind == "actions":
+            self.actions()
+        elif step.kind == "pick_action":
+            if step.arg not in ACTION_OK:
+                raise SafetyStop(f"action {step.arg!r} is not on the allow-list")
+            _, scr = self.screen()
+            n = pick_action(scr, step.arg)
+            if n is None:
+                raise TourError(f"no {step.arg!r} entry on the Actions page")
+            self.menu(str(n), also=("actions", str(n)))
         elif step.kind == "pick_public":
             _, scr = self.screen()
             if not public_channel_listed(scr):
@@ -533,8 +601,9 @@ class Tour:
                 f.write(body)
             rels.append(rel)
         return {"id": f"splash-anim-{cols}", "group": G_SPLASH, "mode": cols,
-                "title": f"Accueil, animated ({cols} col)",
-                "description": "The welcome page's reveal, recorded frame by frame from the device.",
+                "title": "Accueil animé",
+                "description": "La page d'accueil qui se dessine, enregistrée image par image sur l'appareil "
+                               "(screen watch, au rythme du micrologiciel).",
                 "frames": rels, "frame_ms": ms, "image": f"renders/{cols}/splash-anim.gif",
                 "synthetic": False}
 
@@ -611,7 +680,7 @@ def load_manifest(out=GALLERY):
         return {"version": 1, "screens": [], "animations": []}
 
 
-def write_manifest(screens, anims, source, out=GALLERY, keep_synthetic_anims=True, note=""):
+def write_manifest(screens, anims, source, out=GALLERY, keep_synthetic_anims=False, note=""):
     old = load_manifest(out)
     if keep_synthetic_anims and not anims:
         anims = [a for a in old.get("animations", []) if a.get("synthetic")]
@@ -661,85 +730,36 @@ def build_site():
     subprocess.run([sys.executable, "-I", os.path.join(SITE, "build.py")], check=True)
 
 
-# ------------------------------------------------------------------ placeholders
+# ------------------------------------------------------------------ importing real dumps
 
 FW_SAMPLES = os.path.normpath(os.path.join(ROOT, "..", "meshcore-observer-minitel", "examples",
                                            "companion_radio", "ui-minitel", "tools", "samples"))
-SCRATCH_DUMPS = []   # extra real dumps, given with --real
+PAGE_TO_SHOT = {"home": "home", "convlist": "convlist", "conv": "conv-channel", "news": "news", "contacts": "contacts",
+                "contact": "contact", "settings": "settings", "status": "status", "graphs": "graphs", "clock": "clock",
+                "actions": "conv-actions", "msginfo": "msginfo", "device": "device", "mykey": "mykey"}
 
 
-def placeholders(out=GALLERY, real=()):
-    """A gallery from the dumps that exist before the tour has run, clearly marked."""
-    samples = os.path.join(SCREENSHOT, "samples")
-    renders = os.path.join(SCREENSHOT, "renders")
+def import_real(out=GALLERY, real=()):
+    """Gallery entries from real dumps captured by hand (minitel_dump.py), for pages the tour
+    has not captured yet. Only real device captures: never synthetic samples."""
     by_id = {s.id: s for s in SHOTS}
-    plan = []   # (source dump, shot id, cols, synthetic, note, existing render)
-    note_fw = ("Synthetic: built on the host by the firmware's own screen model "
-               "(gen_screen_samples.cpp), before the Sommaire was renumbered; the menu shown is out of date.")
-    note_py = "Synthetic: drawn by make_samples.py (a Python port of the firmware page), plausible values."
-    for cols in (80, 40):
-        p = os.path.join(FW_SAMPLES, f"sommaire{cols}.txt")
-        if os.path.exists(p):
-            plan.append((p, "home", cols, True, note_fw, None))
+    old = load_manifest(out)
+    screens = [e for e in old.get("screens", []) if not e.get("synthetic")]
+    anims = [x for x in old.get("animations", []) if not x.get("synthetic")]
     for p in real:
-        scr = mtscreen.load_dump(p)
-        sid = {"home": "home", "convlist": "convlist", "conv": "conv-channel", "news": "news"}.get(scr.page, scr.page)
-        plan.append((p, sid, scr.cols, False, "Real capture from the device (USB `screen`).", None))
-    plan.append((os.path.join(samples, "messages40.dump"), "conv-channel", 40, True, note_py,
-                 os.path.join(renders, "screen-messages40.png")))
-    for cols in (40, 80):
-        for n in range(1, 5):
-            plan.append((os.path.join(samples, f"splash{cols}-scene{n}.dump"), f"splash-{n}", cols, True,
-                         "Synthetic: make_samples.py's port of UITaskSplash.cpp, plausible values.",
-                         os.path.join(renders, f"screen-splash{cols}-scene{n}.png")))
-    screens, seen = [], set()
-    for src, sid, cols, synthetic, note, render in plan:
-        if not os.path.exists(src) or (sid, cols) in seen:
-            continue
-        seen.add((sid, cols))
-        shot = by_id.get(sid) or Shot(sid, "Autres", sid, "", [], sid)
-        rel = os.path.join("dumps", str(cols), f"{sid}.dump")
-        dst = os.path.join(out, rel)
-        os.makedirs(os.path.dirname(dst), exist_ok=True)
-        with open(src, encoding="utf-8", errors="replace") as f:
+        with open(p, encoding="utf-8", errors="replace") as f:
             text = f.read()
         scr = mtscreen.parse_dump(text)
-        with open(dst, "w", encoding="utf-8") as f:
+        sid = PAGE_TO_SHOT.get(scr.page, scr.page)
+        shot = by_id.get(sid) or Shot(sid, "Autres", sid, "", [], sid)
+        rel = os.path.join("dumps", str(scr.cols), f"{sid}.dump")
+        os.makedirs(os.path.join(out, os.path.dirname(rel)), exist_ok=True)
+        with open(os.path.join(out, rel), "w", encoding="utf-8") as f:
             f.write(normalise(text))
-        e = entry(shot, cols, rel, scr)
-        e["synthetic"] = synthetic
-        e["note"] = note
-        if shot.id == "conv-channel" and synthetic:
-            e["title"] = "A channel conversation (#rennes)"
-        if render and os.path.exists(render):
-            img = os.path.join(out, e["image"])
-            os.makedirs(os.path.dirname(img), exist_ok=True)
-            shutil.copyfile(render, img)
-        screens.append(e)
-    anims = []
-    for cols in (40, 80):
-        frames = sorted(glob.glob(os.path.join(samples, f"splash{cols}-anim", "f*.dump")))
-        if not frames:
-            continue
-        rels = []
-        for f in frames:
-            rel = os.path.join("dumps", str(cols), "splash-anim", os.path.basename(f))
-            os.makedirs(os.path.join(out, os.path.dirname(rel)), exist_ok=True)
-            shutil.copyfile(f, os.path.join(out, rel))
-            rels.append(rel)
-        a = {"id": f"splash-anim-{cols}", "group": G_SPLASH, "mode": cols,
-             "title": f"Accueil, animated ({cols} col)",
-             "description": "Scene 1's reveal: nodes, then links, then the title, at 130 ms per frame.",
-             "frames": rels, "frame_ms": 130, "image": f"renders/{cols}/splash-anim.gif", "synthetic": True,
-             "note": "Synthetic: make_samples.py's 36-frame port of the firmware's reveal."}
-        gif = os.path.join(renders, f"screen-splash{cols}.gif")
-        if os.path.exists(gif):
-            img = os.path.join(out, a["image"])
-            os.makedirs(os.path.dirname(img), exist_ok=True)
-            shutil.copyfile(gif, img)
-        anims.append(a)
-    return write_manifest(screens, anims, "placeholders", out, keep_synthetic_anims=False,
-                          note="Placeholder gallery: run tools/tour/tour.py run to replace it with real captures.")
+        e = entry(shot, scr.cols, rel, scr)
+        e["captured"] = datetime.datetime.fromtimestamp(os.path.getmtime(p)).astimezone().isoformat(timespec="minutes")
+        screens = [x for x in screens if x["id"] != e["id"]] + [e]
+    return write_manifest(screens, anims, old.get("source") or "import", out)
 
 
 # ------------------------------------------------------------------ offline simulation
@@ -765,6 +785,7 @@ class FakeDevice:
         self.page, self.mode, self.text, self.prompt, self.guide, self.gcount = "home", mode, "", "none", 0, 0
         self.samples = samples or {}
         self.log = []
+        self.empty_envois = []
         self.sent_on_radio = []
         self.scene = None
 
@@ -774,7 +795,11 @@ class FakeDevice:
             with open(self.samples[key], encoding="utf-8") as f:
                 return f.read()
         lines = [f"FAKE {self.page.upper()}", ""]
-        if self.page == "convlist":   # a room first: the tour must skip it
+        if self.page == "actions":
+            lines += [" Message choisi ", "  12:00 Quelqu'un > bonjour", "", "  1 Répondre", "  2 Effacer ce message",
+                      "  3 Détails", " Ce canal ", "  4 Rechercher un mot", "  5 Réponses rapides", "  6 Silence",
+                      "  7 Tout marquer lu", "  8 Fiche du canal", "  9 Supprimer la conversation"]
+        elif self.page == "convlist":   # a room first: the tour must skip it
             lines += [" 1  & Le salon", " 2  # rennes", " 3  @ Quelqu'un"]
         elif self.page == "channels":
             lines += [" 0  Public    défaut", " 1  #rennes   fr-35"]
@@ -814,6 +839,20 @@ class FakeDevice:
             self.text += line[5:]
         elif line == "key envoi":
             choice, self.text = self.text, ""
+            if self.page == "conv" and choice == "":
+                self.empty_envois.append(len(self.log) - 1)
+                self.page = "actions"
+                return ok
+            if self.page == "actions":
+                label = {"1": "reply", "2": "delete", "3": "details", "4": "search"}.get(choice, "other")
+                if label == "details":
+                    self.page = "msginfo"
+                elif label == "search":
+                    self.prompt = "search"
+                else:
+                    self.sent_on_radio.append(("actions", label))
+                    raise AssertionError(f"Actions entry {label} must never be chosen")
+                return ok
             if (self.page, choice) in self.TRANSMITS or self.page in ("conv", "advert", "admin", "console", "trace",
                                                                       "device"):
                 self.sent_on_radio.append((self.page, choice))
@@ -834,7 +873,9 @@ class FakeDevice:
                 self.gcount += 1
                 self.guide = 1 if self.gcount >= 2 else 0
             elif k == "sommaire":
-                self.page = "home"
+                self.page, self.prompt = "home", "none"
+            elif k == "haut" and self.page != "conv":
+                raise AssertionError("arrow outside a conversation")
             elif k == "annulation":
                 self.text = ""
         return ok
@@ -876,8 +917,10 @@ def simulate(out, real=()):
     assert dev.mode == 80, "the original mode was not restored"
     assert dev.page == "home", "the UI was not left on the Sommaire"
     envois = [i for i, c in enumerate(dev.log) if c == "key envoi"]
-    for i in envois:   # every ENVOI follows a type and a ui state
-        assert dev.log[i - 1] == "ui state" and dev.log[i - 2].startswith("type "), dev.log[i - 3:i + 1]
+    for i in envois:   # every ENVOI follows a ui state, and a typed choice unless it opens Actions
+        assert dev.log[i - 1] == "ui state", dev.log[i - 3:i + 1]
+        assert dev.log[i - 2].startswith("type ") or i in dev.empty_envois, dev.log[i - 3:i + 1]
+    assert dev.empty_envois, "the Actions page was never visited"
     got = {(e["shot"], e["mode"]) for e in screens}
     print(f"simulate: {len(screens)} screens, {len(failures)} failures, {len(envois)} ENVOI, "
           f"{len(dev.log)} commands")
@@ -898,6 +941,19 @@ def simulate(out, real=()):
         except SafetyStop:
             continue
         raise AssertionError("an unsafe request was not refused")
+    dev.cmd("ui reset")
+    dev.page, dev.text = "conv", "coucou"   # a message on the line: Actions must refuse
+    try:
+        tour.actions()
+        raise AssertionError("ENVOI with text on the line was not refused")
+    except SafetyStop:
+        pass
+    for bad in ("Effacer", "Supprimer", "Répondre", "Silence"):
+        try:
+            tour.run_step(Step("pick_action", bad))
+            raise AssertionError(f"Actions entry {bad} was not refused")
+        except SafetyStop:
+            pass
     dev.cmd("ui reset")
     dev.page = "advert"
     try:
@@ -923,7 +979,8 @@ def main(argv=None):
     r.add_argument("--port", help=f"serial device (default {SERIAL_GLOB})")
     r.add_argument("--modes", default="40,80", help="column modes to visit, e.g. 80 or 40,80")
     r.add_argument("--only", help="comma-separated shot ids: " + ",".join(SHOT_IDS))
-    r.add_argument("--splash-anim", action="store_true", help="also record the welcome page animation")
+    r.add_argument("--no-splash-anim", action="store_true",
+                   help="don't record the welcome page animation (screen watch)")
     r.add_argument("--no-render", action="store_true")
     r.add_argument("--no-site", action="store_true")
     r.add_argument("--yes", action="store_true", help="don't ask before starting")
@@ -932,8 +989,8 @@ def main(argv=None):
     s = sub.add_parser("simulate", help="offline test against a fake device")
     s.add_argument("--out", help="output directory (default: a temporary one)")
     s.add_argument("--real", action="append", default=[], help="a real dump to serve (repeatable)")
-    p = sub.add_parser("placeholders", help="gallery from the existing sample dumps (marked synthetic)")
-    p.add_argument("--real", action="append", default=[], help="a real dump to include (repeatable)")
+    p = sub.add_parser("import", help="add real dumps captured by hand to the gallery (no synthetic samples)")
+    p.add_argument("real", nargs="+", help="dump files from the device")
     p.add_argument("--out", default=GALLERY)
     p.add_argument("--no-render", action="store_true")
     p.add_argument("--no-site", action="store_true")
@@ -953,8 +1010,8 @@ def main(argv=None):
         simulate(out, a.real)
         print(f"manifest: {manifest_path(out)}")
         return
-    if a.cmd == "placeholders":
-        m = placeholders(a.out, a.real)
+    if a.cmd == "import":
+        m = import_real(a.out, a.real)
         print(f"{len(m['screens'])} screens, {len(m['animations'])} animations -> {manifest_path(a.out)}")
         if not a.no_render:
             render_missing(m, a.out)
@@ -981,7 +1038,7 @@ def main(argv=None):
     dev = SerialDevice(port, log=log)
     try:
         tour = Tour(dev, out=a.out)
-        screens, anims, failures = walk(tour, modes, only, a.splash_anim)
+        screens, anims, failures = walk(tour, modes, only, not a.no_splash_anim and not only)
     finally:
         dev.close()
         if log:
@@ -990,6 +1047,7 @@ def main(argv=None):
         old = load_manifest(a.out)
         got = {e["id"] for e in screens}
         screens = [e for e in old.get("screens", []) if e["id"] not in got and not e.get("synthetic")] + screens
+        anims = anims or [x for x in old.get("animations", []) if not x.get("synthetic")]
     m = write_manifest(screens, anims, "tour", a.out)
     print(f"{len(m['screens'])} screens, {len(m['animations'])} animations -> {manifest_path(a.out)}")
     for f in failures:

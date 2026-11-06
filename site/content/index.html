@@ -1,0 +1,38 @@
+<!-- title: Accueil | nav: 0 | label: Sommaire | desc: 3615 MESHCORE: a MeshCore LoRa mesh companion whose screen and keyboard are a French Minitel 2. -->
+<p class="big3615">3615 MESHCORE</p>
+<p class="lede">A <a href="https://github.com/meshcore-dev/MeshCore">MeshCore</a> companion radio whose screen and keyboard are a real French <b>Minitel 2</b>. A Seeed XIAO nRF52840 with a Wio-SX1262 LoRa module sits behind the terminal, wired to its DIN port through a one-transistor interface. Read the mesh, write to it, and look after your repeaters from a 1980s Télétel terminal.</p>
+
+<figure class="hero">
+<img src="img/hero.jpg" alt="A Minitel 2 on a desk showing the 3615 MESHCORE conversation list: channels and private conversations with the time and the last message" width="1600" height="1200">
+<figcaption>The conversation list, rendered from a real <code>screen</code> dump of the device by the photo-realistic renderer (a render, not a photograph).</figcaption>
+</figure>
+
+<h2 id="what">What it is</h2>
+<p>The XIAO runs MeshCore's BLE companion firmware with an extra user interface: the Minitel. The phone app keeps working alongside it, with the same identity, contacts and channels, and the Minitel never consumes or changes the app's offline queue. On the Minitel you get:</p>
+<ul>
+<li>conversations on channels, direct messages and rooms, with a history kept in flash, delivery marks and the hops and SNR of every received message;</li>
+<li>contacts, stations heard on the air, nearby stations by distance and bearing, contact sheets with path reset, trace and sharing;</li>
+<li>repeater and room administration, down to a remote console;</li>
+<li>French flood regions named the Gaulix way, suggested from your département;</li>
+<li>radio graphs drawn in Vidéotex mosaics, an animated welcome page, emoji turned into ASCII, accents typed the Minitel way;</li>
+<li>a USB command line to back up the identity, back-fill the history, take screen dumps and drive the whole UI from a script.</li>
+</ul>
+<p>Everything works in the Minitel's two modes: <b>Vidéotex, 40 columns</b> (double-size titles, G1 mosaics) and <b>Mixte, 80 columns</b> (more on each line, ISO 6429 attributes).</p>
+
+<h2 id="esprit">The 3615 spirit</h2>
+<p>From 1982 to 2012 the Minitel brought online services into French homes: you dialled 3615, typed a service name, and pages came down the phone line at 1200 baud in white on black. The pages had a grammar of their own: a service line on top, inverse title bars, a <i>Sommaire</i> (the main menu) reached with its own key, choices typed as a number then <kbd class="k envoi">Envoi</kbd>, and <kbd class="k">Suite</kbd>, <kbd class="k">Retour</kbd>, <kbd class="k">Guide</kbd> and <kbd class="k">Répétition</kbd> for the rest.</p>
+<p>3615 MESHCORE follows that grammar. There is no phone line any more: the "service" is a LoRa mesh, run by its users, with no operator and no subscription, carried from node to node. The Minitel is again a window onto a network of people, only this time the network is in the neighbours' attics.</p>
+
+<h2 id="liens">Quick links</h2>
+<ul class="links">
+<li><a href="screens.html"><b><span class="n">1</span>Écrans</b>Every page, as live text or as a photo render.</a></li>
+<li><a href="features.html"><b><span class="n">2</span>Fonctions</b>What the service does, grouped by topic.</a></li>
+<li><a href="build.html"><b><span class="n">3</span>Montage</b>Parts, the interface, wiring, flashing, first boot.</a></li>
+<li><a href="reference.html"><b><span class="n">4</span>Référence</b>Sommaire map, keys, USB commands, dump format, host tools.</a></li>
+<li><a href="troubleshooting.html"><b><span class="n">5</span>Dépannage</b>Répertoire, no answer, parity errors, crashes.</a></li>
+<li><a href="credits.html"><b><span class="n">6</span>Crédits</b>MeshCore, the font, the data, the interface, the licences.</a></li>
+</ul>
+
+<h2 id="apercu">A glimpse</h2>
+<p>The Sommaire in 40 columns, drawn by your browser from a dump. Switch to <b>Image</b> for the renderer's picture of the same dump.</p>
+{{shot:home-40}}

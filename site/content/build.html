@@ -1,0 +1,110 @@
+<!-- title: Montage | nav: 3 | label: Montage | desc: Build your own 3615 MESHCORE: parts, the one-transistor interface, wiring to the XIAO, flashing, first boot and the Minitel's own keys. -->
+<h1>Montage: build one</h1>
+<p class="lede">One evening of work: a Minitel 2, a XIAO nRF52840 with its LoRa board, a transistor, four resistors and a DIN plug. No modification to the Minitel itself.</p>
+<ol class="toc">
+<li><a href="#parts">Parts</a></li>
+<li><a href="#interface">The interface</a></li>
+<li><a href="#din">The DIN plug</a></li>
+<li><a href="#wiring">Wiring to the XIAO</a></li>
+<li><a href="#test">Bring-up test (optional)</a></li>
+<li><a href="#firmware">Build and flash the firmware</a></li>
+<li><a href="#boot">First boot</a></li>
+<li><a href="#keys">The Minitel's own keys</a></li>
+<li><a href="#identity">Back up the identity</a></li>
+</ol>
+
+<h2 id="parts">Parts</h2>
+<table>
+<thead><tr><th>Part</th><th>Notes</th></tr></thead>
+<tbody>
+<tr><td>Minitel 2 (Philips/Radiotechnique or Alcatel)</td><td>Developed and tested on a Philips Minitel 2, ROM <code>Bv9</code>, the only model tried so far. It needs the five-pin DIN "prise péri-informatique" at the back. The Minitel 1B has the same socket and the 80-column mode but stops at 4800 baud, where the firmware wants 9600: untested.</td></tr>
+<tr><td>Seeed Studio XIAO nRF52840</td><td>The plain or Sense version. The firmware env is <code>Xiao_nrf52_companion_minitel</code>.</td></tr>
+<tr><td>Wio-SX1262 for XIAO</td><td>The LoRa radio (D1–D5, D8–D10), with its antenna. Use the antenna for your band (868 MHz in Europe).</td></tr>
+<tr><td>2N2222A NPN transistor</td><td>TO-92 or TO-18. Most TO-92 2N2222A/PN2222A are E-B-C; check yours with a multimeter's diode test.</td></tr>
+<tr><td>Resistors</td><td>10 kΩ, 22 kΩ, 220 kΩ (or 10 kΩ, see the parity note), and 9.1 kΩ for the series resistor on D7.</td></tr>
+<tr><td>Male DIN-5 plug, 180°</td><td>The "MIDI" type plug, with a short cable.</td></tr>
+<tr><td>Power for the XIAO</td><td>USB-C (any 5 V supply), or a LiPo cell on the XIAO's battery pads. The Minitel does not power the XIAO: its pin 5 supply is not used.</td></tr>
+<tr><td>Small stripboard or perfboard, wire</td><td>The arduiblog board, or the same five parts on a scrap of stripboard.</td></tr>
+</tbody>
+</table>
+
+<h2 id="interface">The interface</h2>
+<p>The Minitel's DIN port is a 5 V-era serial port: its TX (pin 3) is an open collector, its RX (pin 1) is pulled up inside the Minitel. The interface is the classic one-transistor design published by <b>arduiblog</b> in <a href="https://arduiblog.com/2019/04/29/ressuscitez-le-minitel/">"Ressuscitez le Minitel"</a> (2019), built here unchanged except for two things: it is powered from the XIAO's <b>3V3</b>, not 5 V, and a <b>9.1 kΩ</b> resistor sits in series on the line to D7.</p>
+<figure class="fig">
+{{svg:schematic}}
+<figcaption>The interface as wired for this project. The circuit is arduiblog's (credited above); the drawing is ours. R4 is the addition for the XIAO.</figcaption>
+</figure>
+<ul>
+<li><b>Minitel → XIAO.</b> R3 pulls the Minitel's open-collector TX up to 3V3, so the XIAO only ever sees 0–3.3 V. R4 (9.1 kΩ) limits the current into D7 if anything goes wrong.</li>
+<li><b>XIAO → Minitel.</b> Q1 is a common-base stage: its base sits at a fixed voltage set by R1 and R2. When D6 goes low, the emitter is pulled down, Q1 conducts and pulls the Minitel's RX low. When D6 is high (3.3 V), Q1 is off and the Minitel's own pull-up holds the line high. The stage <b>does not invert</b>, which matters: the nRF52840's UART cannot invert its signals.</li>
+<li><b>Ground.</b> DIN pin 2 to the XIAO's GND. Pins 4 and 5 stay unconnected. Pin 5 is a supply output on the Minitel 2 (8.5–15 V): insulate it and keep it away from the XIAO.</li>
+</ul>
+<div class="note"><p><b>Parity errors at 9600 baud?</b> The 220 kΩ pull-up is weak, and D7 picks up glitches from the CRT (hundreds of sub-20 µs spikes per 200 ms were measured). The UART filters them at 1200 baud. If <code>link log</code> shows parity errors at 9600, lower R3 to about 10 kΩ.</p></div>
+
+<h2 id="din">The DIN plug</h2>
+<figure class="fig">
+{{svg:din}}
+<figcaption>The Minitel's socket from the back of the Minitel, which is the same view as your plug from its solder side.</figcaption>
+</figure>
+<div class="warn"><p><b>Check before connecting the XIAO.</b> With the Minitel switched on, a multimeter between pin 2 and pin 5 shows 8.5–15 V. That confirms the orientation of the pin numbers, and it is the pin you must never wire.</p></div>
+
+<h2 id="wiring">Wiring to the XIAO</h2>
+<table>
+<thead><tr><th>Interface wire</th><th>XIAO pin</th><th>Firmware</th></tr></thead>
+<tbody>
+<tr><td>Q1's free outer leg (the emitter)</td><td><b>D6</b></td><td>P1.11, <code>PIN_SERIAL1_TX</code></td></tr>
+<tr><td>The node of R3 220k and DIN 3, <b>through 9.1 kΩ</b></td><td><b>D7</b></td><td>P1.12, <code>PIN_SERIAL1_RX</code></td></tr>
+<tr><td>Supply: R3 and R1</td><td><b>3V3</b></td><td>not 5 V</td></tr>
+<tr><td>Ground: R2 and DIN 2</td><td><b>GND</b></td><td></td></tr>
+</tbody>
+</table>
+<ul>
+<li><b>I2C moves to the NFC pads.</b> The XIAO variant normally puts I2C on D6/D7. The Minitel env removes those defines and builds with <code>-D CONFIG_NFCT_PINS_AS_GPIOS -D PIN_WIRE_SDA=30 -D PIN_WIRE_SCL=31</code>. The first boot writes the UICR so that the two NFC pads (P0.09, P0.10) become GPIOs; this stays in the chip, and NFC can no longer be used on that board. I2C sensors, if any, go on those two pads at the back of the XIAO.</li>
+<li><b>Nothing else uses Serial1.</b> GPS is compiled out. USB serial carries the local command line.</li>
+<li>Keep the DIN cable short.</li>
+</ul>
+
+<h2 id="test">Bring-up test (optional)</h2>
+<p>Before flashing MeshCore, the stand-alone sketch in <code>firmware/minitel-test/</code> checks the link alone: it logs every byte the Minitel sends and takes commands on USB (115200 baud, type <code>help</code>).</p>
+<pre><code>cd firmware/minitel-test
+pio run -t upload --upload-port /dev/ttyACM0</code></pre>
+<p>Verified on a Philips Minitel 2 (ROM <code>Bv9</code>): ENQROM, status and speed query, screen text and the keyboard at 1200 baud in Vidéotex; then <code>speed 9600</code>, <code>mixte</code>, <code>echo off</code> for 80 columns at 9600 baud with clean input and no parity errors. The speed acknowledgement arrives while the UART restarts and loses its first bytes, so <code>speed</code> confirms with a fresh speed query. The sketch also has a <code>sense</code> command that tells which DIN pin D7 is wired to.</p>
+
+<h2 id="firmware">Build and flash the firmware</h2>
+<p>The firmware is MeshCore's companion radio with the Minitel UI, on the <code>companion-minitel</code> branch of the firmware fork (code in <code>examples/companion_radio/ui-minitel/</code>). With <a href="https://platformio.org/">PlatformIO</a>:</p>
+<pre><code>git clone -b companion-minitel &lt;firmware repository&gt; meshcore-minitel
+cd meshcore-minitel
+pio run -e Xiao_nrf52_companion_minitel -t upload --upload-port /dev/ttyACM0</code></pre>
+<ul>
+<li>Flashing keeps the file system: the identity, contacts, channels and the Minitel history survive an update.</li>
+<li>Upload sometimes fails on the 1200-baud "touch" that resets the XIAO into its bootloader. Retry, or double-tap the XIAO's reset button and upload to the bootloader's port.</li>
+<li>Each build keeps its ELF as <code>.pio/build/Xiao_nrf52_companion_minitel/firmware-&lt;commit&gt;.elf</code>, so a crash record can be resolved to a source line later (see <a href="features.html#crash">crash capture</a>).</li>
+<li>Native unit tests (googletest): <code>pio test -e native -f test_minitel</code> and <code>-f test_minitel_emoji</code>.</li>
+</ul>
+
+<h2 id="boot">First boot</h2>
+<ol>
+<li>Plug the DIN cable into the Minitel, power the XIAO, switch the Minitel on.</li>
+<li>The Minitel starts on its local "répertoire" page. Leave it with <kbd class="k">Fnct</kbd> + <kbd class="k">Sommaire</kbd> (see below). The firmware probes 9600, 1200, 4800 and 300 baud every 3 s, finds the terminal, switches it to 9600 baud, sets 80 or 40 columns and turns the local echo off. The welcome page appears; any key enters the service.</li>
+<li>Pair the phone app (MeshCore) over Bluetooth if you want it alongside: the default pairing code is <code>123456</code>; change it in Réglages 15.</li>
+<li>Set the clock (Sommaire 6, or let the app or two agreeing nodes set it), the node name and position (Réglages 1 and 2), and your département for the regions (Réglages 6).</li>
+<li>40 or 80 columns: Réglages 10. The choice is saved.</li>
+</ol>
+
+<h2 id="keys">The Minitel's own keys</h2>
+<p>A few things are done on the Minitel's keyboard, not by the firmware. <kbd class="k">Fnct</kbd> combinations: press Fnct with the letter, release both, then press the next key.</p>
+<table>
+<thead><tr><th>Keys</th><th>Effect</th></tr></thead>
+<tbody>
+<tr><td><kbd class="k">Fnct</kbd> + <kbd class="k">Sommaire</kbd></td><td>Leave the répertoire (the local page after power-on or standby).</td></tr>
+<tr><td><kbd class="k">Fnct</kbd> + <kbd class="k">E</kbd>, then <kbd class="k">A</kbd></td><td>Disable the automatic standby.</td></tr>
+<tr><td><kbd class="k">Fnct</kbd> + <kbd class="k">T</kbd>, then <kbd class="k">V</kbd></td><td>Back to Vidéotex from the Téléinformatique mode (where the protocol goes silent).</td></tr>
+</tbody>
+</table>
+<p>Whenever the Minitel is switched off or falls asleep, the node keeps working: messages go to the history, direct-message retries continue and the app is served. When the terminal comes back, the firmware notices it, sets it up again and shows the welcome page.</p>
+
+<h2 id="identity">Back up the identity</h2>
+<p>The node's identity is its private key. If the file system is ever erased, the node gets a new key and your correspondents see a new, unknown node. Back it up once, over USB (115200 baud, CR line ends):</p>
+<pre><code>get prv.key        # prints 128 hex digits: save them offline
+set prv.key &lt;hex&gt;  # restore, then reboot</code></pre>
+<div class="warn"><p><b>The private key is a secret.</b> Anyone who has it can impersonate the node and read its direct messages. Never paste it into a chat, a ticket, a log or a screenshot; keep it offline, readable only by you. The Minitel itself never shows, imports or generates keys.</p></div>

@@ -1,0 +1,34 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 760 340" role="img" aria-labelledby="din-t din-d" font-family="system-ui, sans-serif" font-size="15">
+<title id="din-t">Minitel DIN-5 socket pinout</title>
+<desc id="din-d">The Minitel's five-pin DIN socket seen from the back of the Minitel, which is also your plug seen from its solder side: pins along the upper arc, from left to right, 3, 5, 2, 4, 1, with the key notch at the bottom. Pin 1 RX (the Minitel's input), 2 ground, 3 TX (the Minitel's output, open collector), 4 PT, 5 a supply output of 8.5 to 15 volts.</desc>
+<circle cx="210" cy="170" r="120" fill="#1b1e25" stroke="#dfe6f2" stroke-width="2.5"/>
+<circle cx="210" cy="170" r="104" fill="none" stroke="#2a2e38" stroke-width="2"/>
+<rect x="196" y="262" width="28" height="30" fill="#0c0d10" stroke="#dfe6f2" stroke-width="2"/>
+<circle cx="132.0" cy="170.0" r="13" fill="#0c0d10" stroke="#5fd39a" stroke-width="3"/>
+<text x="132.0" y="175.0" text-anchor="middle" fill="#e4e7ed" font-weight="700">3</text>
+<circle cx="154.8" cy="114.8" r="13" fill="#0c0d10" stroke="#f2c46d" stroke-width="3"/>
+<text x="154.8" y="119.8" text-anchor="middle" fill="#e4e7ed" font-weight="700">5</text>
+<circle cx="210.0" cy="92.0" r="13" fill="#0c0d10" stroke="#dfe6f2" stroke-width="3"/>
+<text x="210.0" y="97.0" text-anchor="middle" fill="#e4e7ed" font-weight="700">2</text>
+<circle cx="265.2" cy="114.8" r="13" fill="#0c0d10" stroke="#6e737b" stroke-width="3"/>
+<text x="265.2" y="119.8" text-anchor="middle" fill="#e4e7ed" font-weight="700">4</text>
+<circle cx="288.0" cy="170.0" r="13" fill="#0c0d10" stroke="#5fd39a" stroke-width="3"/>
+<text x="288.0" y="175.0" text-anchor="middle" fill="#e4e7ed" font-weight="700">1</text>
+<text x="210" y="318" text-anchor="middle" font-size="12" fill="#a7adb8">key notch at the bottom</text>
+<text x="390" y="70" fill="#5fd39a" font-weight="700">1</text>
+<text x="414" y="70" fill="#e4e7ed">RX: Minitel input</text>
+<text x="414" y="89" fill="#a7adb8" font-size="13">→ Q1 collector</text>
+<text x="390" y="122" fill="#dfe6f2" font-weight="700">2</text>
+<text x="414" y="122" fill="#e4e7ed">GND</text>
+<text x="414" y="141" fill="#a7adb8" font-size="13">→ XIAO GND</text>
+<text x="390" y="174" fill="#5fd39a" font-weight="700">3</text>
+<text x="414" y="174" fill="#e4e7ed">TX: Minitel output</text>
+<text x="414" y="193" fill="#a7adb8" font-size="13">→ R3 220k, R4 9.1k</text>
+<text x="390" y="226" fill="#a7adb8" font-weight="700">4</text>
+<text x="414" y="226" fill="#e4e7ed">PT</text>
+<text x="414" y="245" fill="#a7adb8" font-size="13">not connected</text>
+<text x="390" y="278" fill="#f2c46d" font-weight="700">5</text>
+<text x="414" y="278" fill="#e4e7ed">+8.5–15 V out</text>
+<text x="414" y="297" fill="#a7adb8" font-size="13">not connected: insulate</text>
+<text x="380" y="330" font-size="12" fill="#a7adb8">Seen from the back of the Minitel = your plug from its solder side.</text>
+</svg>

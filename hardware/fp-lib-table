@@ -1,0 +1,8 @@
+(fp_lib_table
+  (version 7)
+  (lib (name "Resistor_THT")(type "KiCad")(uri "/usr/share/kicad/footprints/Resistor_THT.pretty")(options "")(descr ""))
+  (lib (name "Diode_THT")(type "KiCad")(uri "/usr/share/kicad/footprints/Diode_THT.pretty")(options "")(descr ""))
+  (lib (name "Package_TO_SOT_THT")(type "KiCad")(uri "/usr/share/kicad/footprints/Package_TO_SOT_THT.pretty")(options "")(descr ""))
+  (lib (name "Connector_PinHeader_2.54mm")(type "KiCad")(uri "/usr/share/kicad/footprints/Connector_PinHeader_2.54mm.pretty")(options "")(descr ""))
+  (lib (name "stripboard")(type "KiCad")(uri "${KIPRJMOD}/stripboard.pretty")(options "")(descr "local"))
+)

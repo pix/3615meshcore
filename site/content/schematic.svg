@@ -1,0 +1,74 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 860 420" role="img" aria-labelledby="sch-t sch-d" font-family="system-ui, sans-serif" font-size="15">
+<title id="sch-t">Interface schematic: XIAO nRF52840 to the Minitel DIN port</title>
+<desc id="sch-d">Receive: Minitel pin 3 (TX, open collector) is pulled up to 3V3 by 220 kilohms and goes through 9.1 kilohms to XIAO D7. Transmit: a 2N2222A in common base, base biased by 10 kilohms to 3V3 and 22 kilohms to ground; XIAO D6 drives the emitter, the collector pulls Minitel pin 1 (RX) low. Minitel pin 2 is ground; pins 4 and 5 are not connected.</desc>
+<g fill="none" stroke="#dfe6f2" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+  <!-- XIAO block -->
+  <rect x="30" y="80" width="150" height="260" rx="8" stroke="#5fd39a"/>
+  <!-- Minitel block -->
+  <rect x="690" y="80" width="140" height="260" rx="8" stroke="#f2c46d"/>
+
+  <!-- receive path: 3V3 flag, R3 220k, node, R4 9.1k to D7 -->
+  <path d="M560 40 v14"/><path d="M548 40 h24"/>
+  <rect x="551" y="54" width="18" height="56"/>
+  <path d="M560 110 v20"/>
+  <path d="M560 130 H690"/>
+  <path d="M560 130 H492"/>
+  <rect x="412" y="121" width="80" height="18"/>
+  <path d="M412 130 H180"/>
+
+  <!-- transmit path: Q1 2N2222A, common base -->
+  <path d="M405 250 h60" stroke-width="4"/>
+  <path d="M418 250 L392 224 H180"/>
+  <path d="M452 250 L478 224 H690"/>
+  <path d="M435 250 v40"/>
+  <!-- base bias: R1 10k to a 3V3 flag, R2 22k to ground -->
+  <path d="M435 290 H470"/>
+  <rect x="470" y="281" width="80" height="18"/>
+  <path d="M550 290 h24"/><path d="M574 278 v24"/>
+  <path d="M435 290 v12"/>
+  <rect x="426" y="302" width="18" height="56"/>
+  <path d="M435 358 v14"/><path d="M421 372 h28"/><path d="M426 378 h18"/><path d="M431 384 h8"/>
+
+  <!-- XIAO 3V3 and GND -->
+  <path d="M180 290 h40"/><path d="M220 278 v24"/>
+  <path d="M180 318 h30 v14"/><path d="M196 332 h28"/><path d="M201 338 h18"/><path d="M206 344 h8"/>
+  <!-- DIN 2 ground -->
+  <path d="M690 300 h-30 v18"/><path d="M646 318 h28"/><path d="M651 324 h18"/><path d="M656 330 h8"/>
+</g>
+<!-- emitter arrow (NPN: pointing away from the base) -->
+<path d="M397 229 L407.6 232.6 L400.5 239.6 Z" fill="#dfe6f2"/>
+<!-- junction dots -->
+<g fill="#dfe6f2"><circle cx="560" cy="130" r="4.5"/><circle cx="435" cy="290" r="4.5"/></g>
+
+<g fill="#e4e7ed">
+  <text x="105" y="70" text-anchor="middle" fill="#5fd39a" font-weight="600">XIAO nRF52840</text>
+  <text x="105" y="104" text-anchor="middle" font-size="12" fill="#a7adb8">+ Wio-SX1262</text>
+  <text x="172" y="135" text-anchor="end">D7 (RX)</text>
+  <text x="172" y="229" text-anchor="end">D6 (TX)</text>
+  <text x="172" y="295" text-anchor="end">3V3</text>
+  <text x="172" y="323" text-anchor="end">GND</text>
+  <text x="228" y="295" font-size="13" fill="#a7adb8">3V3</text>
+
+  <text x="760" y="70" text-anchor="middle" fill="#f2c46d" font-weight="600">Minitel DIN</text>
+  <text x="698" y="135">3 TX</text>
+  <text x="698" y="229">1 RX</text>
+  <text x="698" y="305">2 GND</text>
+  <text x="760" y="252" text-anchor="middle" font-size="12" fill="#a7adb8">4 PT, 5 +8.5–15 V:</text>
+  <text x="760" y="268" text-anchor="middle" font-size="12" fill="#a7adb8">not connected</text>
+
+  <text x="560" y="32" text-anchor="middle" font-size="13" fill="#a7adb8">3V3</text>
+  <text x="578" y="80">R3 220k</text>
+  <text x="578" y="98" font-size="12" fill="#a7adb8">(10k if parity errors)</text>
+  <text x="452" y="114" text-anchor="middle">R4 9.1k</text>
+  <text x="452" y="158" text-anchor="middle" font-size="12" fill="#a7adb8">series, on the XIAO side</text>
+  <text x="435" y="200" text-anchor="middle">Q1 2N2222A</text>
+  <text x="384" y="246" text-anchor="end" font-size="12" fill="#a7adb8">E</text>
+  <text x="486" y="246" font-size="12" fill="#a7adb8">C</text>
+  <text x="444" y="278" font-size="12" fill="#a7adb8">B</text>
+  <text x="510" y="275" text-anchor="middle">R1 10k</text>
+  <text x="582" y="294" font-size="13" fill="#a7adb8">3V3</text>
+  <text x="452" y="335">R2 22k</text>
+  <text x="300" y="214" text-anchor="middle" font-size="12" fill="#a7adb8">XIAO → Minitel (not inverted)</text>
+  <text x="300" y="122" text-anchor="middle" font-size="12" fill="#a7adb8">Minitel → XIAO</text>
+</g>
+</svg>

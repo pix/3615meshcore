@@ -1,0 +1,53 @@
+<!-- title: Dépannage | nav: 5 | label: Dépannage | desc: 3615 MESHCORE troubleshooting: the répertoire and standby, no answer from the Minitel, parity errors and noise, crashes, direct messages that never arrive. -->
+<h1>Dépannage</h1>
+<p class="lede">Most problems show up in two USB commands: <code>link log</code> for the Minitel side and <code>boot</code> for the XIAO.</p>
+
+<h2 id="repertoire">The Minitel shows its répertoire, or falls asleep</h2>
+<p>At power-on and after a standby the Minitel 2 is back at 1200 baud in Vidéotex 40 columns, on its local menu, the <i>répertoire</i>. In that state it answers no protocol query, so the firmware cannot take it back by itself.</p>
+<ul>
+<li>Press <kbd class="k">Fnct</kbd> + <kbd class="k">Sommaire</kbd> to leave the répertoire. Within a few seconds the firmware finds the terminal again, sets it up and shows the welcome page.</li>
+<li>Press <kbd class="k">Fnct</kbd> + <kbd class="k">E</kbd>, then <kbd class="k">A</kbd>, to disable the automatic standby, so it does not happen again.</li>
+<li>Once per outage the firmware also sends the protocol reset (<code>1B 39 7F</code>) at 1200 then 9600 baud and probes again; <code>link log</code> shows whether it was acknowledged. The Minitel 2 guide says a peripheral can command standby exit from ROM CV3/BV9, but no source found gives the codes.</li>
+</ul>
+<p>Nothing is lost meanwhile: the node keeps receiving, retrying direct messages and serving the phone app.</p>
+
+<h2 id="noanswer">No answer from the Minitel</h2>
+<ul>
+<li><b>Mode.</b> In the Téléinformatique mode (<kbd class="k">Fnct</kbd>+<kbd class="k">T</kbd>, <kbd class="k">A</kbd>) the protocol is off by design: no status, no speed change, and keystrokes may not reach the DIN port. Go back with <kbd class="k">Fnct</kbd>+<kbd class="k">T</kbd>, <kbd class="k">V</kbd>.</li>
+<li><b>Speed.</b> The firmware probes 9600, 1200, 4800 and 300 baud every 3 s. <code>link log</code> lists each round without an answer. If no speed ever answers, check the wiring before anything else.</li>
+<li><b>Wiring.</b> D6 must go to the transistor's emitter, D7 through 9.1 kΩ to the 220 kΩ / DIN 3 node, the interface on <b>3V3</b>, DIN 2 to GND. With the bring-up sketch (<code>firmware/minitel-test/</code>), <code>sense</code> tells whether D7 sees the Minitel's TX (pulled down by the pin's own pull-down: LOW) or its RX (held HIGH by the Minitel), which catches swapped wires.</li>
+<li><b>Pin numbering.</b> Check pin 5 with a multimeter: 8.5–15 V against pin 2 with the Minitel on. If you find it elsewhere, your view of the plug is mirrored.</li>
+<li><b>By hand.</b> <code>link try 1B 39 74</code> sends the speed query at the current speed and prints the reply.</li>
+</ul>
+
+<h2 id="parity">Parity errors, noise on D7</h2>
+<p>The Minitel's TX is an open collector with only the 220 kΩ pull-up behind it, and the CRT is next to it: D7 idles with hundreds of very short glitches. The UART filters them at 1200 baud; at 9600 some get through as bytes with bad parity, counted by <code>link log</code> (<code>parity_err</code>). Bytes with bad parity are dropped, and a burst of them is taken as a sign the terminal was reset.</p>
+<ul>
+<li>Lower the pull-up R3 from 220 kΩ to about <b>10 kΩ</b>.</li>
+<li>Keep the DIN cable short and the ground wire solid.</li>
+</ul>
+
+<h2 id="crash">Crashes and restarts</h2>
+<ul>
+<li><code>boot</code> tells why the XIAO last restarted (power-on, reset button, watchdog, lockup, software reset, which includes crashes) and prints the last crash record: <code>pc</code>, <code>lr</code>, the fault registers, the task and the uptime. The État page (Réglages 11) shows it too.</li>
+<li>Resolve it with the ELF of the build that crashed: <code>examples/companion_radio/ui-minitel/tools/crash2line.sh &lt;pc&gt; &lt;lr&gt; firmware-&lt;commit&gt;.elf</code>.</li>
+<li><code>stack</code> shows how much of the 4 KB loop stack was never used; a small number means the stack came close to overflowing.</li>
+<li><code>boot clear</code> forgets the record once dealt with.</li>
+</ul>
+
+<h2 id="dm">Direct messages never arrive</h2>
+<p>A direct message is encrypted for a pair of keys. If the sender is not in your contacts, the node cannot decrypt its messages: they are dropped without a trace, and you cannot write to it either.</p>
+<ul>
+<li>Ask the other side to send an advert, or add the node yourself: Contacts, <code>N</code>, its 64-digit public key, the type and a name.</li>
+<li>Check the auto-add settings (Réglages 7): with auto-add off for that type, adverts do not create contacts.</li>
+<li>Give your own key to correspondents from Réglages 13 (Mon identité).</li>
+<li>A <code>?</code> in the hops column means no known path: messages flood. <i>Forget the path</i> on the contact sheet forces a new one to be learnt.</li>
+</ul>
+
+<h2 id="other">Other things</h2>
+<ul>
+<li><b>Cannot send: "heure non réglée".</b> Set the clock (Sommaire 6), let the app set it, or enable "envoyer sans heure".</li>
+<li><b>Accents look wrong in 80 columns.</b> The Mixte French set only has à é è ù ç ° £ §; other accented letters are sent correctly but shown bare.</li>
+<li><b>Upload fails.</b> The 1200-baud touch sometimes misses: retry, or double-tap the XIAO's reset button and upload to the bootloader's port.</li>
+<li><b>The identity changed after a flash.</b> The file system was erased. Restore the key with <code>set prv.key</code> and reboot (see <a href="build.html#identity">identity backup</a>).</li>
+</ul>

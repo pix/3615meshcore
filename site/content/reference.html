@@ -1,0 +1,197 @@
+<!-- title: Référence | nav: 4 | label: Référence | desc: 3615 MESHCORE reference: Sommaire map, keys, every USB command, the screen dump format and the host tools. -->
+<h1>Référence</h1>
+<ol class="toc">
+<li><a href="#sommaire">Sommaire map</a></li>
+<li><a href="#keys">Keys</a></li>
+<li><a href="#layout">Screen layout</a></li>
+<li><a href="#usb">USB command line</a></li>
+<li><a href="#dump">Screen dump format</a></li>
+<li><a href="#tools">Host tools</a></li>
+<li><a href="#files">Files on the device</a></li>
+</ol>
+
+<h2 id="sommaire">Sommaire map</h2>
+<p>Type the number, then <kbd class="k envoi">Envoi</kbd>. <kbd class="k">Sommaire</kbd> comes back here from anywhere.</p>
+<table>
+<thead><tr><th>N°</th><th>Page</th><th>Inside</th></tr></thead>
+<tbody>
+<tr><td>1</td><td>Conversations</td><td>number: open; <code>L</code>: mark all read</td></tr>
+<tr><td>2</td><td>Dernières nouvelles</td><td>number: open that conversation</td></tr>
+<tr><td>3</td><td>Contacts et stations entendues</td><td><code>E</code> heard, <code>C</code> contacts, <code>P</code> nearby, <code>N</code> add by key, <code>S</code> add a room, <code>A</code> advert; number: contact sheet (1 write, 2 add, 3 room login, 4 forget password, 5 forget path, 6 trace, 7 administration, 8 share, 9 remove, 10 favourite)</td></tr>
+<tr><td>4</td><td>Réglages et identité</td><td>see below</td></tr>
+<tr><td>5</td><td>Envoyer une annonce</td><td>1 zero hop, 2 flood (confirmed)</td></tr>
+<tr><td>6</td><td>Date et heure</td><td>1 set the local time, 2 send without a clock, 3 time zone</td></tr>
+<tr><td>7</td><td>Page d'accueil 3615 MESHCORE</td><td>the welcome page; any key leaves</td></tr>
+<tr><td>8</td><td>Graphiques</td><td>1–9, see <a href="features.html#graphs">Graphiques</a></td></tr>
+</tbody>
+</table>
+<h3 id="reglages">Réglages (Sommaire 4)</h3>
+<table>
+<thead><tr><th>N°</th><th>Setting</th><th>N°</th><th>Setting</th></tr></thead>
+<tbody>
+<tr><td>1</td><td>Node name</td><td>9</td><td>Bell for incoming messages</td></tr>
+<tr><td>2</td><td>Position (<code>48.8566 2.3522</code>, <code>0 0</code> for none)</td><td>10</td><td>40 / 80 columns</td></tr>
+<tr><td>3</td><td>Date et heure</td><td>11</td><td>État et statistiques</td></tr>
+<tr><td>4</td><td>Canaux: <code>H</code> hashtag channel, <code>P</code> private channel; number: channel sheet</td><td>12</td><td>Réponses rapides</td></tr>
+<tr><td>5</td><td>Default region (region picker)</td><td>13</td><td>Mon identité</td></tr>
+<tr><td>6</td><td>Régions automatiques (<code>D</code> département, <code>T</code> apply all)</td><td>14</td><td>Accents composés: <code>*</code>, <code>#</code> or off</td></tr>
+<tr><td>7</td><td>Ajout automatique des contacts</td><td>15</td><td>Bluetooth et alimentation</td></tr>
+<tr><td>8</td><td>Client repeat on/off</td><td></td><td></td></tr>
+</tbody>
+</table>
+
+<h2 id="keys">Keys</h2>
+<table>
+<thead><tr><th>Key</th><th>Effect</th></tr></thead>
+<tbody>
+<tr><td><kbd class="k">Sommaire</kbd></td><td>Main menu, from anywhere (closes any question)</td></tr>
+<tr><td><kbd class="k envoi">Envoi</kbd></td><td>Validate: a menu number, a message, an answer</td></tr>
+<tr><td><kbd class="k">Retour</kbd></td><td>Previous page; in a history, older messages; leave a sheet</td></tr>
+<tr><td><kbd class="k">Suite</kbd></td><td>Next page; in a history, newer messages; from the Sommaire, the next unread conversation</td></tr>
+<tr><td><kbd class="k">Correction</kbd></td><td>Delete the last character</td></tr>
+<tr><td><kbd class="k">Annulation</kbd></td><td>Clear the input line</td></tr>
+<tr><td><kbd class="k">Guide</kbd></td><td>Once: the page's help line. Twice: the Guide screen (the page, its keys, typing accents in this mode)</td></tr>
+<tr><td><kbd class="k">Répétition</kbd></td><td>Redraw the whole screen (in the remote console: recall a command)</td></tr>
+<tr><td><kbd class="k">Connexion/Fin</kbd></td><td>Back: conversation → list → Sommaire</td></tr>
+<tr><td>↑ ↓</td><td>In a conversation, pick a message</td></tr>
+</tbody>
+</table>
+
+<h2 id="layout">Screen layout</h2>
+<table>
+<thead><tr><th>Row</th><th>Content</th></tr></thead>
+<tbody>
+<tr><td>1</td><td>Service line, in inverse video: 3615 MESHCORE, the page title (80 col), the unread count (blinking), BLE state, battery, local time</td></tr>
+<tr><td>2–3</td><td>Page title: underlined bold in 80 col, double height with a mosaic rule in 40 col</td></tr>
+<tr><td>4–21</td><td>Page content</td></tr>
+<tr><td>22</td><td>Notices, or the GUIDE help line</td></tr>
+<tr><td>23</td><td>Keys for this page, with key names in inverse video</td></tr>
+<tr><td>24</td><td>Input line: menu choice, message, or the answer to a question</td></tr>
+</tbody>
+</table>
+<p>40 columns use Vidéotex codes (US positioning, inverse and blink attributes, double height and size, G1 mosaics, G2 accents through SS2). 80 columns use the Mixte mode's ISO 6429 codes (CUP, ED, EL, one SGR per sequence) and the French set through SO/SI. The last cell of row 24 is never written, so the screen never scrolls.</p>
+
+<h2 id="usb">USB command line</h2>
+<p>USB serial, 115200 baud. End each line with CR; characters are echoed; replies are indented by two spaces and end with <code>OK</code> (or <code>ERR …</code>). The MeshCore companion's own local commands (<code>get</code>/<code>set</code> of preferences and so on) work as usual; these are the ones the Minitel build adds or relies on.</p>
+<h3 id="usb-node">Node</h3>
+<table>
+<thead><tr><th>Command</th><th>Reply / effect</th></tr></thead>
+<tbody>
+<tr><td><code>get prv.key</code></td><td>The node's private key, 128 hex digits. <b>See the warning below.</b></td></tr>
+<tr><td><code>set prv.key &lt;128 hex&gt;</code></td><td>Restore an identity; takes effect after a reboot</td></tr>
+<tr><td><code>get tz.offset</code> / <code>set tz.offset &lt;h&gt;</code></td><td>Time zone for display and for the Date et heure page, −12 … +14</td></tr>
+<tr><td><code>clock</code></td><td><code>&lt;unix&gt; YYYY-MM-DD HH:MM:SS UTC set|unset</code></td></tr>
+<tr><td><code>clock sync &lt;unix_ts&gt;</code></td><td>Set the RTC to UTC seconds, backwards too (an explicit host action)</td></tr>
+<tr><td><code>stack</code></td><td>Bytes of the 4 KB loop stack never used so far, and the free heap</td></tr>
+<tr><td><code>boot</code></td><td>Why the XIAO last restarted (power-on, reset button, watchdog, lockup, software reset including crashes), the uptime, and the last crash record: <code>pc=… lr=… cfsr=… hfsr=… mmfar=… bfar=… task=… t=…</code></td></tr>
+<tr><td><code>boot clear</code></td><td>Forget the saved crash record</td></tr>
+</tbody>
+</table>
+<div class="warn"><p><b>Private key.</b> <code>get prv.key</code> prints the secret that <i>is</i> the node. Anyone who has it can impersonate the node and read its direct messages. Keep it offline; never paste it into logs, chats, tickets or screenshots.</p></div>
+<h3 id="usb-hist">History</h3>
+<table>
+<thead><tr><th>Command</th><th>Reply / effect</th></tr></thead>
+<tbody>
+<tr><td><code>hist list</code></td><td>One line per conversation: <code>&lt;id&gt; &lt;channel|dm|room&gt; &lt;count&gt; &lt;unread&gt; &lt;name&gt;</code></td></tr>
+<tr><td><code>hist add &lt;conv&gt; &lt;unix_ts&gt; &lt;in|out&gt; &lt;sender_hex|-&gt; &lt;text_hex&gt;</code></td><td><code>OK</code>, <code>DUP</code> (same direction, sender and text within ±10 min), <code>OLD</code> (40 newer messages already) or <code>ERR</code>. <code>&lt;conv&gt;</code> is <code>ch:&lt;index&gt;</code>, <code>ch:&lt;name&gt;</code>, <code>dm:&lt;key prefix&gt;</code> or <code>room:&lt;key prefix&gt;</code>; sender and text are UTF-8 in hex (text 1–160 bytes, sender up to 31). Lines up to 511 characters.</td></tr>
+<tr><td><code>hist clear &lt;conv&gt;</code></td><td>Empty a conversation's history</td></tr>
+</tbody>
+</table>
+<h3 id="usb-link">Minitel link</h3>
+<table>
+<thead><tr><th>Command</th><th>Reply / effect</th></tr></thead>
+<tbody>
+<tr><td><code>link log</code></td><td>State, speed, re-inits, parity errors, then the last 16 link events (speed found, round without answer, status lost, reset sent / acknowledged, configured, Téléinformatique…)</td></tr>
+<tr><td><code>link try &lt;hex bytes&gt;</code></td><td>Send up to 32 raw bytes at the current speed, print what comes back in 600 ms (<code>!</code> marks a parity error). Modem, dialling, line seizure, transparency and download commands are refused.</td></tr>
+<tr><td><code>link txlog on|off|dump|clear</code></td><td>Record the last 2048 bytes sent to the terminal; <code>dump</code> prints them in hex with an ASCII column</td></tr>
+<tr><td><code>ui cursor none|csi|cof|dec</code></td><td>80 col: how to hide the cursor while drawing (saved); 40 col always uses COF/CON</td></tr>
+<tr><td><code>redraw</code></td><td>Clear the terminal and send the whole page again (like <kbd class="k">Répétition</kbd>)</td></tr>
+</tbody>
+</table>
+<h3 id="usb-ui">Screen and UI driving</h3>
+<table>
+<thead><tr><th>Command</th><th>Reply / effect</th></tr></thead>
+<tbody>
+<tr><td><code>screen</code></td><td>Dump the screen model (format below)</td></tr>
+<tr><td><code>screen watch &lt;frames&gt; &lt;ms&gt;</code></td><td>One dump every <code>ms</code> (50–60000), <code>frames</code> times (1–2000); headers carry <code>t=</code>, only the last frame ends with <code>OK</code>. <code>screen watch stop</code> ends it.</td></tr>
+<tr><td><code>key &lt;name&gt; […]</code></td><td>Function keys: <code>envoi retour repetition guide annulation sommaire correction suite connexion</code> (<code>fin</code>), <code>esc</code>, arrows <code>haut bas gauche droite</code> (<code>up down left right</code>)</td></tr>
+<tr><td><code>type &lt;text&gt;</code></td><td>The rest of the line, typed on the keyboard (spaces kept)</td></tr>
+<tr><td><code>typehex &lt;utf8 hex&gt;</code></td><td>Any UTF-8, sent as the keyboard would (accents as SS2 sequences, same composition); emoji become their ASCII codes</td></tr>
+<tr><td><code>wait idle [ms]</code></td><td><code>OK</code> once every queued key is handled and the page is built and sent; <code>ERR timeout</code> after <code>ms</code> (default 5000)</td></tr>
+<tr><td><code>ui state</code></td><td><code>UI page=… mode=… link=… prompt=… input=&lt;hex&gt; pending=&lt;hex&gt; guide=… help=… notice=… … idle=…</code>: page id, 40/80, open question and its input (a password or pairing code is masked), list and paging positions, splash scene and frame</td></tr>
+<tr><td><code>ui reset</code></td><td>Back to the Sommaire, any question closed</td></tr>
+<tr><td><code>splash scene &lt;0-3|off&gt;</code></td><td>Hold a welcome-page scene complete (for screenshots); <code>off</code> resumes the animation</td></tr>
+<tr><td><code>splash speed [&lt;ms per frame&gt; [&lt;s per scene&gt;]]</code></td><td>Welcome page pace, default 130 ms and 18 s (saved)</td></tr>
+</tbody>
+</table>
+<p>Injected keys go through exactly the same handling as real ones and can do anything the keyboard can, sending messages included; confirmations are still asked. At most 63 keys wait in the queue: send long texts in parts, with <code>wait idle</code> in between. Page ids: <code>splash home convlist conv contacts contact advert settings clock status channels channel news regionpick autoreg autoadd trace admin console graphs graph quick nearby mykey device</code>.</p>
+<pre><code>ui reset
+type 4
+key envoi
+wait idle
+type 11
+key envoi
+wait idle
+ui state
+  UI page=status mode=80 link=ok prompt=none input=- ... idle=1
+screen</code></pre>
+
+<h2 id="dump">Screen dump format (v1)</h2>
+<pre><code>  SCREEN v1 cols=&lt;40|80&gt; rows=25 mode=&lt;mixte|videotex&gt; page=&lt;id&gt; cellw=&lt;8|6&gt; cellh=10 [t=&lt;ms&gt;]
+  ROW &lt;r&gt; &lt;text_hex&gt; &lt;attr_hex&gt;     r = 0..24 (row 0, the status row, is blank)
+  CURSOR &lt;r&gt; &lt;c&gt; &lt;0|1&gt;
+  OK</code></pre>
+<ul>
+<li><code>text_hex</code>: the row's UTF-8, exactly <code>cols</code> characters, one per cell, with the real glyph (<code>é</code>). A G1 mosaic cell carries its code as an ASCII character 0x20–0x7F.</li>
+<li><code>attr_hex</code>: 4 hex digits per cell.</li>
+<li>Double height: the character sits on the row it is written on; the cell of the row above is a blank with the continuation bit.</li>
+<li>In 80 col a mosaic is drawn as an inverse blank or <code>-</code>/<code>_</code> and double height as bold, as the terminal shows them; in 40 col bold and underline do not exist.</li>
+<li>The dump is the model the firmware is drawing: rows not yet sent to the terminal already show their new content.</li>
+</ul>
+<table>
+<thead><tr><th>Bit</th><th>Meaning</th><th>Bit</th><th>Meaning</th></tr></thead>
+<tbody>
+<tr><td>0</td><td>inverse</td><td>6</td><td>mosaic G1</td></tr>
+<tr><td>1</td><td>blink</td><td>7</td><td>concealed</td></tr>
+<tr><td>2</td><td>underline (on a mosaic: separated)</td><td>8–10</td><td>foreground colour 0–7</td></tr>
+<tr><td>3</td><td>bold</td><td>11–13</td><td>background colour 0–7</td></tr>
+<tr><td>4</td><td>double height</td><td>14</td><td>continuation (covered by a double-size neighbour)</td></tr>
+<tr><td>5</td><td>double width</td><td></td><td></td></tr>
+</tbody>
+</table>
+<p>G1 mosaic: bits 0–4 and 6 of the code are the 2 × 3 blocks top-left, top-right, middle-left, middle-right, bottom-left, bottom-right.</p>
+
+<h2 id="tools">Host tools</h2>
+<p>Python 3, run isolated (<code>python3 -I</code>). The screenshot tools need numpy and Pillow; the rest is standard library. Every tool finds the XIAO as <code>/dev/serial/by-id/*&lt;serial&gt;*</code> and refuses <code>/dev/ttyUSB*</code> devices (on a desk with a repeater on a USB-serial adapter, opening its tty resets it). Change the serial number in the scripts for your own XIAO.</p>
+<h3 id="tool-dump"><code>tools/screenshot/minitel_dump.py</code></h3>
+<pre><code>python3 -I minitel_dump.py -o page.dump          # fetch a dump from the XIAO
+python3 -I minitel_dump.py --from-file log.txt   # clean a dump out of a terminal log
+python3 -I minitel_dump.py --render -- --angle   # fetch, then render</code></pre>
+<h3 id="tool-render"><code>tools/screenshot/minitel_render.py</code></h3>
+<p>A photo-realistic render of a Minitel 2 showing the dump, computed in numpy: a ray-marched terminal on a desk, a refracting curved glass, the raster's beam spot and bandwidth, halation, reflections, depth of field and grain. Also the CRT face alone (<code>--screen-only</code>, about 2 s), and animated GIFs from several dumps.</p>
+<pre><code>python3 -I minitel_render.py page.dump                     # 1920x1440 photo
+python3 -I minitel_render.py page.dump --angle --style night
+python3 -I minitel_render.py page.dump --screen-only       # the tube only, 1280x960
+python3 -I minitel_render.py f*.dump --frame-ms 130 -o anim.gif</code></pre>
+<h3 id="tool-tour"><code>tools/tour/tour.py</code></h3>
+<p>Walks every page in 40 and 80 columns over USB, saves each dump to <code>gallery/dumps/</code> with <code>gallery/manifest.json</code> (page, mode, title, description), renders them and rebuilds this site. It only visits pages: every <kbd class="k envoi">Envoi</kbd> is checked against <code>ui state</code> and an allow-list of navigation choices first, room conversations (which log in) are skipped, and nothing that transmits is ever pressed.</p>
+<pre><code>python3 -I tools/tour/tour.py run                 # both modes, render, build the site
+python3 -I tools/tour/tour.py run --splash-anim   # also record the welcome page animation
+python3 -I tools/tour/tour.py simulate            # offline test against a fake device
+python3 -I tools/tour/tour.py list                # the pages it visits</code></pre>
+<h3 id="tool-site"><code>site/build.py</code></h3>
+<p>Builds this site into <code>site/dist/</code>: plain files for any web server. <code>site/tools/make_webfont.py</code> rebuilds the Minitel web fonts from the CC0 font.</p>
+
+<h2 id="files">Files on the device</h2>
+<table>
+<thead><tr><th>File</th><th>Content</th></tr></thead>
+<tbody>
+<tr><td><code>/minitel.cfg</code> (internal flash)</td><td>40/80 columns, send without clock, bell, accent prefix</td></tr>
+<tr><td><code>/mt/index</code></td><td>Conversation table: names, unread counts, last activity</td></tr>
+<tr><td><code>/mt/c…</code>, <code>/mt/d…</code>, <code>/mt/r…</code></td><td>One ring of 40 messages per channel, DM or room (about 7.4 KB each)</td></tr>
+<tr><td><code>/mt/rooms</code></td><td>Room passwords (in clear, like the app's)</td></tr>
+<tr><td><code>/mt/chscope</code>, <code>/mt/mute</code></td><td>Per-channel region and news visibility; silenced conversations</td></tr>
+<tr><td><code>/minitel.crash</code></td><td>The last crash record, until <code>boot clear</code></td></tr>
+</tbody>
+</table>
+<p>The <code>/mt/</code> files live on the XIAO's 2 MB QSPI flash. Nothing here formats or wipes a file system; the MeshCore preferences, contacts and channels keep their usual format.</p>

@@ -1,0 +1,21 @@
+# Python
+__pycache__/
+*.pyc
+*.tmp
+
+# Third-party documents we may not redistribute (manuals, extracts, terminfo dumps)
+ref/*.pdf
+ref/*.txt
+ref/*.png
+ref/*.termcap
+ref/*.terminfo
+ref/*.terminfo.src
+*heltec*manual*
+
+# Build outputs
+.pio/
+site/dist/
+
+# Renders: bulky and regenerable from the dumps (tools/tour/tour.py render)
+tools/screenshot/renders/
+gallery/renders/

@@ -1,0 +1,654 @@
+(kicad_sch (version 20250114) (generator "eeschema") (generator_version "10.0")
+(uuid "f3882247-a4a2-55a5-9c37-6b1dc5cd460b") (paper "A4")
+(title_block (title "Minitel companion - DIN-5 interface") (rev "1"))
+(lib_symbols
+(symbol "Connector_Generic:Conn_01x01"
+		(pin_names
+			(offset 1.016)
+			(hide yes)
+		)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(in_pos_files yes)
+		(duplicate_pin_numbers_are_jumpers no)
+		(property "Reference" "J"
+			(at 0 2.54 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Value" "Conn_01x01"
+			(at 0 -2.54 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Footprint" ""
+			(at 0 0 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(hide yes)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Datasheet" ""
+			(at 0 0 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(hide yes)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Description" "Generic connector, single row, 01x01, script generated (kicad-library-utils/schlib/autogen/connector/)"
+			(at 0 0 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(hide yes)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "ki_keywords" "connector"
+			(at 0 0 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(hide yes)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "ki_fp_filters" "Connector*:*_1x??_*"
+			(at 0 0 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(hide yes)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(symbol "Conn_01x01_1_1"
+			(rectangle
+				(start -1.27 1.27)
+				(end 1.27 -1.27)
+				(stroke
+					(width 0.254)
+					(type default)
+				)
+				(fill
+					(type background)
+				)
+			)
+			(rectangle
+				(start -1.27 0.127)
+				(end 0 -0.127)
+				(stroke
+					(width 0.1524)
+					(type default)
+				)
+				(fill
+					(type none)
+				)
+			)
+			(pin passive line
+				(at -5.08 0 0)
+				(length 3.81)
+				(name "Pin_1"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+				(number "1"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+			)
+		)
+		(embedded_fonts no)
+	)
+(symbol "Device:R"
+		(pin_numbers
+			(hide yes)
+		)
+		(pin_names
+			(offset 0)
+		)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(in_pos_files yes)
+		(duplicate_pin_numbers_are_jumpers no)
+		(property "Reference" "R"
+			(at 2.032 0 90)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Value" "R"
+			(at 0 0 90)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Footprint" ""
+			(at -1.778 0 90)
+			(show_name no)
+			(do_not_autoplace no)
+			(hide yes)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Datasheet" ""
+			(at 0 0 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(hide yes)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Description" "Resistor"
+			(at 0 0 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(hide yes)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "ki_keywords" "R res resistor"
+			(at 0 0 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(hide yes)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "ki_fp_filters" "R_*"
+			(at 0 0 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(hide yes)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(symbol "R_0_1"
+			(rectangle
+				(start -1.016 -2.54)
+				(end 1.016 2.54)
+				(stroke
+					(width 0.254)
+					(type default)
+				)
+				(fill
+					(type none)
+				)
+			)
+		)
+		(symbol "R_1_1"
+			(pin passive line
+				(at 0 3.81 270)
+				(length 1.27)
+				(name ""
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+				(number "1"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+			)
+			(pin passive line
+				(at 0 -3.81 90)
+				(length 1.27)
+				(name ""
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+				(number "2"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+			)
+		)
+		(embedded_fonts no)
+	)
+(symbol "Transistor_BJT:PN2222A"
+		(pin_names
+			(offset 0)
+			(hide yes)
+		)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(in_pos_files yes)
+		(duplicate_pin_numbers_are_jumpers no)
+		(property "Reference" "Q"
+			(at 5.08 1.905 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "Value" "PN2222A"
+			(at 5.08 0 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "Footprint" "Package_TO_SOT_THT:TO-92_Inline"
+			(at 5.08 -1.905 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(hide yes)
+			(effects
+				(font
+					(size 1.27 1.27)
+					(italic yes)
+				)
+				(justify left)
+			)
+		)
+		(property "Datasheet" "https://www.onsemi.com/pub/Collateral/PN2222-D.PDF"
+			(at 0 0 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(hide yes)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "Description" "1A Ic, 40V Vce, NPN Transistor, General Purpose Transistor, TO-92"
+			(at 0 0 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(hide yes)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Sim.Device" "NPN"
+			(at 0 0 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(hide yes)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Sim.Pins" "1=E 2=B 3=C"
+			(at 0 0 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(hide yes)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "ki_keywords" "NPN Transistor"
+			(at 0 0 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(hide yes)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(symbol "PN2222A_0_1"
+			(polyline
+				(pts
+					(xy -2.54 0)
+					(xy 0.635 0)
+				)
+				(stroke
+					(width 0)
+					(type default)
+				)
+				(fill
+					(type none)
+				)
+			)
+			(polyline
+				(pts
+					(xy 0.635 1.905)
+					(xy 0.635 -1.905)
+				)
+				(stroke
+					(width 0.508)
+					(type default)
+				)
+				(fill
+					(type none)
+				)
+			)
+			(circle
+				(center 1.27 0)
+				(radius 2.8194)
+				(stroke
+					(width 0.254)
+					(type default)
+				)
+				(fill
+					(type none)
+				)
+			)
+		)
+		(symbol "PN2222A_1_1"
+			(polyline
+				(pts
+					(xy 0.635 0.635)
+					(xy 2.54 2.54)
+				)
+				(stroke
+					(width 0)
+					(type default)
+				)
+				(fill
+					(type none)
+				)
+			)
+			(polyline
+				(pts
+					(xy 0.635 -0.635)
+					(xy 2.54 -2.54)
+				)
+				(stroke
+					(width 0)
+					(type default)
+				)
+				(fill
+					(type none)
+				)
+			)
+			(polyline
+				(pts
+					(xy 1.27 -1.778)
+					(xy 1.778 -1.27)
+					(xy 2.286 -2.286)
+					(xy 1.27 -1.778)
+				)
+				(stroke
+					(width 0)
+					(type default)
+				)
+				(fill
+					(type outline)
+				)
+			)
+			(pin passive line
+				(at 2.54 -5.08 90)
+				(length 2.54)
+				(name "E"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+				(number "1"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+			)
+			(pin input line
+				(at -5.08 0 0)
+				(length 2.54)
+				(name "B"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+				(number "2"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+			)
+			(pin passive line
+				(at 2.54 5.08 270)
+				(length 2.54)
+				(name "C"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+				(number "3"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+			)
+		)
+		(embedded_fonts no)
+		(property "ki_fp_filters" "TO?92*"
+			(at 0 0 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(hide yes)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+	)
+)
+(symbol (lib_id "Device:R") (at 60.96 60.96 0) (unit 1) (exclude_from_sim no) (in_bom yes) (on_board yes) (dnp no) (uuid "620baa36-b5e1-541c-a932-1b47fd06e301")
+(property "Reference" "R1" (at 63.96 58.96 0) (effects (font (size 1.27 1.27)) (justify left)))
+(property "Value" "1k" (at 63.96 62.96 0) (effects (font (size 1.27 1.27)) (justify left)))
+(property "Footprint" "Resistor_THT:R_Axial_DIN0207_L6.3mm_D2.5mm_P7.62mm_Horizontal" (at 60.96 60.96 0) (effects (font (size 1.27 1.27)) (hide yes)))
+(property "Datasheet" "" (at 60.96 60.96 0) (effects (font (size 1.27 1.27)) (hide yes)))
+(property "Description" "Q1 base" (at 60.96 60.96 0) (effects (font (size 1.27 1.27)) (hide yes)))
+(pin "1" (uuid "319f14ee-6b91-4d41-9275-041869ec5f17"))
+(pin "2" (uuid "99bb8d77-7f6f-4272-95be-b5940b90920e"))
+(instances (project "minitel_if" (path "/f3882247-a4a2-55a5-9c37-6b1dc5cd460b" (reference "R1") (unit 1)))))
+(label "GPIO48" (at 60.96 57.15 90) (effects (font (size 1.27 1.27)) (justify left bottom)) (uuid "d8742851-44c3-49ec-80f9-a3dc23e6787b"))
+(label "Q1_B" (at 60.96 64.77 270) (effects (font (size 1.27 1.27)) (justify right bottom)) (uuid "2c33e58a-4236-43db-9d19-50101980ffbd"))
+(symbol (lib_id "Device:R") (at 76.2 60.96 0) (unit 1) (exclude_from_sim no) (in_bom yes) (on_board yes) (dnp no) (uuid "0d845a8f-380f-5df6-8c96-45c62505ce33")
+(property "Reference" "R2" (at 79.2 58.96 0) (effects (font (size 1.27 1.27)) (justify left)))
+(property "Value" "10k" (at 79.2 62.96 0) (effects (font (size 1.27 1.27)) (justify left)))
+(property "Footprint" "Resistor_THT:R_Axial_DIN0207_L6.3mm_D2.5mm_P2.54mm_Vertical" (at 76.2 60.96 0) (effects (font (size 1.27 1.27)) (hide yes)))
+(property "Datasheet" "" (at 76.2 60.96 0) (effects (font (size 1.27 1.27)) (hide yes)))
+(property "Description" "Q1 base pull-down (line idle while the ESP boots)" (at 76.2 60.96 0) (effects (font (size 1.27 1.27)) (hide yes)))
+(pin "1" (uuid "eda8792e-f766-450e-8642-78df9de9a197"))
+(pin "2" (uuid "46d7399e-8d7d-4b3c-940c-4ee4af9bf14c"))
+(instances (project "minitel_if" (path "/f3882247-a4a2-55a5-9c37-6b1dc5cd460b" (reference "R2") (unit 1)))))
+(label "Q1_B" (at 76.2 57.15 90) (effects (font (size 1.27 1.27)) (justify left bottom)) (uuid "39b1be0d-13ae-4a2a-af1e-142816266bed"))
+(label "GND" (at 76.2 64.77 270) (effects (font (size 1.27 1.27)) (justify right bottom)) (uuid "a86d1d8c-7d3b-46bd-8778-2cbdd69027fa"))
+(symbol (lib_id "Transistor_BJT:PN2222A") (at 104.14 60.96 0) (unit 1) (exclude_from_sim no) (in_bom yes) (on_board yes) (dnp no) (uuid "fe9c1d13-545e-5e49-a100-7c721f3fa5c7")
+(property "Reference" "Q1" (at 107.14 58.96 0) (effects (font (size 1.27 1.27)) (justify left)))
+(property "Value" "2N2222" (at 107.14 62.96 0) (effects (font (size 1.27 1.27)) (justify left)))
+(property "Footprint" "Package_TO_SOT_THT:TO-92_Inline_Wide" (at 104.14 60.96 0) (effects (font (size 1.27 1.27)) (hide yes)))
+(property "Datasheet" "" (at 104.14 60.96 0) (effects (font (size 1.27 1.27)) (hide yes)))
+(property "Description" "sinks Minitel RX (UART TX inverted)" (at 104.14 60.96 0) (effects (font (size 1.27 1.27)) (hide yes)))
+(pin "1" (uuid "306a8e16-9324-4531-9b84-36ee32eb9cda"))
+(pin "2" (uuid "65dffc61-964f-4e96-b495-9b428ae145ef"))
+(pin "3" (uuid "8e3ad2ad-70b4-4347-83b7-1410ffb0fc04"))
+(instances (project "minitel_if" (path "/f3882247-a4a2-55a5-9c37-6b1dc5cd460b" (reference "Q1") (unit 1)))))
+(label "GND" (at 106.68 66.04 270) (effects (font (size 1.27 1.27)) (justify right bottom)) (uuid "9c4b8733-4376-4b7c-81fc-c19d918591ff"))
+(label "Q1_B" (at 99.06 60.96 180) (effects (font (size 1.27 1.27)) (justify right bottom)) (uuid "c6fbf637-a60d-4eca-b8cf-e70d25d6055f"))
+(label "MT_RX" (at 106.68 55.88 90) (effects (font (size 1.27 1.27)) (justify left bottom)) (uuid "0b1c66dc-ba8e-4e76-a2f7-caba0018c4d5"))
+(symbol (lib_id "Device:R") (at 60.96 99.06 0) (unit 1) (exclude_from_sim no) (in_bom yes) (on_board yes) (dnp no) (uuid "1780a2d6-5f45-53cf-b376-6065c9f5f4e9")
+(property "Reference" "R3" (at 63.96 97.06 0) (effects (font (size 1.27 1.27)) (justify left)))
+(property "Value" "10k" (at 63.96 101.06 0) (effects (font (size 1.27 1.27)) (justify left)))
+(property "Footprint" "Resistor_THT:R_Axial_DIN0207_L6.3mm_D2.5mm_P2.54mm_Vertical" (at 60.96 99.06 0) (effects (font (size 1.27 1.27)) (hide yes)))
+(property "Datasheet" "" (at 60.96 99.06 0) (effects (font (size 1.27 1.27)) (hide yes)))
+(property "Description" "pull-up for the Minitel open-collector TX" (at 60.96 99.06 0) (effects (font (size 1.27 1.27)) (hide yes)))
+(pin "1" (uuid "9c539fbf-41db-4597-b37c-bdcfd26ed118"))
+(pin "2" (uuid "190c3f9b-6048-49f3-9ecc-d39c58fd4955"))
+(instances (project "minitel_if" (path "/f3882247-a4a2-55a5-9c37-6b1dc5cd460b" (reference "R3") (unit 1)))))
+(label "+3V3" (at 60.96 95.25 90) (effects (font (size 1.27 1.27)) (justify left bottom)) (uuid "4eac632b-5ed5-4a56-a66f-988eeafa1718"))
+(label "MT_TX" (at 60.96 102.87 270) (effects (font (size 1.27 1.27)) (justify right bottom)) (uuid "12acfb2f-92b7-4eae-97c8-cd609c980830"))
+(symbol (lib_id "Device:R") (at 76.2 99.06 0) (unit 1) (exclude_from_sim no) (in_bom yes) (on_board yes) (dnp no) (uuid "6e0eb5d1-2bfe-5d55-9187-ff8db4def79c")
+(property "Reference" "R4" (at 79.2 97.06 0) (effects (font (size 1.27 1.27)) (justify left)))
+(property "Value" "10k" (at 79.2 101.06 0) (effects (font (size 1.27 1.27)) (justify left)))
+(property "Footprint" "Resistor_THT:R_Axial_DIN0207_L6.3mm_D2.5mm_P7.62mm_Horizontal" (at 76.2 99.06 0) (effects (font (size 1.27 1.27)) (hide yes)))
+(property "Datasheet" "" (at 76.2 99.06 0) (effects (font (size 1.27 1.27)) (hide yes)))
+(property "Description" "series protection" (at 76.2 99.06 0) (effects (font (size 1.27 1.27)) (hide yes)))
+(pin "1" (uuid "85a1c93c-6c01-41f6-b650-3c4b10c9b323"))
+(pin "2" (uuid "a0543aa5-64c6-40bc-976e-05ad5406a897"))
+(instances (project "minitel_if" (path "/f3882247-a4a2-55a5-9c37-6b1dc5cd460b" (reference "R4") (unit 1)))))
+(label "MT_TX" (at 76.2 95.25 90) (effects (font (size 1.27 1.27)) (justify left bottom)) (uuid "c76e51ad-ee25-4650-a2dc-42bbb071e4f3"))
+(label "GPIO47" (at 76.2 102.87 270) (effects (font (size 1.27 1.27)) (justify right bottom)) (uuid "8ae29b3d-5512-45c3-95c4-77e0ff7994c0"))
+(symbol (lib_id "Connector_Generic:Conn_01x01") (at 160.02 55.88 0) (unit 1) (exclude_from_sim no) (in_bom yes) (on_board yes) (dnp no) (uuid "393b9ab4-9d72-5094-aea4-56bb36842392")
+(property "Reference" "J1" (at 163.02 53.88 0) (effects (font (size 1.27 1.27)) (justify left)))
+(property "Value" "V3 3V3 (J3.2)" (at 163.02 57.88 0) (effects (font (size 1.27 1.27)) (justify left)))
+(property "Footprint" "stripboard:WirePad" (at 160.02 55.88 0) (effects (font (size 1.27 1.27)) (hide yes)))
+(property "Datasheet" "" (at 160.02 55.88 0) (effects (font (size 1.27 1.27)) (hide yes)))
+(property "Description" "" (at 160.02 55.88 0) (effects (font (size 1.27 1.27)) (hide yes)))
+(pin "1" (uuid "7cb2f8c8-73f0-4d8b-bda1-74e8f6799eb0"))
+(instances (project "minitel_if" (path "/f3882247-a4a2-55a5-9c37-6b1dc5cd460b" (reference "J1") (unit 1)))))
+(label "+3V3" (at 154.94 55.88 180) (effects (font (size 1.27 1.27)) (justify right bottom)) (uuid "4e77c8f2-ddb5-4376-8414-287c3eadedfe"))
+(symbol (lib_id "Connector_Generic:Conn_01x01") (at 160.02 66.04 0) (unit 1) (exclude_from_sim no) (in_bom yes) (on_board yes) (dnp no) (uuid "53416257-3061-5b14-aa10-f61ad18b5006")
+(property "Reference" "J2" (at 163.02 64.04 0) (effects (font (size 1.27 1.27)) (justify left)))
+(property "Value" "V3 GND (J3.1)" (at 163.02 68.04 0) (effects (font (size 1.27 1.27)) (justify left)))
+(property "Footprint" "stripboard:WirePad" (at 160.02 66.04 0) (effects (font (size 1.27 1.27)) (hide yes)))
+(property "Datasheet" "" (at 160.02 66.04 0) (effects (font (size 1.27 1.27)) (hide yes)))
+(property "Description" "" (at 160.02 66.04 0) (effects (font (size 1.27 1.27)) (hide yes)))
+(pin "1" (uuid "a11d1f22-f31e-4ecc-bc92-1368e6b79270"))
+(instances (project "minitel_if" (path "/f3882247-a4a2-55a5-9c37-6b1dc5cd460b" (reference "J2") (unit 1)))))
+(label "GND" (at 154.94 66.04 180) (effects (font (size 1.27 1.27)) (justify right bottom)) (uuid "e3970f78-e500-4b94-8037-97f6b75eb54a"))
+(symbol (lib_id "Connector_Generic:Conn_01x01") (at 160.02 76.2 0) (unit 1) (exclude_from_sim no) (in_bom yes) (on_board yes) (dnp no) (uuid "7a33c58f-c9ad-5919-a7be-f8a7099a1352")
+(property "Reference" "J3" (at 163.02 74.2 0) (effects (font (size 1.27 1.27)) (justify left)))
+(property "Value" "V3 GPIO47 (J2.13)" (at 163.02 78.2 0) (effects (font (size 1.27 1.27)) (justify left)))
+(property "Footprint" "stripboard:WirePad" (at 160.02 76.2 0) (effects (font (size 1.27 1.27)) (hide yes)))
+(property "Datasheet" "" (at 160.02 76.2 0) (effects (font (size 1.27 1.27)) (hide yes)))
+(property "Description" "" (at 160.02 76.2 0) (effects (font (size 1.27 1.27)) (hide yes)))
+(pin "1" (uuid "c8ed3324-c50c-4105-ac54-4e2ebff9c814"))
+(instances (project "minitel_if" (path "/f3882247-a4a2-55a5-9c37-6b1dc5cd460b" (reference "J3") (unit 1)))))
+(label "GPIO47" (at 154.94 76.2 180) (effects (font (size 1.27 1.27)) (justify right bottom)) (uuid "e273d3e1-2182-4afc-a50d-966099de3eda"))
+(symbol (lib_id "Connector_Generic:Conn_01x01") (at 160.02 83.82 0) (unit 1) (exclude_from_sim no) (in_bom yes) (on_board yes) (dnp no) (uuid "fad56048-1115-506c-bafb-ab1277be804b")
+(property "Reference" "J4" (at 163.02 81.82 0) (effects (font (size 1.27 1.27)) (justify left)))
+(property "Value" "V3 GPIO48 (J2.14)" (at 163.02 85.82 0) (effects (font (size 1.27 1.27)) (justify left)))
+(property "Footprint" "stripboard:WirePad" (at 160.02 83.82 0) (effects (font (size 1.27 1.27)) (hide yes)))
+(property "Datasheet" "" (at 160.02 83.82 0) (effects (font (size 1.27 1.27)) (hide yes)))
+(property "Description" "" (at 160.02 83.82 0) (effects (font (size 1.27 1.27)) (hide yes)))
+(pin "1" (uuid "c672f94a-6c23-42a1-a15f-3ca64bd267d4"))
+(instances (project "minitel_if" (path "/f3882247-a4a2-55a5-9c37-6b1dc5cd460b" (reference "J4") (unit 1)))))
+(label "GPIO48" (at 154.94 83.82 180) (effects (font (size 1.27 1.27)) (justify right bottom)) (uuid "602594c8-e6ed-4560-9e44-c47f21d76548"))
+(symbol (lib_id "Connector_Generic:Conn_01x01") (at 160.02 109.22 0) (unit 1) (exclude_from_sim no) (in_bom yes) (on_board yes) (dnp no) (uuid "86d2fc38-806d-5d81-b1bc-30fb116f4849")
+(property "Reference" "J5" (at 163.02 107.22 0) (effects (font (size 1.27 1.27)) (justify left)))
+(property "Value" "DIN1 RX" (at 163.02 111.22 0) (effects (font (size 1.27 1.27)) (justify left)))
+(property "Footprint" "stripboard:WirePad" (at 160.02 109.22 0) (effects (font (size 1.27 1.27)) (hide yes)))
+(property "Datasheet" "" (at 160.02 109.22 0) (effects (font (size 1.27 1.27)) (hide yes)))
+(property "Description" "" (at 160.02 109.22 0) (effects (font (size 1.27 1.27)) (hide yes)))
+(pin "1" (uuid "27b9142d-55a7-43f9-9e37-422dfdef6d89"))
+(instances (project "minitel_if" (path "/f3882247-a4a2-55a5-9c37-6b1dc5cd460b" (reference "J5") (unit 1)))))
+(label "MT_RX" (at 154.94 109.22 180) (effects (font (size 1.27 1.27)) (justify right bottom)) (uuid "dc9bdb0c-9faa-4a76-8c4d-381409868fe0"))
+(symbol (lib_id "Connector_Generic:Conn_01x01") (at 160.02 119.38 0) (unit 1) (exclude_from_sim no) (in_bom yes) (on_board yes) (dnp no) (uuid "b180ad92-c4ff-5fbb-b307-ebac185253fc")
+(property "Reference" "J6" (at 163.02 117.38 0) (effects (font (size 1.27 1.27)) (justify left)))
+(property "Value" "DIN2 GND" (at 163.02 121.38 0) (effects (font (size 1.27 1.27)) (justify left)))
+(property "Footprint" "stripboard:WirePad" (at 160.02 119.38 0) (effects (font (size 1.27 1.27)) (hide yes)))
+(property "Datasheet" "" (at 160.02 119.38 0) (effects (font (size 1.27 1.27)) (hide yes)))
+(property "Description" "" (at 160.02 119.38 0) (effects (font (size 1.27 1.27)) (hide yes)))
+(pin "1" (uuid "40cdad89-814d-4ab4-acc8-2a3bc8222182"))
+(instances (project "minitel_if" (path "/f3882247-a4a2-55a5-9c37-6b1dc5cd460b" (reference "J6") (unit 1)))))
+(label "GND" (at 154.94 119.38 180) (effects (font (size 1.27 1.27)) (justify right bottom)) (uuid "314adb18-fd2a-4fc9-afb5-72a1a42f5c61"))
+(symbol (lib_id "Connector_Generic:Conn_01x01") (at 160.02 129.54 0) (unit 1) (exclude_from_sim no) (in_bom yes) (on_board yes) (dnp no) (uuid "139e9dfd-5681-5de4-af75-53e969136b16")
+(property "Reference" "J7" (at 163.02 127.54 0) (effects (font (size 1.27 1.27)) (justify left)))
+(property "Value" "DIN3 TX" (at 163.02 131.54 0) (effects (font (size 1.27 1.27)) (justify left)))
+(property "Footprint" "stripboard:WirePad" (at 160.02 129.54 0) (effects (font (size 1.27 1.27)) (hide yes)))
+(property "Datasheet" "" (at 160.02 129.54 0) (effects (font (size 1.27 1.27)) (hide yes)))
+(property "Description" "" (at 160.02 129.54 0) (effects (font (size 1.27 1.27)) (hide yes)))
+(pin "1" (uuid "5386988c-6c35-487b-8412-e7b8bbeb97ef"))
+(instances (project "minitel_if" (path "/f3882247-a4a2-55a5-9c37-6b1dc5cd460b" (reference "J7") (unit 1)))))
+(label "MT_TX" (at 154.94 129.54 180) (effects (font (size 1.27 1.27)) (justify right bottom)) (uuid "fbf2a2a5-8092-4c59-8575-036c78bd2116"))
+(text "Minitel 2 <-> Heltec WiFi LoRa 32 V3 interface (stripboard)" (exclude_from_sim no) (at 40 30 0) (effects (font (size 1.5 1.5)) (justify left bottom)) (uuid "5b61e58d-4178-4cc9-87a1-89e36ec56638"))
+(text "Minitel DIN-5: open-collector TTL, receiver supplies the pull-up. 1200/4800/9600 bd 7E1." (exclude_from_sim no) (at 40 36 0) (effects (font (size 1.5 1.5)) (justify left bottom)) (uuid "f1ef3193-cb4b-4e13-8f5c-24e179d51b63"))
+(text "GPIO48 = UART TX with output inversion (Q1 inverts). GPIO47 = UART RX, not inverted." (exclude_from_sim no) (at 40 42 0) (effects (font (size 1.5 1.5)) (justify left bottom)) (uuid "21d4d95d-8621-4566-8f5d-d96092a7becb"))
+(text "DIN4 (PT) and DIN5 are left unconnected: PT is ignored in 80-col modes," (exclude_from_sim no) (at 40 125 0) (effects (font (size 1.5 1.5)) (justify left bottom)) (uuid "f131a307-2419-4757-909a-6b50cf6ff32d"))
+(text "and pin 5 is a supply output (8.5-15 V) on the Minitel 2 - never wire it to the ESP." (exclude_from_sim no) (at 40 131 0) (effects (font (size 1.5 1.5)) (justify left bottom)) (uuid "b382f5bc-2be9-46ec-946c-3991e1597ddf"))
+(text "Power: Heltec V3 from USB 5 V. Only GND is shared with the Minitel." (exclude_from_sim no) (at 40 137 0) (effects (font (size 1.5 1.5)) (justify left bottom)) (uuid "4357a58f-f675-46cd-aa37-9be90fb6a81c"))
+(text "Wire pads to the Heltec V3" (exclude_from_sim no) (at 140 45 0) (effects (font (size 1.5 1.5)) (justify left bottom)) (uuid "acb4cc1c-2df8-4851-8c60-1efca4f4e693"))
+(text "Wire pads to the DIN-5 male plug" (exclude_from_sim no) (at 140 100 0) (effects (font (size 1.5 1.5)) (justify left bottom)) (uuid "0515b944-e4cc-41a3-b861-3cbe76aacd18"))
+(sheet_instances (path "/" (page "1")))
+(embedded_fonts no))

@@ -1,0 +1,7 @@
+(sym_lib_table
+  (version 7)
+  (lib (name "Device")(type "KiCad")(uri "/usr/share/kicad/symbols/Device.kicad_sym")(options "")(descr ""))
+  (lib (name "Diode")(type "KiCad")(uri "/usr/share/kicad/symbols/Diode.kicad_sym")(options "")(descr ""))
+  (lib (name "Transistor_BJT")(type "KiCad")(uri "/usr/share/kicad/symbols/Transistor_BJT.kicad_sym")(options "")(descr ""))
+  (lib (name "Connector_Generic")(type "KiCad")(uri "/usr/share/kicad/symbols/Connector_Generic.kicad_sym")(options "")(descr ""))
+)

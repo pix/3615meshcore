@@ -1,0 +1,41 @@
+<!-- title: Crédits | nav: 6 | label: Crédits | desc: Credits and licences of 3615 MESHCORE: MeshCore, the Minitel font, the Gaulix region naming, INSEE and geo.api.gouv.fr data, the emoji data, the arduiblog interface. -->
+<h1>Crédits et licences</h1>
+<p class="lede">3615 MESHCORE stands on other people's work. Thank you to all of them.</p>
+
+<h2 id="meshcore">MeshCore</h2>
+<p>The firmware is <a href="https://github.com/meshcore-dev/MeshCore">MeshCore</a> by Scott Powell / rippleradios.com and its contributors, under the <b>MIT licence</b>, with the Minitel user interface added in <code>examples/companion_radio/ui-minitel/</code> on a fork. The phone app it stays compatible with is the MeshCore companion app.</p>
+
+<h2 id="font">The Minitel font</h2>
+<p>The characters on every screen of this site, and in the photo renders, come from <b>Minitel.ttf / Minitel.sfd</b> by <b>Frédéric Bisson</b> (Zigazou), from <a href="https://github.com/zigazou/minitel-canvas">zigazou/minitel-canvas</a>, dedicated to the public domain under <b>CC0 1.0 Universal</b> (licence file kept next to the font: <a href="assets/fonts/LICENSE-Minitel-font.txt">LICENSE-Minitel-font.txt</a>). It redraws the Minitel ROM characters on their exact 8 × 10 dot grid. Frédéric Bisson also wrote PyMinitel and the miedit page editor.</p>
+<p>The web fonts here (<code>minitel40</code>, <code>minitel80</code> and their "separated mosaic" variants) are rebuilt dot by dot from that font by <code>site/tools/make_webfont.py</code>, with the G1 mosaics added at the Unicode sextant code points. They are offered under the same CC0 dedication.</p>
+
+<h2 id="regions">Regions: Gaulix, INSEE, geo.api.gouv.fr</h2>
+<ul>
+<li><b>Region names and hierarchy</b> follow the French MeshCore community's conventions, as published by <a href="https://gaulix.fr/docs-parametrage/regles-de-nommage-regions-canaux-meshcore/">Gaulix: "Règles de nommage des régions et canaux MeshCore"</a> and its <i>Générateur de région MeshCore</i>. The département-to-région mapping was extracted from that generator (its provenance is recorded in <code>gaulix-regions.json</code> in the firmware).</li>
+<li><b>Names, préfectures and the commune table</b>: INSEE, <i>Code officiel géographique</i> 2026, under the <a href="https://www.etalab.gouv.fr/licence-ouverte-open-licence/">Licence Ouverte / Open Licence 2.0</a> (Etalab).</li>
+<li><b>Préfecture town-hall positions and commune bounding boxes</b>: <a href="https://geo.api.gouv.fr/">geo.api.gouv.fr</a> (API Découpage administratif), Licence Ouverte 2.0.</li>
+<li>Region and département codes were cross-checked against Debian's <a href="https://salsa.debian.org/iso-codes-team/iso-codes">iso-codes</a> (ISO 3166-2); nothing from it is embedded.</li>
+</ul>
+
+<h2 id="emoji">Emoji data</h2>
+<p>The emoji → ASCII table is generated (checked by SHA-256) from:</p>
+<ul>
+<li><a href="https://www.unicode.org/Public/18.0.0/emoji/">Unicode <code>emoji-test.txt</code></a>, Emoji 18.0: every emoji and its CLDR short name. © Unicode, Inc., under the <a href="https://www.unicode.org/license.txt">Unicode License v3</a>.</li>
+<li><a href="https://github.com/github/gemoji">github/gemoji</a> <code>db/emoji.json</code>: GitHub shortcodes, <b>MIT</b>.</li>
+<li><a href="https://github.com/iamcal/emoji-data">iamcal/emoji-data</a> <code>emoji.json</code>: Slack shortcodes, <b>MIT</b>.</li>
+</ul>
+
+<h2 id="interface">The interface</h2>
+<p>The one-transistor DIN interface is <b>arduiblog</b>'s, from <a href="https://arduiblog.com/2019/04/29/ressuscitez-le-minitel/">"Ressuscitez le Minitel"</a> (2019). It is used here as published, powered at 3V3 with a series resistor added for the XIAO; the schematic on the <a href="build.html#interface">Montage</a> page is our own drawing of it.</p>
+
+<h2 id="refs">Protocol references</h2>
+<p>The link layer was written from the <i>Spécifications Techniques d'Utilisation du Minitel 1B</i> (STUM 1B), the Minitel 2 user guide, the CNET peripheral interface specification (1982), the Minitel entries of ncurses' <code>terminfo.src</code>, and the code and notes of <a href="https://github.com/eserandour/Minitel1B_Hard">Minitel1B_Hard</a>, <a href="https://github.com/Zigazou/PyMinitel">PyMinitel</a> and <a href="https://github.com/iodeo/Minitel-ESP32">iodeo/Minitel-ESP32</a>. Those are references only; no code was taken from them, and their documents are not redistributed here.</p>
+
+<h2 id="tools">Tools</h2>
+<p>The host tools use Python, <a href="https://numpy.org/">NumPy</a> and <a href="https://python-pillow.org/">Pillow</a>; the web fonts are built with <a href="https://github.com/fonttools/fonttools">fontTools</a>; the firmware with <a href="https://platformio.org/">PlatformIO</a>.</p>
+
+<h2 id="trademarks">No affiliation</h2>
+<p>This is an independent hobby project. It is not affiliated with, endorsed by or connected to Orange, France Télécom, the PTT, Philips, Alcatel, Seeed Studio or the MeshCore project. "Minitel", "Télétel" and "3615" are used only to describe the terminal and the style of service this project imitates; no logo or trademark artwork is used. The terminal in the renders is drawn generic and unbranded.</p>
+
+<h2 id="licence">This project</h2>
+<p>The firmware changes are part of the MeshCore fork (MIT). The licence of this repository's own tools, hardware notes and documentation is stated in its <code>README.md</code>.</p>

@@ -1,13 +1,13 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 860 420" role="img" aria-labelledby="sch-t sch-d" font-family="system-ui, sans-serif" font-size="15">
-<title id="sch-t">Interface schematic: XIAO nRF52840 to the Minitel DIN port</title>
-<desc id="sch-d">Receive: Minitel pin 3 (TX, open collector) is pulled up to 3V3 by 220 kilohms and goes through 9.1 kilohms to XIAO D7. Transmit: a 2N2222A in common base, base biased by 10 kilohms to 3V3 and 22 kilohms to ground; XIAO D6 drives the emitter, the collector pulls Minitel pin 1 (RX) low. Minitel pin 2 is ground; pins 4 and 5 are not connected.</desc>
+<title id="sch-t">Schéma de l'interface : du XIAO nRF52840 à la prise DIN du Minitel</title>
+<desc id="sch-d">Réception : la broche 3 du Minitel (sortie à collecteur ouvert) est tirée au 3V3 par 220 kilohms et rejoint D7 du XIAO à travers 9,1 kilohms. Émission : un 2N2222A en base commune, base polarisée par 10 kilohms vers le 3V3 et 22 kilohms vers la masse ; D6 du XIAO attaque l'émetteur, le collecteur tire la broche 1 du Minitel (entrée) vers le bas. La broche 2 est la masse ; les broches 4 et 5 ne sont pas reliées.</desc>
 <g fill="none" stroke="#dfe6f2" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
   <!-- XIAO block -->
   <rect x="30" y="80" width="150" height="260" rx="8" stroke="#5fd39a"/>
   <!-- Minitel block -->
   <rect x="690" y="80" width="140" height="260" rx="8" stroke="#f2c46d"/>
 
-  <!-- receive path: 3V3 flag, R3 220k, node, R4 9.1k to D7 -->
+  <!-- receive path: 3V3 flag, R3 220k, node, R4 9,1k to D7 -->
   <path d="M560 40 v14"/><path d="M548 40 h24"/>
   <rect x="551" y="54" width="18" height="56"/>
   <path d="M560 110 v20"/>
@@ -46,21 +46,21 @@
   <text x="172" y="135" text-anchor="end">D7 (RX)</text>
   <text x="172" y="229" text-anchor="end">D6 (TX)</text>
   <text x="172" y="295" text-anchor="end">3V3</text>
-  <text x="172" y="323" text-anchor="end">GND</text>
+  <text x="172" y="323" text-anchor="end">masse</text>
   <text x="228" y="295" font-size="13" fill="#a7adb8">3V3</text>
 
   <text x="760" y="70" text-anchor="middle" fill="#f2c46d" font-weight="600">Minitel DIN</text>
-  <text x="698" y="135">3 TX</text>
-  <text x="698" y="229">1 RX</text>
-  <text x="698" y="305">2 GND</text>
-  <text x="760" y="252" text-anchor="middle" font-size="12" fill="#a7adb8">4 PT, 5 +8.5–15 V:</text>
-  <text x="760" y="268" text-anchor="middle" font-size="12" fill="#a7adb8">not connected</text>
+  <text x="698" y="135">3 sortie</text>
+  <text x="698" y="229">1 entrée</text>
+  <text x="698" y="305">2 masse</text>
+  <text x="760" y="252" text-anchor="middle" font-size="12" fill="#a7adb8">4 PT, 5 +8,5–15 V :</text>
+  <text x="760" y="268" text-anchor="middle" font-size="12" fill="#a7adb8">non reliées</text>
 
   <text x="560" y="32" text-anchor="middle" font-size="13" fill="#a7adb8">3V3</text>
   <text x="578" y="80">R3 220k</text>
-  <text x="578" y="98" font-size="12" fill="#a7adb8">(10k if parity errors)</text>
-  <text x="452" y="114" text-anchor="middle">R4 9.1k</text>
-  <text x="452" y="158" text-anchor="middle" font-size="12" fill="#a7adb8">series, on the XIAO side</text>
+  <text x="540" y="84" text-anchor="end" font-size="12" fill="#a7adb8">(10k si erreurs de parité)</text>
+  <text x="452" y="114" text-anchor="middle">R4 9,1k</text>
+  <text x="452" y="158" text-anchor="middle" font-size="12" fill="#a7adb8">en série, côté XIAO</text>
   <text x="435" y="200" text-anchor="middle">Q1 2N2222A</text>
   <text x="384" y="246" text-anchor="end" font-size="12" fill="#a7adb8">E</text>
   <text x="486" y="246" font-size="12" fill="#a7adb8">C</text>
@@ -68,7 +68,7 @@
   <text x="510" y="275" text-anchor="middle">R1 10k</text>
   <text x="582" y="294" font-size="13" fill="#a7adb8">3V3</text>
   <text x="452" y="335">R2 22k</text>
-  <text x="300" y="214" text-anchor="middle" font-size="12" fill="#a7adb8">XIAO → Minitel (not inverted)</text>
+  <text x="300" y="214" text-anchor="middle" font-size="12" fill="#a7adb8">XIAO → Minitel (non inversé)</text>
   <text x="300" y="122" text-anchor="middle" font-size="12" fill="#a7adb8">Minitel → XIAO</text>
 </g>
 </svg>

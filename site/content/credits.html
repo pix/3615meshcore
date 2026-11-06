@@ -1,41 +1,41 @@
-<!-- title: Crédits | nav: 6 | label: Crédits | desc: Credits and licences of 3615 MESHCORE: MeshCore, the Minitel font, the Gaulix region naming, INSEE and geo.api.gouv.fr data, the emoji data, the arduiblog interface. -->
+<!-- title: Crédits | nav: 6 | label: Crédits | desc: Crédits et licences de 3615 MESHCORE : MeshCore, la police Minitel, le nommage des régions Gaulix, les données INSEE et geo.api.gouv.fr, les données d'émojis, l'interface d'arduiblog. -->
 <h1>Crédits et licences</h1>
-<p class="lede">3615 MESHCORE stands on other people's work. Thank you to all of them.</p>
+<p class="lede">3615 MESHCORE repose sur le travail des autres. Merci à toutes et à tous.</p>
 
 <h2 id="meshcore">MeshCore</h2>
-<p>The firmware is <a href="https://github.com/meshcore-dev/MeshCore">MeshCore</a> by Scott Powell / rippleradios.com and its contributors, under the <b>MIT licence</b>, with the Minitel user interface added in <code>examples/companion_radio/ui-minitel/</code> on a fork. The phone app it stays compatible with is the MeshCore companion app.</p>
+<p>Le micrologiciel est <a href="https://github.com/meshcore-dev/MeshCore">MeshCore</a>, de Scott Powell / rippleradios.com et de ses contributeurs, sous <b>licence MIT</b>, auquel une version dérivée ajoute l'interface Minitel dans <code>examples/companion_radio/ui-minitel/</code>. L'application de téléphone avec laquelle il reste compatible est l'application compagnon de MeshCore.</p>
 
-<h2 id="font">The Minitel font</h2>
-<p>The characters on every screen of this site, and in the photo renders, come from <b>Minitel.ttf / Minitel.sfd</b> by <b>Frédéric Bisson</b> (Zigazou), from <a href="https://github.com/zigazou/minitel-canvas">zigazou/minitel-canvas</a>, dedicated to the public domain under <b>CC0 1.0 Universal</b> (licence file kept next to the font: <a href="assets/fonts/LICENSE-Minitel-font.txt">LICENSE-Minitel-font.txt</a>). It redraws the Minitel ROM characters on their exact 8 × 10 dot grid. Frédéric Bisson also wrote PyMinitel and the miedit page editor.</p>
-<p>The web fonts here (<code>minitel40</code>, <code>minitel80</code> and their "separated mosaic" variants) are rebuilt dot by dot from that font by <code>site/tools/make_webfont.py</code>, with the G1 mosaics added at the Unicode sextant code points. They are offered under the same CC0 dedication.</p>
+<h2 id="font">La police Minitel</h2>
+<p>Les caractères de tous les écrans de ce site, comme ceux des rendus photographiques, viennent de <b>Minitel.ttf / Minitel.sfd</b> de <b>Frédéric Bisson</b> (Zigazou), tirés de <a href="https://github.com/zigazou/minitel-canvas">zigazou/minitel-canvas</a> et placés dans le domaine public sous <b>CC0 1.0 Universel</b> (la licence est fournie avec la police : <a href="assets/fonts/LICENSE-Minitel-font.txt">LICENSE-Minitel-font.txt</a>). Elle redessine les caractères de la ROM du Minitel sur leur grille exacte de 8 × 10 points. Frédéric Bisson est aussi l'auteur de PyMinitel et de l'éditeur de pages miedit.</p>
+<p>Les polices web du site (<code>minitel40</code>, <code>minitel80</code> et leurs variantes pour les mosaïques disjointes) en sont reconstruites point par point par <code>site/tools/make_webfont.py</code>, avec les mosaïques G1 ajoutées aux points de code Unicode des sextants. Elles sont proposées sous la même dédicace CC0.</p>
 
-<h2 id="regions">Regions: Gaulix, INSEE, geo.api.gouv.fr</h2>
+<h2 id="regions">Régions : Gaulix, INSEE, geo.api.gouv.fr</h2>
 <ul>
-<li><b>Region names and hierarchy</b> follow the French MeshCore community's conventions, as published by <a href="https://gaulix.fr/docs-parametrage/regles-de-nommage-regions-canaux-meshcore/">Gaulix: "Règles de nommage des régions et canaux MeshCore"</a> and its <i>Générateur de région MeshCore</i>. The département-to-région mapping was extracted from that generator (its provenance is recorded in <code>gaulix-regions.json</code> in the firmware).</li>
-<li><b>Names, préfectures and the commune table</b>: INSEE, <i>Code officiel géographique</i> 2026, under the <a href="https://www.etalab.gouv.fr/licence-ouverte-open-licence/">Licence Ouverte / Open Licence 2.0</a> (Etalab).</li>
-<li><b>Préfecture town-hall positions and commune bounding boxes</b>: <a href="https://geo.api.gouv.fr/">geo.api.gouv.fr</a> (API Découpage administratif), Licence Ouverte 2.0.</li>
-<li>Region and département codes were cross-checked against Debian's <a href="https://salsa.debian.org/iso-codes-team/iso-codes">iso-codes</a> (ISO 3166-2); nothing from it is embedded.</li>
+<li><b>Les noms et la hiérarchie des régions</b> suivent les conventions de la communauté MeshCore française publiées par <a href="https://gaulix.fr/docs-parametrage/regles-de-nommage-regions-canaux-meshcore/">Gaulix : « Règles de nommage des régions et canaux MeshCore »</a> et son <i>Générateur de région MeshCore</i>. La correspondance entre départements et régions a été extraite de ce générateur (la provenance est notée dans <code>gaulix-regions.json</code>, dans le micrologiciel).</li>
+<li><b>Noms, préfectures et table des communes</b> : INSEE, <i>Code officiel géographique</i> 2026, sous <a href="https://www.etalab.gouv.fr/licence-ouverte-open-licence/">Licence Ouverte / Open Licence 2.0</a> (Etalab).</li>
+<li><b>Position des mairies des préfectures et emprise des communes</b> : <a href="https://geo.api.gouv.fr/">geo.api.gouv.fr</a> (API Découpage administratif), Licence Ouverte 2.0.</li>
+<li>Les codes de régions et de départements ont été recoupés avec les <a href="https://salsa.debian.org/iso-codes-team/iso-codes">iso-codes</a> de Debian (ISO 3166-2) ; rien n'en est repris.</li>
 </ul>
 
-<h2 id="emoji">Emoji data</h2>
-<p>The emoji → ASCII table is generated (checked by SHA-256) from:</p>
+<h2 id="emoji">Données des émojis</h2>
+<p>La table émoji → ASCII est produite (et vérifiée par SHA-256) à partir de :</p>
 <ul>
-<li><a href="https://www.unicode.org/Public/18.0.0/emoji/">Unicode <code>emoji-test.txt</code></a>, Emoji 18.0: every emoji and its CLDR short name. © Unicode, Inc., under the <a href="https://www.unicode.org/license.txt">Unicode License v3</a>.</li>
-<li><a href="https://github.com/github/gemoji">github/gemoji</a> <code>db/emoji.json</code>: GitHub shortcodes, <b>MIT</b>.</li>
-<li><a href="https://github.com/iamcal/emoji-data">iamcal/emoji-data</a> <code>emoji.json</code>: Slack shortcodes, <b>MIT</b>.</li>
+<li><a href="https://www.unicode.org/Public/18.0.0/emoji/"><code>emoji-test.txt</code> d'Unicode</a>, Emoji 18.0 : chaque émoji et son nom court CLDR. © Unicode, Inc., sous <a href="https://www.unicode.org/license.txt">Unicode License v3</a>.</li>
+<li><a href="https://github.com/github/gemoji">github/gemoji</a> <code>db/emoji.json</code> : les codes courts de GitHub, <b>MIT</b>.</li>
+<li><a href="https://github.com/iamcal/emoji-data">iamcal/emoji-data</a> <code>emoji.json</code> : les codes courts de Slack, <b>MIT</b>.</li>
 </ul>
 
-<h2 id="interface">The interface</h2>
-<p>The one-transistor DIN interface is <b>arduiblog</b>'s, from <a href="https://arduiblog.com/2019/04/29/ressuscitez-le-minitel/">"Ressuscitez le Minitel"</a> (2019). It is used here as published, powered at 3V3 with a series resistor added for the XIAO; the schematic on the <a href="build.html#interface">Montage</a> page is our own drawing of it.</p>
+<h2 id="interface">L'interface</h2>
+<p>L'interface DIN à un transistor est celle d'<b>arduiblog</b>, publiée dans <a href="https://arduiblog.com/2019/04/29/ressuscitez-le-minitel/">« Ressuscitez le Minitel »</a> (2019). Elle est reprise telle quelle, alimentée en 3V3 et avec une résistance série ajoutée pour le XIAO ; le schéma de la page <a href="build.html#interface">Montage</a> est notre propre dessin.</p>
 
-<h2 id="refs">Protocol references</h2>
-<p>The link layer was written from the <i>Spécifications Techniques d'Utilisation du Minitel 1B</i> (STUM 1B), the Minitel 2 user guide, the CNET peripheral interface specification (1982), the Minitel entries of ncurses' <code>terminfo.src</code>, and the code and notes of <a href="https://github.com/eserandour/Minitel1B_Hard">Minitel1B_Hard</a>, <a href="https://github.com/Zigazou/PyMinitel">PyMinitel</a> and <a href="https://github.com/iodeo/Minitel-ESP32">iodeo/Minitel-ESP32</a>. Those are references only; no code was taken from them, and their documents are not redistributed here.</p>
+<h2 id="refs">Documentation du protocole</h2>
+<p>La gestion de la liaison a été écrite d'après les <i>Spécifications Techniques d'Utilisation du Minitel 1B</i> (STUM 1B), le guide d'utilisation du Minitel 2, la spécification de l'interface péri-informatique du CNET (1982), les entrées Minitel du <code>terminfo.src</code> de ncurses, et le code et les notes de <a href="https://github.com/eserandour/Minitel1B_Hard">Minitel1B_Hard</a>, <a href="https://github.com/Zigazou/PyMinitel">PyMinitel</a> et <a href="https://github.com/iodeo/Minitel-ESP32">iodeo/Minitel-ESP32</a>. Ce sont des références : aucun code n'en a été repris, et ces documents ne sont pas redistribués ici.</p>
 
-<h2 id="tools">Tools</h2>
-<p>The host tools use Python, <a href="https://numpy.org/">NumPy</a> and <a href="https://python-pillow.org/">Pillow</a>; the web fonts are built with <a href="https://github.com/fonttools/fonttools">fontTools</a>; the firmware with <a href="https://platformio.org/">PlatformIO</a>.</p>
+<h2 id="tools">Outils</h2>
+<p>Les outils utilisent Python, <a href="https://numpy.org/">NumPy</a> et <a href="https://python-pillow.org/">Pillow</a> ; les polices web sont construites avec <a href="https://github.com/fonttools/fonttools">fontTools</a> ; le micrologiciel avec <a href="https://platformio.org/">PlatformIO</a>.</p>
 
-<h2 id="trademarks">No affiliation</h2>
-<p>This is an independent hobby project. It is not affiliated with, endorsed by or connected to Orange, France Télécom, the PTT, Philips, Alcatel, Seeed Studio or the MeshCore project. "Minitel", "Télétel" and "3615" are used only to describe the terminal and the style of service this project imitates; no logo or trademark artwork is used. The terminal in the renders is drawn generic and unbranded.</p>
+<h2 id="trademarks">Aucune affiliation</h2>
+<p>C'est un projet amateur indépendant. Il n'a aucun lien avec Orange, France Télécom, les PTT, Philips, Alcatel, Seeed Studio ni le projet MeshCore, qui ne l'approuvent ni ne le soutiennent. « Minitel », « Télétel » et « 3615 » ne servent qu'à désigner le terminal et le genre de service que ce projet imite ; aucun logo ni élément graphique de marque n'est utilisé. Le terminal de l'image d'accueil est dessiné sans marque.</p>
 
-<h2 id="licence">This project</h2>
-<p>The firmware changes are part of the MeshCore fork (MIT). The licence of this repository's own tools, hardware notes and documentation is stated in its <code>README.md</code>.</p>
+<h2 id="licence">Ce projet</h2>
+<p>Les modifications du micrologiciel font partie de la version dérivée de MeshCore (MIT). La licence des outils, des notes matérielles et de la documentation de ce dépôt est indiquée dans son <code>README.md</code>.</p>

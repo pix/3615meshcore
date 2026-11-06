@@ -8,7 +8,9 @@ A Seeed XIAO nRF52840 with a Wio-SX1262 sits behind the terminal, wired to its D
 
 *The conversation list, rendered from a real `screen` dump of the device by `tools/screenshot/minitel_render.py` (a render, not a photograph).*
 
-Website: **https://HOST/PATH/** (the documentation site built from `site/`: screens gallery, features, build guide, reference).
+Website (in French): **https://HOST/PATH/**, built from `site/`: every screen of the service, features, build guide, reference.
+
+> **En français.** 3615 MESHCORE est un compagnon radio MeshCore dont l'écran et le clavier sont un vrai Minitel 2, piloté par un Seeed XIAO nRF52840 et un Wio-SX1262 branchés sur la prise péri-informatique. Toute la documentation (écrans, fonctions, montage, référence, dépannage) est en français sur le site ; ce README en donne l'essentiel en anglais.
 
 ## Features
 
@@ -20,7 +22,7 @@ Website: **https://HOST/PATH/** (the documentation site built from `site/`: scre
 - **French flood regions** named the Gaulix way (`eu > fr > fr-bre > fr-35`), suggested from your position or typed département.
 - **Emoji turned into ASCII** (`:-)`, `(y)`, `:pizza:`, `:flag-fr:`); radio text is sanitised so nothing can drive the terminal.
 - **Accents typed the Minitel way**: the dead keys, the French set's keys, and `*'e`-style composition.
-- **Quick replies** and conversation tools (`/r`, `/c`, `/q`, `/renvoi`, `/silence`).
+- A conversation **Actions** page (ENVOI on an empty line): reply, resend, delete a message, message details, search, quick replies, silence, mark all read. Your own channel messages show how many times relays were heard repeating them.
 - An **animated welcome page** in four scenes, cheap enough at 9600 baud that a key always enters at once.
 - **Both Minitel modes**: Vidéotex 40 columns and Mixte 80 columns.
 - **USB command line**: identity backup, clock, history import, **screen dumps**, and **driving the whole UI** from a script.
@@ -115,27 +117,26 @@ Python 3, run with `python3 -I`. They find the XIAO as `/dev/serial/by-id/*3C0B5
 |---|---|
 | `tools/screenshot/minitel_dump.py` | fetch a `screen` dump over USB |
 | `tools/screenshot/minitel_render.py` | photo-realistic render of a Minitel 2 showing a dump (PNG, GIF, CRT face only); numpy + Pillow. See its README. |
-| `tools/tour/tour.py` | walk every page in 40 and 80 columns, save the dumps and `gallery/manifest.json`, render them, rebuild the site. Visits pages only: never sends on the radio. `simulate` tests it offline. |
-| `site/build.py` | build the website into `site/dist/` (plain files); standard library, Pillow optional |
+| `tools/tour/tour.py` | walk every page in 40 and 80 columns, save the dumps and `gallery/manifest.json`, record the welcome animation (`screen watch`), rebuild the site. Visits pages only: never sends on the radio. `simulate` tests it offline; `--render` optionally makes photo renders. |
+| `site/build.py` | build the website into `site/dist/` (plain files); standard library only |
 | `site/tools/make_webfont.py` | rebuild the Minitel web fonts (fontTools, numpy) |
 
 ### The website and the gallery
 
 ```sh
-python3 -I tools/tour/tour.py run       # with the XIAO on USB: real captures, renders, site
-python3 -I tools/tour/tour.py render    # render missing images from the dumps (renders are not in git)
-python3 -I site/build.py --check        # build site/dist/ and check its links
+python3 -I tools/tour/tour.py run --firmware <commit>   # with the XIAO on USB: real captures, then the site
+python3 -I site/build.py --check                         # build site/dist/ and check its links
 python3 -m http.server -d site/dist     # preview
 ```
 
-Each screen of the gallery can be shown as **text** (the dump drawn live by the browser in the Minitel web font: mosaics, double size, blink, inverse, selectable) or as **image** (the photo-realistic render). Until the tour has run on the device, most screens are synthetic samples, clearly marked as such.
+Every screen of the gallery is a real capture from the device, drawn as text by the browser in the Minitel web fonts (mosaics, double size, blink, inverse; selectable and copyable). The only picture on the site is the hero render. The site is static and needs no image renderer.
 
 ## Repository layout
 
 ```
 docs/img/            README pictures
 firmware/minitel-test/  bring-up sketch for the link (PlatformIO)
-gallery/             screen dumps + manifest.json (renders/ is generated, not in git)
+gallery/             real screen dumps + manifest.json
 hardware/            earlier Heltec V3 interface (KiCad, generated)
 ref/                 protocol notes (third-party manuals are not included)
 site/                the website: build.py, content/, templates/, assets/ (fonts, CSS, JS)

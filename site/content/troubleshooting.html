@@ -1,53 +1,54 @@
-<!-- title: Dépannage | nav: 5 | label: Dépannage | desc: 3615 MESHCORE troubleshooting: the répertoire and standby, no answer from the Minitel, parity errors and noise, crashes, direct messages that never arrive. -->
+<!-- title: Dépannage | nav: 5 | label: Dépannage | desc: Dépannage de 3615 MESHCORE : répertoire et veille, pas de réponse du Minitel, erreurs de parité et parasites, plantages, messages privés qui n'arrivent pas. -->
 <h1>Dépannage</h1>
-<p class="lede">Most problems show up in two USB commands: <code>link log</code> for the Minitel side and <code>boot</code> for the XIAO.</p>
+<p class="lede">La plupart des problèmes se voient avec deux commandes USB : <code>link log</code> côté Minitel, <code>boot</code> côté XIAO.</p>
 
-<h2 id="repertoire">The Minitel shows its répertoire, or falls asleep</h2>
-<p>At power-on and after a standby the Minitel 2 is back at 1200 baud in Vidéotex 40 columns, on its local menu, the <i>répertoire</i>. In that state it answers no protocol query, so the firmware cannot take it back by itself.</p>
+<h2 id="repertoire">Le Minitel affiche son répertoire, ou se met en veille</h2>
+<p>À la mise sous tension et après une veille, le Minitel 2 revient à 1200 bauds en Vidéotex 40 colonnes, sur son menu local, le <i>répertoire</i>. Dans cet état, il ne répond à aucune demande du protocole : le micrologiciel ne peut pas le reprendre seul.</p>
 <ul>
-<li>Press <kbd class="k">Fnct</kbd> + <kbd class="k">Sommaire</kbd> to leave the répertoire. Within a few seconds the firmware finds the terminal again, sets it up and shows the welcome page.</li>
-<li>Press <kbd class="k">Fnct</kbd> + <kbd class="k">E</kbd>, then <kbd class="k">A</kbd>, to disable the automatic standby, so it does not happen again.</li>
-<li>Once per outage the firmware also sends the protocol reset (<code>1B 39 7F</code>) at 1200 then 9600 baud and probes again; <code>link log</code> shows whether it was acknowledged. The Minitel 2 guide says a peripheral can command standby exit from ROM CV3/BV9, but no source found gives the codes.</li>
+<li>Appuyez sur <kbd class="k">Fnct</kbd> + <kbd class="k">Sommaire</kbd> pour sortir du répertoire. En quelques secondes, le micrologiciel retrouve le terminal, le reconfigure et affiche la page d'accueil.</li>
+<li>Appuyez sur <kbd class="k">Fnct</kbd> + <kbd class="k">E</kbd>, puis <kbd class="k">A</kbd>, pour désactiver la mise en veille automatique et ne plus y revenir.</li>
+<li>Une fois par panne, le micrologiciel envoie aussi la réinitialisation du protocole (<code>1B 39 7F</code>) à 1200 puis à 9600 bauds et réessaie ; <code>link log</code> indique si elle a été acquittée. Le guide du Minitel 2 dit qu'un périphérique peut commander la sortie de veille à partir de la ROM CV3/BV9, mais aucune source trouvée ne donne les codes.</li>
 </ul>
-<p>Nothing is lost meanwhile: the node keeps receiving, retrying direct messages and serving the phone app.</p>
+<p>Rien n'est perdu entre-temps : le nœud continue de recevoir, de réessayer les messages privés et de servir l'appli du téléphone.</p>
 
-<h2 id="noanswer">No answer from the Minitel</h2>
+<h2 id="noanswer">Le Minitel ne répond pas</h2>
 <ul>
-<li><b>Mode.</b> In the Téléinformatique mode (<kbd class="k">Fnct</kbd>+<kbd class="k">T</kbd>, <kbd class="k">A</kbd>) the protocol is off by design: no status, no speed change, and keystrokes may not reach the DIN port. Go back with <kbd class="k">Fnct</kbd>+<kbd class="k">T</kbd>, <kbd class="k">V</kbd>.</li>
-<li><b>Speed.</b> The firmware probes 9600, 1200, 4800 and 300 baud every 3 s. <code>link log</code> lists each round without an answer. If no speed ever answers, check the wiring before anything else.</li>
-<li><b>Wiring.</b> D6 must go to the transistor's emitter, D7 through 9.1 kΩ to the 220 kΩ / DIN 3 node, the interface on <b>3V3</b>, DIN 2 to GND. With the bring-up sketch (<code>firmware/minitel-test/</code>), <code>sense</code> tells whether D7 sees the Minitel's TX (pulled down by the pin's own pull-down: LOW) or its RX (held HIGH by the Minitel), which catches swapped wires.</li>
-<li><b>Pin numbering.</b> Check pin 5 with a multimeter: 8.5–15 V against pin 2 with the Minitel on. If you find it elsewhere, your view of the plug is mirrored.</li>
-<li><b>By hand.</b> <code>link try 1B 39 74</code> sends the speed query at the current speed and prints the reply.</li>
-</ul>
-
-<h2 id="parity">Parity errors, noise on D7</h2>
-<p>The Minitel's TX is an open collector with only the 220 kΩ pull-up behind it, and the CRT is next to it: D7 idles with hundreds of very short glitches. The UART filters them at 1200 baud; at 9600 some get through as bytes with bad parity, counted by <code>link log</code> (<code>parity_err</code>). Bytes with bad parity are dropped, and a burst of them is taken as a sign the terminal was reset.</p>
-<ul>
-<li>Lower the pull-up R3 from 220 kΩ to about <b>10 kΩ</b>.</li>
-<li>Keep the DIN cable short and the ground wire solid.</li>
+<li><b>Le mode.</b> En mode Téléinformatique (<kbd class="k">Fnct</kbd>+<kbd class="k">T</kbd>, <kbd class="k">A</kbd>), le protocole est coupé par construction : pas d'état, pas de changement de vitesse, et les touches peuvent ne pas atteindre la prise DIN. Revenez-en avec <kbd class="k">Fnct</kbd>+<kbd class="k">T</kbd>, <kbd class="k">V</kbd>.</li>
+<li><b>La vitesse.</b> Le micrologiciel essaie 9600, 1200, 4800 et 300 bauds toutes les 3 s ; <code>link log</code> liste chaque tour sans réponse. Si aucune vitesse ne répond jamais, vérifiez d'abord le câblage.</li>
+<li><b>Le câblage.</b> D6 va à l'émetteur du transistor, D7 au point commun 220 kΩ / DIN 3 à travers 9,1 kΩ, l'interface est alimentée en <b>3V3</b>, DIN 2 va à la masse. Avec le programme d'essai (<code>firmware/minitel-test/</code>), <code>sense</code> dit si D7 voit la sortie du Minitel (tirée vers le bas par la résistance interne de la broche : BAS) ou son entrée (maintenue HAUTE par le Minitel) : de quoi repérer deux fils inversés.</li>
+<li><b>La numérotation des broches.</b> Mesurez la broche 5 : 8,5 à 15 V par rapport à la broche 2, Minitel allumé. Si vous la trouvez ailleurs, vous regardez la fiche dans le mauvais sens.</li>
+<li><b>À la main.</b> <code>link try 1B 39 74</code> envoie la demande de vitesse à la vitesse en cours et affiche la réponse.</li>
 </ul>
 
-<h2 id="crash">Crashes and restarts</h2>
+<h2 id="parity">Erreurs de parité, parasites sur D7</h2>
+<p>La sortie du Minitel est à collecteur ouvert, avec seulement la résistance de rappel de 220 kΩ derrière, et le tube cathodique est juste à côté : au repos, D7 reçoit des centaines de parasites très brefs. L'UART les filtre à 1200 bauds ; à 9600, certains passent sous forme d'octets à la parité fausse, comptés par <code>link log</code> (<code>parity_err</code>). Ces octets sont jetés, et une rafale d'entre eux est prise pour une réinitialisation du terminal.</p>
 <ul>
-<li><code>boot</code> tells why the XIAO last restarted (power-on, reset button, watchdog, lockup, software reset, which includes crashes) and prints the last crash record: <code>pc</code>, <code>lr</code>, the fault registers, the task and the uptime. The État page (Réglages 11) shows it too.</li>
-<li>Resolve it with the ELF of the build that crashed: <code>examples/companion_radio/ui-minitel/tools/crash2line.sh &lt;pc&gt; &lt;lr&gt; firmware-&lt;commit&gt;.elf</code>.</li>
-<li><code>stack</code> shows how much of the 4 KB loop stack was never used; a small number means the stack came close to overflowing.</li>
-<li><code>boot clear</code> forgets the record once dealt with.</li>
+<li>Descendez la résistance de rappel R3 de 220 kΩ vers <b>10 kΩ</b>.</li>
+<li>Gardez le câble DIN court et une masse bien franche.</li>
 </ul>
 
-<h2 id="dm">Direct messages never arrive</h2>
-<p>A direct message is encrypted for a pair of keys. If the sender is not in your contacts, the node cannot decrypt its messages: they are dropped without a trace, and you cannot write to it either.</p>
+<h2 id="crash">Plantages et redémarrages</h2>
 <ul>
-<li>Ask the other side to send an advert, or add the node yourself: Contacts, <code>N</code>, its 64-digit public key, the type and a name.</li>
-<li>Check the auto-add settings (Réglages 7): with auto-add off for that type, adverts do not create contacts.</li>
-<li>Give your own key to correspondents from Réglages 13 (Mon identité).</li>
-<li>A <code>?</code> in the hops column means no known path: messages flood. <i>Forget the path</i> on the contact sheet forces a new one to be learnt.</li>
+<li><code>boot</code> donne la raison du dernier redémarrage du XIAO (mise sous tension, bouton reset, chien de garde, blocage, redémarrage logiciel, plantages compris) et affiche le dernier plantage : <code>pc</code>, <code>lr</code>, les registres d'erreur, la tâche et la durée de fonctionnement. La page État (Réglages 11) l'affiche aussi.</li>
+<li>Retrouvez la ligne en cause avec l'ELF de la compilation qui a planté : <code>examples/companion_radio/ui-minitel/tools/crash2line.sh &lt;pc&gt; &lt;lr&gt; firmware-&lt;commit&gt;.elf</code>.</li>
+<li><code>stack</code> indique la part jamais utilisée de la pile de 4 Ko de la tâche principale ; un petit nombre veut dire qu'elle a frôlé le débordement.</li>
+<li><code>boot clear</code> oublie l'enregistrement une fois traité.</li>
 </ul>
 
-<h2 id="other">Other things</h2>
+<h2 id="dm">Les messages privés n'arrivent pas</h2>
+<p>Un message privé est chiffré pour une paire de clés. Si l'expéditeur n'est pas dans vos contacts, le nœud ne peut pas déchiffrer ses messages : ils sont perdus sans laisser de trace, et vous ne pouvez pas lui écrire non plus.</p>
 <ul>
-<li><b>Cannot send: "heure non réglée".</b> Set the clock (Sommaire 6), let the app set it, or enable "envoyer sans heure".</li>
-<li><b>Accents look wrong in 80 columns.</b> The Mixte French set only has à é è ù ç ° £ §; other accented letters are sent correctly but shown bare.</li>
-<li><b>Upload fails.</b> The 1200-baud touch sometimes misses: retry, or double-tap the XIAO's reset button and upload to the bootloader's port.</li>
-<li><b>The identity changed after a flash.</b> The file system was erased. Restore the key with <code>set prv.key</code> and reboot (see <a href="build.html#identity">identity backup</a>).</li>
+<li>Demandez à l'autre de faire une annonce, ou ajoutez son nœud vous-même : Contacts, <code>N</code>, sa clé publique de 64 chiffres, le type et un nom.</li>
+<li>Vérifiez l'ajout automatique (Réglages 7) : s'il est coupé pour ce type, les annonces ne créent pas de contact.</li>
+<li>Donnez votre propre clé à vos correspondants depuis Réglages 13 (Mon identité).</li>
+<li>Un <code>?</code> dans la colonne des sauts veut dire qu'aucun chemin n'est connu : les messages partent en diffusion. <i>Oublier le chemin</i> sur la fiche en fait apprendre un nouveau.</li>
+</ul>
+
+<h2 id="other">En vrac</h2>
+<ul>
+<li><b>Envoi impossible : « heure non réglée ».</b> Réglez l'heure (Sommaire 6), laissez l'appli la régler, ou activez « envoyer sans heure ».</li>
+<li><b>Les accents s'affichent mal en 80 colonnes.</b> Le jeu français du mode Mixte n'a que à é è ù ç ° £ § ; les autres lettres accentuées partent correctement mais s'affichent sans accent.</li>
+<li><b>« /r » est parti tel quel.</b> Les anciennes commandes à barre oblique n'existent plus : sur une ligne vide, <kbd class="k envoi">Envoi</kbd> ouvre la page Actions.</li>
+<li><b>La programmation échoue.</b> Le toucher à 1200 bauds rate parfois : recommencez, ou appuyez deux fois sur le reset du XIAO et programmez sur le port du chargeur d'amorçage.</li>
+<li><b>L'identité a changé après une programmation.</b> Le système de fichiers a été effacé. Restaurez la clé avec <code>set prv.key</code> et redémarrez (voir la <a href="build.html#identity">sauvegarde de l'identité</a>).</li>
 </ul>

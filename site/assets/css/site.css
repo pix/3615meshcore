@@ -41,7 +41,7 @@ a:hover { color: #8ff0bf; }
 a:focus-visible, button:focus-visible { outline: 2px solid var(--go); outline-offset: 2px; }
 img { max-width: 100%; height: auto; }
 code, kbd, pre, samp { font-family: var(--mono); font-size: .9em; }
-code { background: var(--bg3); padding: .08em .35em; border-radius: 4px; }
+code { background: var(--bg3); padding: .08em .35em; border-radius: 4px; overflow-wrap: anywhere; }
 pre { background: var(--bg2); border: 1px solid var(--line); border-radius: 8px; padding: .9em 1em;
       overflow-x: auto; line-height: 1.45; }
 pre code { background: none; padding: 0; }
@@ -114,7 +114,8 @@ td code { white-space: nowrap; }
 .hero img { display: block; border-radius: 10px; border: 1px solid var(--line); width: 100%; }
 .hero figcaption, .fig figcaption { color: var(--muted); font-size: .9em; margin-top: 6px; }
 .fig { margin: 18px 0; }
-.fig svg { display: block; width: 100%; height: auto; background: var(--bg2); border: 1px solid var(--line); border-radius: 8px; }
+.fig { overflow-x: auto; }
+.fig svg { display: block; width: 100%; min-width: 600px; height: auto; background: var(--bg2); border: 1px solid var(--line); border-radius: 8px; }
 footer { border-top: 1px solid var(--line); color: var(--muted); font-size: .9em; padding: 22px 16px 40px; text-align: center; }
 footer p { margin: .3em auto; }
 .big3615 { font: 32px/1.25 var(--mt); background: var(--bar); color: var(--bar-ink); display: inline-block; padding: 2px 12px; margin: 26px 0 6px; }
@@ -125,24 +126,11 @@ footer p { margin: .3em auto; }
   font: 12px/1.25 var(--mt); display: inline-block; padding: 2px 6px; border-radius: 3px;
   background: var(--bg3); color: var(--ink); vertical-align: .15em; margin-left: .4em; white-space: nowrap;
 }
-.tag.real { background: #1d3d2c; color: #b7f5d3; }
-.tag.synth { background: #4a3a14; color: #ffe0a3; }
 
 /* ---------- screen panels: a dark tube, the text render or the photo render inside */
 .shot { margin: 18px 0 34px; }
 .shot figcaption h3 { margin-top: 0; }
 .shot figcaption p { margin: .2em 0 .6em; color: var(--muted); }
-.shot figcaption .why { color: #ffe0a3; font-size: .92em; }
-.views { display: inline-flex; border: 1px solid var(--line); border-radius: 6px; overflow: hidden; margin: 2px 0 10px; }
-.views button {
-  font: 12px/1.25 var(--mt); background: var(--bg2); color: var(--ink); border: 0; padding: 7px 12px; cursor: pointer;
-}
-.views button + button { border-left: 1px solid var(--line); }
-.views button[aria-pressed="true"] { background: var(--bar); color: var(--bar-ink); }
-.allviews { display: flex; flex-wrap: wrap; gap: 8px 14px; align-items: center; background: var(--bg2);
-            border: 1px solid var(--line); border-radius: 8px; padding: 10px 14px; margin: 16px 0; }
-.allviews .views { margin: 0; }
-.shot[data-view="text"] .iv, .shot[data-view="image"] .tv { display: none; }
 
 .tube {
   position: relative; max-width: 100%; overflow-x: auto; overflow-y: hidden;
@@ -150,13 +138,10 @@ footer p { margin: .3em auto; }
   border-radius: 22px; padding: 4.5% 5.5%; border: 1px solid #22262e;
   box-shadow: inset 0 0 40px rgb(0 0 0 / .85), 0 1px 0 #2a2e36;
 }
-.tube.iv { padding: 0; background: #000; line-height: 0; }
-.tube.iv img { width: 100%; border-radius: 21px; }
 .tube::after {  /* faint scanlines, over the text but never in the way of selection */
   content: ""; position: absolute; inset: 0; pointer-events: none; border-radius: inherit;
   background: repeating-linear-gradient(to bottom, transparent 0 2px, rgb(0 0 0 / .09) 2px 3px);
 }
-.tube.iv::after { display: none; }
 
 .mt {
   --f: clamp(8px, calc((min(100vw, 1040px) - 120px) / 40), 21px);
@@ -220,12 +205,10 @@ footer p { margin: .3em auto; }
   .svc { font-size: 12px; }
   .menu a { font-size: 12px; padding: 4px 6px; }
   .tube { border-radius: 14px; padding: 18px 12px; }
-  .tube.iv img { border-radius: 13px; }
   .mt { --f: clamp(7px, calc((100vw - 58px) / 40), 21px); }
   .mt.mt80 { --f: 11px; }   /* 80 col stays legible on a phone: the panel scrolls sideways */
 }
 @media print {
-  .top, .views, .allviews, footer { display: none; }
-  .shot[data-view] .tv { display: block; } .shot[data-view] .iv { display: none; }
+  .top, .animbar, footer { display: none; }
   body { background: #fff; color: #000; }
 }

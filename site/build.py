@@ -9,18 +9,18 @@ Inputs:
   site/content/*.html          page bodies; first line: <!-- title: ... | nav: N | label: ... -->
   site/content/*.svg           drawings included with {{svg:name}}
   site/assets/                 CSS, JS, the Minitel web fonts (site/tools/make_webfont.py)
-  gallery/manifest.json        the screens (tools/tour/tour.py), dumps and renders
+  gallery/manifest.json        the screens (tools/tour/tour.py) and their dumps
   docs/img/hero.jpg            the hero picture
 
 Macros in content pages:
-  {{shot:ID}}         a screen with its text/image toggle (ID = manifest id like convlist-80,
+  {{shot:ID}}         a screen, drawn as text (ID = manifest id like convlist-80,
                       or a shot id like convlist: the 80 col one, else the 40 col one)
   {{see:ID,ID...}}    links to those screens in the gallery
   {{svg:NAME}}        site/content/NAME.svg inline
   {{gallery_status}}  one sentence on how many screens are real captures
 
-Standard library only; Pillow, when importable, converts the renders to WebP (else they are
-copied as they are).
+Standard library only. Screens are drawn as text from the dumps (site/mtscreen.py and the
+Minitel web fonts); no image renderer is needed. The only picture is docs/img/hero.jpg.
 """
 import argparse
 import html
@@ -43,12 +43,12 @@ REPO_URL = "https://github.com/OWNER/3615-meshcore"   # set when the repository 
 
 GROUP_ORDER = ["Accueil", "Sommaire", "Conversations", "Contacts et stations", "Réglages", "Graphiques", "Autres"]
 GROUP_INTRO = {
-    "Accueil": "The animated welcome page, shown after boot and whenever the Minitel is switched on or wakes up.",
-    "Sommaire": "The main menu, and the Guide screen (GUIDE twice).",
-    "Conversations": "Channels, direct messages and rooms, and the merged news page.",
-    "Contacts et stations": "Contacts, stations heard on the air, nearby stations, contact sheets, repeater administration, adverts.",
-    "Réglages": "Settings, identity, channels and regions, statistics, quick replies, the clock.",
-    "Graphiques": "Radio statistics since boot: G1 mosaic plots in 40 columns, text plots in 80.",
+    "Accueil": "La page d'accueil animée, affichée au démarrage et chaque fois que le Minitel s'allume ou se réveille.",
+    "Sommaire": "Le menu principal, et l'écran Guide (GUIDE deux fois).",
+    "Conversations": "Canaux, messages privés et salons, la page Actions d'une conversation, les dernières nouvelles.",
+    "Contacts et stations": "Contacts, stations entendues et proches, fiches, administration d'un relais, annonces.",
+    "Réglages": "Réglages, identité, canaux et régions, statistiques, réponses rapides, Bluetooth, date et heure.",
+    "Graphiques": "Les statistiques radio depuis le démarrage : mosaïques G1 en 40 colonnes, tracés en caractères en 80.",
     "Autres": "",
 }
 
@@ -93,10 +93,10 @@ class Gallery:
                 self.m = json.load(f)
         except (OSError, ValueError):
             self.m = {"screens": [], "animations": []}
-        self.screens = self.m.get("screens", [])
-        self.anims = self.m.get("animations", [])
+        # only real captures from the device are published
+        self.screens = [e for e in self.m.get("screens", []) if not e.get("synthetic")]
+        self.anims = [e for e in self.m.get("animations", []) if not e.get("synthetic")]
         self.by_id = {e["id"]: e for e in self.screens + self.anims}
-        self.images = {}   # entry id -> dist-relative image path
 
     def find(self, key):
         if key in self.by_id:
@@ -111,60 +111,8 @@ class Gallery:
         return [e for e in self.screens if e.get("shot") == shot]
 
 
-def convert_images(gal, out):
-    """Renders -> dist/img/screens/, as WebP when Pillow is there."""
-    try:
-        from PIL import Image
-    except ImportError:
-        Image = None
-    dst_dir = os.path.join(out, "img", "screens")
-    os.makedirs(dst_dir, exist_ok=True)
-    for e in gal.screens + gal.anims:
-        src = os.path.join(gal.path, e.get("image", ""))
-        if not e.get("image") or not os.path.exists(src):
-            continue
-        anim = src.lower().endswith(".gif")
-        if Image is None:
-            name = e["id"] + os.path.splitext(src)[1]
-            shutil.copyfile(src, os.path.join(dst_dir, name))
-        else:
-            name = e["id"] + ".webp"
-            dst = os.path.join(dst_dir, name)
-            if not (os.path.exists(dst) and os.path.getmtime(dst) >= os.path.getmtime(src)):
-                im = Image.open(src)
-                if anim:
-                    frames, durs = [], []
-                    try:
-                        while True:
-                            fr = im.convert("RGB")
-                            fr.thumbnail((800, 600))
-                            frames.append(fr)
-                            durs.append(im.info.get("duration", 130))
-                            im.seek(im.tell() + 1)
-                    except EOFError:
-                        pass
-                    try:
-                        frames[0].save(dst, save_all=True, append_images=frames[1:], duration=durs, loop=0,
-                                       quality=70, method=4)
-                    except (OSError, ValueError):   # no animated WebP in this Pillow: a smaller GIF
-                        name = e["id"] + ".gif"
-                        frames[0].save(os.path.join(dst_dir, name), save_all=True, append_images=frames[1:],
-                                       duration=durs, loop=0, optimize=True)
-                else:
-                    im = im.convert("RGB")
-                    im.thumbnail((1280, 960))
-                    im.save(dst, quality=82, method=6)
-        gal.images[e["id"]] = f"img/screens/{name}"
-
-
 def mode_tag(e):
-    return f'<span class="tag">{e["mode"]} col</span>'
-
-
-def origin_tag(e):
-    if e.get("synthetic"):
-        return '<span class="tag synth">synthetic sample</span>'
-    return '<span class="tag real">real capture</span>'
+    return f'<span class="tag">{e["mode"]} col.</span>'
 
 
 def frames_of(gal, e):
@@ -175,22 +123,24 @@ def frames_of(gal, e):
                 text = f.read()
         except OSError:
             continue
-        if text == last:
+        key = re.sub(r" t=\d+", "", text)
+        if key == last:
             continue
-        last = text
+        last = key
         out.append(mtscreen.parse_dump(text))
     return out
 
 
 def shot_html(gal, e, heading="h3", anchor=True):
-    """A screen figure: caption, the text/image toggle, the text render and the picture."""
-    label = f'{e["title"]}, {e["mode"]} columns'
+    """Un écran : légende et rendu texte du relevé (police Minitel)."""
+    label = f'{e["title"]}, {e["mode"]} colonnes'
     if "frames" in e:
         scrs = frames_of(gal, e)
+        ms = int(e.get("frame_ms", 130))
         body = "".join(mtscreen.screen_html(s, label if i == len(scrs) - 1 else "") for i, s in enumerate(scrs))
-        text = (f'<div class="anim" data-ms="{int(e.get("frame_ms", 130))}" data-hold="3000">{body}</div>')
-        bar = '<div class="animbar"><button type="button" data-play>Pause</button>' \
-              f'<span>{len(scrs)} frames, {int(e.get("frame_ms", 130))} ms each</span></div>'
+        text = f'<div class="anim" data-ms="{ms}" data-hold="3000">{body}</div>'
+        bar = ('<div class="animbar"><button type="button" data-play hidden>Pause</button>'
+               f'<span>{len(scrs)} images, {ms} ms chacune</span></div>')
     else:
         try:
             scr = mtscreen.load_dump(os.path.join(gal.path, e["dump"]))
@@ -199,23 +149,12 @@ def shot_html(gal, e, heading="h3", anchor=True):
             return ""
         text = mtscreen.screen_html(scr, label)
         bar = ""
-    img = gal.images.get(e["id"])
-    alt = f'Photo-realistic render of the Minitel screen: {e["title"]} ({e["mode"]} columns)'
-    if img:
-        image = f'<div class="tube iv"><img src="{esc(img)}" alt="{esc(alt)}" loading="lazy" width="1280" height="960"></div>'
-        views = ('<div class="views" role="group" aria-label="Render" hidden>'
-                 '<button type="button" data-v="text" aria-pressed="true">Texte</button>'
-                 '<button type="button" data-v="image" aria-pressed="false">Image</button></div>')
-        noscript = f'<noscript><p><a href="{esc(img)}">Image render</a></p></noscript>'
-    else:
-        image, views, noscript = "", "", ""
-    why = f'<p class="why">{esc(e["note"])}</p>' if e.get("synthetic") and e.get("note") else ""
     ida = f' id="{esc(e["id"])}"' if anchor else ""
     link = f'<a href="#{esc(e["id"])}">{esc(e["title"])}</a>' if anchor else esc(e["title"])
-    return (f'<figure class="shot"{ida} data-view="text"><figcaption>'
-            f'<{heading}>{link}{mode_tag(e)}{origin_tag(e)}</{heading}>'
-            f'<p>{esc(e.get("description", ""))}</p>{why}</figcaption>{views}'
-            f'<div class="tube tv">{text}</div>{bar}{image}{noscript}</figure>')
+    return (f'<figure class="shot"{ida}><figcaption>'
+            f'<{heading}>{link}{mode_tag(e)}</{heading}>'
+            f'<p>{esc(e.get("description", ""))}</p></figcaption>'
+            f'<div class="tube">{text}</div>{bar}</figure>')
 
 
 def gallery_page(gal):
@@ -223,24 +162,13 @@ def gallery_page(gal):
     for e in gal.anims + gal.screens:
         groups.setdefault(e.get("group") or "Autres", []).append(e)
     names = [g for g in GROUP_ORDER if g in groups] + [g for g in groups if g not in GROUP_ORDER]
-    real = sum(1 for e in gal.screens if not e.get("synthetic"))
     parts = ['<h1>Les écrans</h1>',
-             '<p class="lede">Every page of 3615 MESHCORE, as the firmware drew it. Each screen comes from a '
-             '<code>screen</code> dump taken over USB, shown two ways: <b>Texte</b> is the dump drawn live '
-             'by your browser in the Minitel font (select and copy it), <b>Image</b> is the photo-realistic '
-             'render of the same dump by <code>minitel_render.py</code>.</p>',
+             '<p class="lede">Toutes les pages de 3615 MESHCORE, telles que le Minitel les affiche. Chaque écran est '
+             'un relevé <code>screen</code> pris sur l\'appareil par USB, redessiné par votre navigateur dans la '
+             'police du Minitel : inverse, clignotement, double taille et mosaïques compris. C\'est du vrai texte, '
+             'que vous pouvez sélectionner et copier.</p>',
              f'<p>{gallery_status(gal)}</p>',
-             '<div class="allviews" hidden><span>Show every screen as</span>'
-             '<div class="views" role="group" aria-label="Render for every screen">'
-             '<button type="button" data-all="text" aria-pressed="true">Texte</button>'
-             '<button type="button" data-all="image" aria-pressed="false">Image</button></div>'
-             '<span class="muted">(remembered on this browser)</span></div>',
              '<ul class="groups">' + "".join(f'<li><a href="#{slug(g)}">{esc(g)}</a></li>' for g in names) + '</ul>']
-    if real < len(gal.screens):
-        parts.append('<div class="warn"><p><b>Preview.</b> Screens marked <span class="tag synth">synthetic sample</span> '
-                     'are placeholders made on the host (the firmware\'s own screen model run natively, or a Python port '
-                     'of a page), some from before the Sommaire was renumbered. They are replaced by real captures when '
-                     '<code>tools/tour/tour.py run</code> walks the device.</p></div>')
     for g in names:
         parts.append(f'<h2 id="{slug(g)}">{esc(g)}</h2>')
         if GROUP_INTRO.get(g):
@@ -252,13 +180,24 @@ def gallery_page(gal):
 
 def gallery_status(gal):
     n = len(gal.screens)
-    real = sum(1 for e in gal.screens if not e.get("synthetic"))
     if n == 0:
-        return "No screens yet: run <code>tools/tour/tour.py</code>."
-    if real == n:
-        return f"{n} screens, all captured from the device by the tour script."
-    return (f"{n} screens so far: {real} captured from the device, {n - real} synthetic samples "
-            f"standing in until the tour script runs.")
+        return "Pas encore d'écran : lancez <code>tools/tour/tour.py run</code>."
+    when = gal.m.get("generated", "")[:10]
+    mois = ["janvier", "février", "mars", "avril", "mai", "juin", "juillet", "août", "septembre", "octobre",
+            "novembre", "décembre"]
+    if re.match(r"\d{4}-\d\d-\d\d$", when):
+        y, mo, d = (int(x) for x in when.split("-"))
+        when = f"{'1er' if d == 1 else d} {mois[mo - 1]} {y}"
+    fw = gal.m.get("firmware")
+    s = "écran" if n == 1 else "écrans"
+    out = f"{n} {s}, tous relevés sur l'appareil"
+    if gal.m.get("source") == "tour":
+        out += " par le script de visite"
+    if when:
+        out += f", le {when}"
+    if fw:
+        out += f" (micrologiciel <code>{esc(fw)}</code>)"
+    return out + "."
 
 
 # ------------------------------------------------------------------ pages
@@ -284,8 +223,7 @@ def expand(text, gal):
     def shot(m):
         e = gal.find(m.group(1).strip())
         if not e:
-            return ('<p class="note">Screen <code>' + esc(m.group(1)) + '</code>: captured by the tour script, '
-                    'not available yet.</p>')
+            return ''   # not captured yet: nothing rather than a placeholder
         return shot_html(gal, e, anchor=False)
 
     def see(m):
@@ -294,10 +232,10 @@ def expand(text, gal):
             key = key.strip()
             es = [gal.by_id[key]] if key in gal.by_id else sorted(gal.all_for(key), key=lambda x: -x["mode"])
             for e in es:
-                links.append(f'<a href="screens.html#{esc(e["id"])}">{esc(e["title"])} ({e["mode"]} col)</a>')
+                links.append(f'<a href="screens.html#{esc(e["id"])}">{esc(e["title"])} ({e["mode"]} col.)</a>')
         if not links:
-            return '<span class="muted">Screens: after the tour.</span>'
-        return '<span class="muted">Screens:</span> ' + ", ".join(links)
+            return ''
+        return '<span class="muted">À l\'écran :</span> ' + ", ".join(links)
 
     def svg(m):
         with open(os.path.join(CONTENT, m.group(1).strip() + ".svg"), encoding="utf-8") as f:
@@ -308,6 +246,7 @@ def expand(text, gal):
     text = re.sub(r"\{\{see:([^}]+)\}\}", see, text)
     text = re.sub(r"\{\{svg:([^}]+)\}\}", svg, text)
     text = text.replace("{{gallery_status}}", gallery_status(gal))
+    text = re.sub(r"<p>\s*</p>", "", text)   # a {{see:}} with nothing captured yet
     text = text.replace("{{repo}}", REPO_URL)
     return text
 
@@ -328,10 +267,8 @@ def nav_html(pages, current):
 def build(out=DIST):
     gal = Gallery()
     if os.path.isdir(out):
-        for name in os.listdir(out):   # keep img/ (converted pictures are cached by mtime)
+        for name in os.listdir(out):
             p = os.path.join(out, name)
-            if name == "img":
-                continue
             shutil.rmtree(p) if os.path.isdir(p) else os.remove(p)
     os.makedirs(out, exist_ok=True)
     shutil.copytree(os.path.join(HERE, "assets"), os.path.join(out, "assets"))
@@ -340,7 +277,6 @@ def build(out=DIST):
         src = os.path.join(ROOT, "docs", "img", name)
         if os.path.exists(src):
             shutil.copyfile(src, os.path.join(out, "img", name))
-    convert_images(gal, out)
 
     with open(os.path.join(HERE, "templates", "base.html"), encoding="utf-8") as f:
         base = f.read()
@@ -352,7 +288,7 @@ def build(out=DIST):
             pages.append({"file": fn, "title": meta.get("title", fn), "label": meta.get("label", meta.get("title", fn)),
                           "nav": meta.get("nav"), "desc": meta.get("desc", ""), "body": body})
     pages.append({"file": "screens.html", "title": "Les écrans", "label": "Écrans", "nav": "1",
-                  "desc": "Every page of 3615 MESHCORE, as text and as a photo-realistic render.", "body": None})
+                  "desc": "Toutes les pages de 3615 MESHCORE, en texte et en rendu photographique.", "body": None})
     pages.sort(key=lambda p: (p["nav"] is None, int(p["nav"]) if p["nav"] and p["nav"].isdigit() else 99))
 
     sizes = []
@@ -361,7 +297,7 @@ def build(out=DIST):
         title = SITE_TITLE if p["file"] == "index.html" else f'{p["title"]} · {SITE_TITLE}'
         page = (base.replace("{{title}}", esc(title))
                 .replace("{{here}}", esc(p["title"] if p["file"] != "index.html" else "Messagerie LoRa sur Minitel"))
-                .replace("{{desc}}", esc(p["desc"] or "A MeshCore companion whose screen and keyboard are a French Minitel 2."))
+                .replace("{{desc}}", esc(p["desc"] or "Un compagnon MeshCore dont l'écran et le clavier sont un Minitel 2."))
                 .replace("{{nav}}", nav_html(pages, p["file"]))
                 .replace("{{repo}}", REPO_URL)
                 .replace("{{content}}", body))

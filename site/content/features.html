@@ -1,154 +1,163 @@
-<!-- title: Fonctions | nav: 2 | label: Fonctions | desc: What 3615 MESHCORE does: conversations, news, contacts, rooms and repeater administration, trace, graphs, regions, emoji, accents, the welcome page, USB driving and crash capture. -->
+<!-- title: Fonctions | nav: 2 | label: Fonctions | desc: Ce que fait 3615 MESHCORE : conversations, page Actions, nouvelles, contacts, salons et relais, trace, graphiques, régions, émojis, accents, page d'accueil, pilotage USB, plantages. -->
 <h1>Fonctions</h1>
-<p class="lede">Everything below runs on the XIAO and is drawn on the Minitel. The phone app keeps working alongside, with the same identity, contacts and channels.</p>
+<p class="lede">Tout ce qui suit tourne sur le XIAO et s'affiche sur le Minitel. L'application du téléphone fonctionne à côté, avec la même identité, les mêmes contacts et les mêmes canaux.</p>
 <ol class="toc">
-<li><a href="#conversations">Conversations and history</a></li>
+<li><a href="#conversations">Conversations et historique</a></li>
+<li><a href="#actions">La page Actions</a></li>
 <li><a href="#news">Dernières nouvelles</a></li>
-<li><a href="#contacts">Contacts, heard and nearby stations</a></li>
-<li><a href="#admin">Rooms and repeater administration</a></li>
-<li><a href="#path">Path and trace</a></li>
+<li><a href="#contacts">Contacts, stations entendues et proches</a></li>
+<li><a href="#admin">Salons et administration des relais</a></li>
+<li><a href="#path">Chemin et trace</a></li>
 <li><a href="#graphs">Graphiques</a></li>
-<li><a href="#regions">Regions</a></li>
-<li><a href="#text">Emoji and untrusted text</a></li>
-<li><a href="#accents">Typing accents</a></li>
-<li><a href="#quick">Quick replies and conversation tools</a></li>
-<li><a href="#splash">The animated welcome page</a></li>
-<li><a href="#clock">Clock</a></li>
-<li><a href="#device">Bluetooth, pairing code, power</a></li>
-<li><a href="#usb">USB: driving, screen dumps, the tour</a></li>
-<li><a href="#crash">Crash capture</a></li>
-<li><a href="#link">The link, standby and the répertoire</a></li>
+<li><a href="#regions">Régions</a></li>
+<li><a href="#text">Émojis et texte venu de la radio</a></li>
+<li><a href="#accents">Taper les accents</a></li>
+<li><a href="#splash">La page d'accueil animée</a></li>
+<li><a href="#clock">Date et heure</a></li>
+<li><a href="#device">Bluetooth, code d'appairage, alimentation</a></li>
+<li><a href="#telemetry">Télémesure : qui peut lire quoi</a></li>
+<li><a href="#usb">USB : pilotage, relevés d'écran, visite</a></li>
+<li><a href="#crash">Capture des plantages</a></li>
+<li><a href="#link">La liaison, la veille et le répertoire</a></li>
 </ol>
 
-<h2 id="conversations">Conversations and history</h2>
-<p>Sommaire 1 lists every configured channel, plus direct-message conversations and rooms, newest activity first: unread count, time of the last message, the channel's send region (80 col) and the last message. A number then <kbd class="k envoi">Envoi</kbd> opens one.</p>
+<h2 id="conversations">Conversations et historique</h2>
+<p>Sommaire 1 liste tous les canaux configurés, les conversations privées et les salons, la plus récente en tête : nombre de non-lus, heure du dernier message, région d'envoi du canal (en 80 colonnes) et dernier message. Un numéro suivi de <kbd class="k envoi">Envoi</kbd> ouvre la conversation.</p>
 <ul>
-<li>Messages read <code>hh:mm Author &gt; text</code>, newest at the bottom; <kbd class="k">Retour</kbd> goes back in time, <kbd class="k">Suite</kbd> forward. Row 24 is the compose line; in 80 col it shows how many bytes are left before MeshCore's limit (for a channel, keeping room for your name).</li>
-<li><b>Delivery marks</b> on direct messages and room posts: <code>(...)</code>, then <code>(reçu)</code> on the ACK, or <code>(échec ?)</code> after three attempts, the last one flooded. Messages sent from the phone show <code>(appli)</code> until their ACK.</li>
-<li><b>How each message arrived:</b> <code>[direct +7 dB]</code> or <code>[3 sauts -2 dB]</code> (40 col: <code>[d+7]</code>, <code>[3s-2]</code>): direct or the flood hop count, and the SNR of the last hop.</li>
-<li>Every incoming message rings the Minitel's bell (Réglages 9 turns it off; a silenced conversation never rings).</li>
-<li><b>History in flash.</b> 40 messages per conversation, up to 48 conversations (about 350 KB of the XIAO's 2 MB QSPI flash), written 10 s after the last message so a power cut loses at most those seconds. From the Sommaire, <kbd class="k">Suite</kbd> jumps to the next conversation with unread messages.</li>
-<li><b>Back-fill.</b> A new channel starts empty. Its past messages can be imported over USB with <code>hist add</code>. Imported messages are merged by time, never ring, never count as unread and never go on the radio; they show <code>°</code> after the time.</li>
+<li>Les messages se lisent <code>hh:mm Auteur &gt; texte</code>, le plus récent en bas ; <kbd class="k">Retour</kbd> remonte le temps, <kbd class="k">Suite</kbd> revient vers le présent. La rangée 24 est la ligne de saisie ; en 80 colonnes, elle indique combien d'octets il reste avant la limite de MeshCore (pour un canal, en gardant la place de votre nom).</li>
+<li><b>Accusés de réception</b> des messages privés et des salons : <code>(...)</code>, puis <code>(reçu)</code> à l'accusé, ou <code>(échec ?)</code> après trois essais, le dernier en diffusion. Les messages envoyés depuis le téléphone portent <code>(appli)</code> jusqu'à leur accusé.</li>
+<li><b>Répétitions entendues.</b> Vos propres messages sur un canal, depuis le Minitel ou l'appli, indiquent combien de fois on les a entendus répétés par les relais : <code>(répété 3 fois)</code>, <code>(aucune répétition entendue)</code>, ou <code>(envoi...)</code> tant que le paquet n'est pas parti (en 40 colonnes : <code>(r3)</code>, <code>(r0)</code>). Seules comptent les copies que ce nœud entend.</li>
+<li><b>Comment chaque message est arrivé :</b> <code>[direct +7 dB]</code> ou <code>[3 sauts -2 dB]</code> (en 40 colonnes : <code>[d+7]</code>, <code>[3s-2]</code>), c'est-à-dire en direct ou le nombre de sauts, et le SNR du dernier saut.</li>
+<li>Chaque message reçu fait sonner le Minitel (Réglages 9 coupe la sonnerie ; une conversation en silence ne sonne jamais).</li>
+<li><b>Historique en mémoire flash.</b> 40 messages par conversation, jusqu'à 48 conversations (environ 350 Ko des 2 Mo de flash QSPI du XIAO), écrits 10 s après le dernier message : une coupure de courant n'en perd que quelques secondes. Depuis le Sommaire, <kbd class="k">Suite</kbd> saute à la prochaine conversation non lue.</li>
+<li><b>Rapatrier l'historique.</b> Un nouveau canal commence vide. Ses messages passés peuvent être importés par USB avec <code>hist add</code>. Les messages importés sont classés par heure, ne sonnent pas, ne comptent pas comme non lus et ne partent jamais sur la radio ; ils portent un <code>°</code> après l'heure.</li>
 </ul>
 <p>{{see:convlist,conv-channel,conv-dm}}</p>
 
+<h2 id="actions">La page Actions</h2>
+<p>Dans une conversation, les flèches ↑ et ↓ choisissent un message (son heure clignote en inverse). <kbd class="k envoi">Envoi</kbd> sur une ligne de saisie <b>vide</b> ouvre la page Actions, pour cette conversation et le message choisi ; avec du texte sur la ligne, <kbd class="k envoi">Envoi</kbd> l'envoie, tout simplement. La ligne de saisie n'est jamais que du texte. Comme partout : numéro puis <kbd class="k envoi">Envoi</kbd> ; <kbd class="k">Retour</kbd> ramène à la conversation telle qu'elle était.</p>
+<table>
+<thead><tr><th>Entrée</th><th>Quand</th><th>Effet</th></tr></thead>
+<tbody>
+<tr><td>Répondre</td><td>message choisi, d'un tiers, sur un canal ou un salon</td><td>Retour à la conversation avec <code>@[auteur]</code> devant la ligne, la forme de mention des applis. Les messages qui vous nomment montrent leur auteur en inverse.</td></tr>
+<tr><td>Renvoyer</td><td>votre message privé ou de salon sans accusé</td><td>Renvoyé avec le même horodatage : le destinataire ignore le doublon et accuse quand même réception.</td></tr>
+<tr><td>Effacer ce message</td><td>message choisi</td><td>Après confirmation, le message n'apparaît plus nulle part sur le Minitel (l'appli garde sa copie).</td></tr>
+<tr><td>Détails</td><td>message choisi</td><td>Tout ce qui est gardé : sens, auteur, date à la seconde, sauts et SNR, accusé, répétitions entendues, taille, texte entier.</td></tr>
+<tr><td>Rechercher un mot</td><td>toujours</td><td>Sans tenir compte des majuscules ni des accents (« ete » trouve « Été ») ; <kbd class="k">Suite</kbd> passe à l'occurrence précédente.</td></tr>
+<tr><td>Réponses rapides</td><td>toujours</td><td>Dix textes prêts (Réglages 12) à ajouter à la ligne ; <code>{pos}</code> devient votre position.</td></tr>
+<tr><td>Silence</td><td>toujours</td><td>Plus de sonnerie, le compteur ne clignote plus et <kbd class="k">Suite</kbd> l'ignore ; la liste la marque <code>s</code>.</td></tr>
+<tr><td>Tout marquer lu</td><td>toujours</td><td>Toutes les conversations.</td></tr>
+<tr><td>Fiche du canal / du contact</td><td>s'il existe</td><td>La fiche ; <kbd class="k">Retour</kbd> y ramène à la conversation.</td></tr>
+<tr><td>Supprimer la conversation</td><td>toujours</td><td>La conversation et son historique, après confirmation.</td></tr>
+</tbody>
+</table>
+<p>{{see:conv-actions,msginfo,conv-search}}</p>
+
 <h2 id="news">Dernières nouvelles</h2>
-<p>Sommaire 2 merges the newest messages of every conversation by time, newest at the bottom, each with its tag (<code>#canal</code>, <code>@contact</code>, <code>&amp;salon</code>), time, author and text. Unread entries blink; looking at the page marks nothing read. A number then <kbd class="k envoi">Envoi</kbd> opens that conversation to reply. A busy channel can be hidden from this page on its channel sheet.</p>
+<p>Sommaire 2 rassemble les derniers messages de toutes les conversations, par ordre d'heure, le plus récent en bas, chacun avec son étiquette (<code>#canal</code>, <code>@contact</code>, <code>&amp;salon</code>), l'heure, l'auteur et le texte. Les non-lus clignotent ; consulter la page ne marque rien comme lu. Numéro puis <kbd class="k envoi">Envoi</kbd> ouvre la conversation pour répondre. Un canal trop bavard peut être masqué de cette page depuis sa fiche.</p>
 <p>{{see:news}}</p>
 
-<h2 id="contacts">Contacts, heard and nearby stations</h2>
-<p>Sommaire 3 lists the contacts by last advert: type, name, hops (<code>?</code> when the path is unknown and messages flood), last advert and key prefix. Favourites come first, marked <code>*</code>. Type a letter then <kbd class="k envoi">Envoi</kbd>:</p>
+<h2 id="contacts">Contacts, stations entendues et proches</h2>
+<p>Sommaire 3 liste les contacts par dernière annonce : type, nom, sauts (<code>?</code> quand le chemin est inconnu et que les messages partent en diffusion), dernière annonce et début de clé. Les favoris viennent en tête, marqués <code>*</code>. Une lettre puis <kbd class="k envoi">Envoi</kbd> :</p>
 <ul>
-<li><code>E</code> stations heard since boot, contact or not; <code>C</code> back to the contacts;</li>
-<li><code>P</code> <b>nearby stations</b>: contacts and heard stations announcing a position, nearest first, with distance, bearing (N, NNE…), hops, and whether each is a contact;</li>
-<li><code>N</code> add a contact by its public key (64 hex digits, a type, a name); <code>S</code> the same for a room; <code>A</code> the advert page.</li>
+<li><code>E</code> les stations entendues depuis le démarrage, contacts ou non ; <code>C</code> retour aux contacts ;</li>
+<li><code>P</code> les <b>stations proches</b> : contacts et stations entendues qui annoncent une position, la plus proche en tête, avec distance, cap (N, NNE…), sauts, et s'il s'agit d'un contact ;</li>
+<li><code>N</code> ajouter un contact par sa clé publique (64 chiffres hexadécimaux, un type, un nom) ; <code>S</code> idem pour un salon ; <code>A</code> la page d'annonce.</li>
 </ul>
-<p>A <b>contact sheet</b> (number + <kbd class="k envoi">Envoi</kbd>) shows the name, key, path, last advert, position and a sparkline of the SNR of its last messages, with actions: write; add a heard station; log in to a room; forget the room password; forget the path; trace the path; administration; <b>share</b> the contact (its last advert sent again to the direct neighbours, like the app's share); remove; favourite on/off (the app's own favourite bit).</p>
-<div class="note"><p><b>Missing correspondents.</b> A node that has not advertised since this node's identity was created is not in the contacts. Its direct messages cannot be decrypted, so they are dropped, and you cannot write to it. Add it with <code>N</code> and its public key, or check the auto-add settings (Réglages 7). Réglages 13 shows your own name and key to give to others.</p></div>
+<p>Une <b>fiche contact</b> (numéro puis <kbd class="k envoi">Envoi</kbd>) montre le nom, la clé, le chemin, la dernière annonce, la position et une petite courbe du SNR de ses derniers messages, avec les actions : écrire ; ajouter une station entendue ; se connecter à un salon ; oublier le mot de passe ; oublier le chemin ; tracer le chemin ; administration ; <b>partager</b> le contact (sa dernière annonce renvoyée aux voisins directs, comme le partage de l'appli) ; supprimer ; favori (le même drapeau que l'appli) ; permissions de télémesure.</p>
+<div class="note"><p><b>Correspondants absents.</b> Un nœud qui n'a pas fait d'annonce depuis la création de votre identité n'est pas dans vos contacts : ses messages privés ne peuvent pas être déchiffrés, ils sont perdus, et vous ne pouvez pas lui écrire. Ajoutez-le avec <code>N</code> et sa clé publique, ou vérifiez l'ajout automatique (Réglages 7). Réglages 13 affiche votre nom et votre clé à donner aux autres.</p></div>
 <p>{{see:contacts,heard,nearby,contact,mykey}}</p>
 
-<h2 id="admin">Rooms and repeater administration</h2>
+<h2 id="admin">Salons et administration des relais</h2>
 <ul>
-<li><b>Rooms.</b> The password is typed as <code>*</code>, saved only after a successful login and never shown. A room conversation logs in on first open, with the saved password or by asking. After a post gets no ACK, the firmware logs in again.</li>
-<li><b>Administration</b> (contact sheet, action 7) for repeaters, rooms and sensors: log in (guest, read-only, read/write or admin, shown on the session line); <i>état</i> (battery, uptime, queue, noise floor, RSSI/SNR, packet counters, airtime, duplicates, errors); <i>voisins</i>, the repeater's neighbours strongest first, with names when known; <i>télémesure</i> (Cayenne LPP channels: voltage, temperature, humidity, pressure, position…).</li>
-<li><b>Remote console.</b> Type a CLI command for the repeater and <kbd class="k envoi">Envoi</kbd>; replies are shown exactly as received (sanitised like any text). <kbd class="k">Répétition</kbd> recalls the last five commands for that repeater.</li>
+<li><b>Salons.</b> Le mot de passe se tape sous forme d'étoiles, n'est enregistré qu'après une connexion réussie et n'est jamais affiché. Une conversation de salon se connecte à la première ouverture, avec le mot de passe enregistré ou en le demandant. Si un message reste sans accusé, le Minitel se reconnecte.</li>
+<li><b>Administration</b> (fiche, action 7) des relais, salons et capteurs : connexion (invité, lecture seule, lecture/écriture ou administrateur) ; <i>état</i> (batterie, durée de fonctionnement, file d'envoi, bruit, RSSI/SNR, compteurs, temps d'émission, doublons, erreurs) ; <i>voisins</i> du relais, du plus fort au plus faible, avec leur nom quand il est connu ; <i>télémesure</i> (canaux Cayenne LPP : tension, température, humidité, pression, position…).</li>
+<li><b>Console à distance.</b> Tapez une commande du relais puis <kbd class="k envoi">Envoi</kbd> ; la réponse s'affiche telle quelle (nettoyée comme tout texte). <kbd class="k">Répétition</kbd> rappelle les cinq dernières commandes de ce relais.</li>
 </ul>
-<p>Requests go out like the app's, and their answers are matched by tag and kept away from the app.</p>
 <p>{{see:admin}}</p>
 
-<h2 id="path">Path and trace</h2>
-<p>The contact sheet shows the path as relay hashes (<code>a3&gt;7f&gt;12</code>). <i>Forget the path</i> (like the app's reset path) makes the next message flood so a fresh path is learnt. <i>Trace</i> sends a trace packet through every relay of the path and back (A B C B A): the page lists each relay with the SNR it heard the packet at, the SNR of the return and the round-trip time; <kbd class="k envoi">Envoi</kbd> traces again.</p>
+<h2 id="path">Chemin et trace</h2>
+<p>La fiche montre le chemin sous forme d'empreintes de relais (<code>a3&gt;7f&gt;12</code>). <i>Oublier le chemin</i> (comme dans l'appli) fait partir le prochain message en diffusion pour en apprendre un nouveau. <i>Tracer</i> envoie un paquet de trace par chaque relais du chemin, aller et retour (A B C B A) : la page donne pour chaque relais le SNR auquel il a reçu le paquet, le SNR du retour et le temps aller-retour.</p>
 
 <h2 id="graphs">Graphiques</h2>
-<p>Sommaire 8: radio statistics kept in RAM since boot (about 1.5 KB, sampled every minute). In 40 columns the plots are drawn with Vidéotex G1 mosaics (2 × 3 blocks per cell, a 70 × 45 plot); in 80 columns they are text plots. <kbd class="k">Suite</kbd> changes the window (2 h, 1 h, 30 min) or the page of a bar chart; row 22 gives min / mean / max.</p>
+<p>Sommaire 8 : des statistiques radio gardées en mémoire depuis le démarrage (environ 1,5 Ko, une mesure par minute). En 40 colonnes, les courbes sont dessinées en mosaïque Vidéotex G1 (2 × 3 pavés par caractère, une zone de 70 × 45) ; en 80 colonnes, en caractères. <kbd class="k">Suite</kbd> change la fenêtre (2 h, 1 h, 30 min) ou la page d'un histogramme ; la rangée 22 donne le minimum, la moyenne et le maximum.</p>
 <table>
-<thead><tr><th>N°</th><th>Graph</th></tr></thead>
+<thead><tr><th>N°</th><th>Graphique</th></tr></thead>
 <tbody>
-<tr><td>1, 2</td><td>SNR and RSSI of received packets: min–max bar and mean per minute, 2 h</td></tr>
-<tr><td>3</td><td>Noise floor, per minute</td></tr>
-<tr><td>4</td><td>Radio traffic: packets received per minute, and sent</td></tr>
-<tr><td>5</td><td>TX airtime per 10 min, with the duty-cycle limit of the current sub-band dotted (869.4–869.65 MHz: 10 %, 868.0–868.6 and 869.7–870.0: 1 %, 868.7–869.2: 0.1 %)</td></tr>
-<tr><td>6</td><td>Battery, every 5 min over 10 h</td></tr>
-<tr><td>7</td><td>Les mieux entendus: stations heard directly, by the SNR of their last advert</td></tr>
-<tr><td>8, 9</td><td>Hop counts of received flood packets; messages per channel</td></tr>
+<tr><td>1, 2</td><td>SNR et RSSI des paquets reçus : barre min–max et moyenne par minute, sur 2 h</td></tr>
+<tr><td>3</td><td>Bruit de fond, minute par minute</td></tr>
+<tr><td>4</td><td>Trafic radio : paquets reçus par minute, et émis</td></tr>
+<tr><td>5</td><td>Temps d'émission par tranche de 10 min, avec en pointillé la limite de la sous-bande (869,4–869,65 MHz : 10 % ; 868,0–868,6 et 869,7–870,0 : 1 % ; 868,7–869,2 : 0,1 %)</td></tr>
+<tr><td>6</td><td>Batterie, toutes les 5 min sur 10 h</td></tr>
+<tr><td>7</td><td>Les mieux entendus : les stations reçues en direct, par le SNR de leur dernière annonce</td></tr>
+<tr><td>8, 9</td><td>Nombre de sauts des paquets reçus en diffusion ; messages par canal</td></tr>
 </tbody>
 </table>
 <p>{{see:graphs,graph-1,graph-4,graph-5,graph-7}}</p>
 
-<h2 id="regions">Regions</h2>
-<p>MeshCore can scope a flood to a region. 3615 MESHCORE names them the way the French community does, following <a href="https://gaulix.fr/docs-parametrage/regles-de-nommage-regions-canaux-meshcore/">Gaulix's naming rules and region generator</a>: <code>eu</code>, <code>fr</code>, <code>fr-&lt;région&gt;</code>, <code>fr-&lt;département&gt;</code> (for example <code>eu &gt; fr &gt; fr-bre &gt; fr-35</code>). Overseas départements have no région level; Corse is <code>fr-cor</code>.</p>
+<h2 id="regions">Régions</h2>
+<p>MeshCore peut limiter une diffusion à une région. 3615 MESHCORE les nomme comme la communauté française, selon <a href="https://gaulix.fr/docs-parametrage/regles-de-nommage-regions-canaux-meshcore/">les règles de nommage et le générateur de région de Gaulix</a> : <code>eu</code>, <code>fr</code>, <code>fr-&lt;région&gt;</code>, <code>fr-&lt;département&gt;</code>, par exemple <code>eu &gt; fr &gt; fr-bre &gt; fr-35</code>. Les départements d'outre-mer n'ont pas de niveau région ; la Corse est <code>fr-cor</code>.</p>
 <ul>
-<li><b>Region picker</b> (Réglages 5, and per channel): none, <code>eu</code>, <code>fr</code>, the 13 metropolitan and 5 overseas régions, then their départements with names and préfectures. <code>T</code> lets you type a code (<code>35</code>, <code>2A</code>, <code>fr-bre</code>, <code>bre</code>…), checked against the tables.</li>
-<li><b>Régions automatiques</b> (Réglages 6) suggests, never applies on its own: the default region from the node's position (its département, as Gaulix recommends for a companion), and a region per channel guessed from its name (<code>#rennes → fr-35</code>, <code>Public → fr</code>). <code>D</code> lets you type your département, which wins over the position guess (right for about 83 % of communes).</li>
-<li>Adding a channel whose name suggests a region offers it at once. A channel's region applies to everything sent on it, from the Minitel and from the app.</li>
-<li>The tables are generated from INSEE's Code officiel géographique 2026 and geo.api.gouv.fr (préfectures, commune boxes), cross-checked with ISO 3166-2.</li>
+<li><b>Choix de la région</b> (Réglages 5, et pour chaque canal) : aucune, <code>eu</code>, <code>fr</code>, les 13 régions de métropole et les 5 d'outre-mer, puis leurs départements avec nom et préfecture. <code>T</code> permet de taper un code (<code>35</code>, <code>2A</code>, <code>fr-bre</code>, <code>bre</code>…), vérifié dans les tables.</li>
+<li><b>Régions automatiques</b> (Réglages 6) propose sans jamais rien appliquer seul : la région par défaut d'après la position du nœud (son département, comme Gaulix le recommande pour un compagnon) et une région par canal devinée d'après son nom (<code>#rennes → fr-35</code>, <code>Public → fr</code>). <code>D</code> permet de saisir son département, qui l'emporte sur la position (juste pour environ 83 % des communes).</li>
+<li>Quand le nom d'un nouveau canal évoque une région, elle est proposée aussitôt. La région d'un canal s'applique à tout ce qui y est envoyé, depuis le Minitel comme depuis l'appli.</li>
+<li>Les tables viennent du Code officiel géographique 2026 de l'INSEE et de geo.api.gouv.fr (préfectures, emprise des communes), recoupés avec l'ISO 3166-2.</li>
 </ul>
 <p>{{see:regionpick,autoreg,channels,channel}}</p>
 
-<h2 id="text">Emoji and untrusted text</h2>
-<p>Text from the radio is untrusted: every C0 and C1 control byte and DEL is dropped, so no escape, protocol or SS2 sequence in a message or a name can reach the terminal. UTF-8 is folded to what the Minitel can draw:</p>
+<h2 id="text">Émojis et texte venu de la radio</h2>
+<p>Le texte reçu par radio n'est pas digne de confiance : tous les caractères de contrôle C0 et C1 et DEL sont supprimés, si bien qu'aucune séquence d'échappement, de protocole ou SS2 cachée dans un message ou un nom ne peut atteindre le terminal. L'UTF-8 est ramené à ce que le Minitel sait afficher :</p>
 <ul>
-<li>the accents the Minitel has are kept; other characters become their nearest ASCII, anything else <code>?</code>;</li>
-<li><b>emoji become ASCII codes</b>: hand-picked emoticons first (<code>:-)</code>, <code>&lt;3</code>, <code>(y)</code>), else the GitHub or Slack shortcode (<code>:pizza:</code>, <code>:satellite:</code>), else the Unicode short name; flags become <code>:flag-fr:</code>. Skin tones and variation selectors are dropped, ZWJ sequences are matched by their parts. The table is generated from Unicode's emoji-test.txt (Emoji 18.0), github/gemoji and iamcal/emoji-data.</li>
+<li>les accents que le Minitel connaît sont gardés, les autres caractères deviennent leur plus proche équivalent ASCII, le reste <code>?</code> ;</li>
+<li><b>les émojis deviennent des codes ASCII</b> : d'abord des émoticônes choisies à la main (<code>:-)</code>, <code>&lt;3</code>, <code>(y)</code>), sinon le code court de GitHub ou Slack (<code>:pizza:</code>, <code>:satellite:</code>), sinon le nom court Unicode ; les drapeaux deviennent <code>:flag-fr:</code>. La table est produite à partir de l'<code>emoji-test.txt</code> d'Unicode (Emoji 18.0), de github/gemoji et d'iamcal/emoji-data.</li>
 </ul>
-<p>{{see:convlist}}</p>
 
-<h2 id="accents">Typing accents</h2>
-<p>Three layers, the Minitel's own way first:</p>
+<h2 id="accents">Taper les accents</h2>
+<p>Trois niveaux, la manière du Minitel d'abord :</p>
 <ol>
-<li><b>Accent keys (40 col, Vidéotex).</b> The keyboard's dead keys: <kbd class="k">Maj</kbd>+<kbd class="k">Suite</kbd> then a letter gives a grave accent, +<kbd class="k">Retour</kbd> an acute, +<kbd class="k">Sommaire</kbd> a circumflex, +<kbd class="k">Guide</kbd> a diaeresis; <kbd class="k">Ctrl</kbd>+<kbd class="k">Correction</kbd> gives ç.</li>
-<li><b>The French set's keys (both modes).</b> <kbd class="k">Ctrl</kbd>+1, 2, 3 give é, ù, è; in 80 col <kbd class="k">Ctrl</kbd>+<kbd class="k">Correction</kbd> gives ç.</li>
-<li><b>Composition</b> (Réglages 14, on by default): a prefix, the accent, the letter. <code>*'e</code> → é, <code>*`e</code> → è, <code>*^e</code> → ê, <code>*"e</code> → ë, <code>*,c</code> → ç, <code>*oe</code> → œ, <code>*=e</code> → €, <code>**</code> → <code>*</code>. A sequence that does not exist is written as typed, so <code>*bonjour*</code> and <code>5*3</code> are unchanged. The pending part shows in inverse at the end of the line.</li>
+<li><b>Les touches d'accent (40 colonnes, Vidéotex).</b> Les touches mortes du clavier : <kbd class="k">Maj</kbd>+<kbd class="k">Suite</kbd> puis la lettre donne l'accent grave, +<kbd class="k">Retour</kbd> l'aigu, +<kbd class="k">Sommaire</kbd> le circonflexe, +<kbd class="k">Guide</kbd> le tréma ; <kbd class="k">Ctrl</kbd>+<kbd class="k">Correction</kbd> donne ç.</li>
+<li><b>Les touches du jeu français (les deux modes).</b> <kbd class="k">Ctrl</kbd>+1, 2, 3 donnent é, ù, è ; en 80 colonnes, <kbd class="k">Ctrl</kbd>+<kbd class="k">Correction</kbd> donne ç.</li>
+<li><b>La composition</b> (Réglages 14, active par défaut) : un préfixe, l'accent, la lettre. <code>*'e</code> → é, <code>*`e</code> → è, <code>*^e</code> → ê, <code>*"e</code> → ë, <code>*,c</code> → ç, <code>*oe</code> → œ, <code>*=e</code> → €, <code>**</code> → <code>*</code>. Une séquence qui n'existe pas s'écrit telle quelle : <code>*bonjour*</code> ou <code>5*3</code> ne changent pas. La partie en attente s'affiche en inverse au bout de la ligne.</li>
 </ol>
-<p>Text is stored and sent as UTF-8. In 80 columns the Minitel's French set only has à é è ù ç (plus ° £ §): other accented letters are sent as typed but shown bare. <kbd class="k">Guide</kbd> twice opens the Guide screen, which recalls the keys for the current mode.</p>
+<p>Le texte est gardé et envoyé en UTF-8. En 80 colonnes, le jeu français du Minitel n'a que à é è ù ç (plus ° £ §) : les autres lettres accentuées partent correctement mais s'affichent sans accent. <kbd class="k">Guide</kbd> deux fois ouvre l'écran Guide, qui rappelle les touches du mode en cours.</p>
 <p>{{see:home-guide}}</p>
 
-<h2 id="quick">Quick replies and conversation tools</h2>
-<p>In a conversation, the arrows pick a message (its time blinks in inverse) and commands typed on the input line are never sent:</p>
-<table>
-<tbody>
-<tr><td><code>/r</code></td><td>reply: prefills <code>@[author]</code> for the picked or newest message, the apps' mention form; messages naming you show their author in inverse</td></tr>
-<tr><td><code>/c mot</code></td><td>search the conversation, case- and accent-insensitive (<code>/c ete</code> finds "Été")</td></tr>
-<tr><td><code>/q</code></td><td>quick replies: pick one of ten texts (Réglages 12, editable); <code>{pos}</code> becomes your position</td></tr>
-<tr><td><code>/renvoi</code></td><td>send again a message that got no ACK, with the same timestamp</td></tr>
-<tr><td><code>/silence</code></td><td>silence the conversation: no bell, no blinking count, skipped by <kbd class="k">Suite</kbd></td></tr>
-<tr><td><code>/lu</code>, <code>/suppr</code></td><td>mark everything read; delete the conversation and its history (confirmed)</td></tr>
-</tbody>
-</table>
-<p>{{see:quick}}</p>
-
-<h2 id="splash">The animated welcome page</h2>
-<p>Like a Télétel service's <i>page d'accueil</i>, it shows after boot and every time the terminal is set up again (power-on, wake-up), whatever page was open, until a key is pressed; Sommaire 7 replays it. Four scenes loop, each revealed then held 18 s:</p>
+<h2 id="splash">La page d'accueil animée</h2>
+<p>Comme la page d'accueil d'un service Télétel, elle s'affiche au démarrage et chaque fois que le terminal est réinitialisé (mise sous tension, réveil), quelle que soit la page ouverte, jusqu'à ce qu'on appuie sur une touche ; Sommaire 7 la rejoue. Quatre scènes tournent, chacune dévoilée puis tenue 18 s :</p>
 <ol>
-<li>the mesh logo, nodes then links (G1 mosaics in 40 col, text art in 80 col), then 3615 MESHCORE in double size;</li>
-<li><i>Radio</i>: an antenna with expanding waves, frequency, BW/SF/CR, TX power, noise floor, the last minute's mean SNR, packet counts;</li>
-<li><i>Identité</i>: name, the public key prefix appearing block by block, position, département and région, Bluetooth, battery;</li>
-<li><i>Réseau</i>: contacts, heard stations, conversations and unread counters rolling up, the newest message.</li>
+<li>le logo du maillage, les nœuds puis les liens (mosaïques G1 en 40 colonnes, dessin en caractères en 80), puis 3615 MESHCORE en double taille ;</li>
+<li><i>Radio</i> : une antenne et ses ondes, la fréquence, BW/SF/CR, la puissance, le bruit de fond, le SNR moyen de la dernière minute, les paquets ;</li>
+<li><i>Identité</i> : le nom, le début de la clé publique qui apparaît pavé par pavé, la position, le département et la région, le Bluetooth, la batterie ;</li>
+<li><i>Réseau</i> : contacts, stations entendues, conversations et non-lus qui défilent, le dernier message.</li>
 </ol>
-<p>Only changed rows are sent, a frame is made only once the previous one is out (at most every 130 ms), and the blinking is the terminal's own attribute: the output never queues up and a key enters at once.</p>
-<p>{{see:splash-anim-40,splash-1,splash-2,splash-3,splash-4}}</p>
+<p>Seules les rangées modifiées sont envoyées, une image n'est préparée que quand la précédente est partie (au plus toutes les 130 ms) et le clignotement est celui du terminal : rien ne s'accumule, et une touche entre dans le service aussitôt.</p>
+<p>{{see:splash-anim,splash-1,splash-2,splash-3,splash-4}}</p>
 
-<h2 id="clock">Clock</h2>
-<p>Sommaire 6 shows the time in the companion's time zone and sets it from a local <code>JJ/MM/AAAA HH:MM</code>; the zone (whole hours, change it twice a year) is set on the same page. While the clock is unset, the time is taken automatically once two nodes' timestamps agree within ±2 minutes. Sending needs the clock, or the "envoyer sans heure" option.</p>
+<h2 id="clock">Date et heure</h2>
+<p>Sommaire 6 affiche l'heure dans le fuseau du compagnon et la règle à partir d'une saisie locale <code>JJ/MM/AAAA HH:MM</code> ; le fuseau horaire (en heures entières, à changer deux fois par an) se règle sur la même page. Tant que l'horloge n'est pas réglée, l'heure est prise automatiquement dès que deux nœuds s'accordent à ±2 minutes. L'envoi demande une horloge réglée, ou l'option « envoyer sans heure ».</p>
 <p>{{see:clock}}</p>
 
-<h2 id="device">Bluetooth, pairing code, power</h2>
-<p>Réglages 15 shows the Bluetooth state, the pairing code the phone asks for and the battery, and can turn Bluetooth off until the next reboot, change the pairing code (the app's "device PIN"), reboot, or power off. Before a reboot or power-off, the history, the conversation index and any pending contacts write are saved.</p>
+<h2 id="device">Bluetooth, code d'appairage, alimentation</h2>
+<p>Réglages 15 affiche l'état du Bluetooth, le code d'appairage que demande le téléphone et la batterie. On peut y couper le Bluetooth jusqu'au prochain redémarrage, changer le code d'appairage (le « device PIN » de l'appli), redémarrer ou éteindre. Avant un redémarrage ou un arrêt, l'historique, l'index des conversations et une éventuelle écriture de contacts en attente sont enregistrés.</p>
 <p>{{see:device,status}}</p>
 
-<h2 id="usb">USB: driving, screen dumps, the tour</h2>
-<p>The XIAO's USB serial port (115200 baud) carries a local command line, for the host rather than the user:</p>
+<h2 id="telemetry">Télémesure : qui peut lire quoi</h2>
+<p>Réglages 7, entrées 8 à 10, règle qui peut lire la télémesure de ce nœud, comme dans l'appli : batterie et données de base, position, capteurs. Chacune vaut <i>personne</i>, <i>contacts autorisés</i> ou <i>tous</i>. Pour <i>contacts autorisés</i>, la fiche de chaque contact (action 11) donne ses permissions : <code>B</code> batterie, <code>P</code> position, <code>C</code> capteurs.</p>
+<p>{{see:autoadd}}</p>
+
+<h2 id="usb">USB : pilotage, relevés d'écran, visite</h2>
+<p>Le port série USB du XIAO (115200 bauds) offre une ligne de commande locale, destinée à l'ordinateur plutôt qu'à l'utilisateur :</p>
 <ul>
-<li><b>Identity backup</b> (<code>get prv.key</code> / <code>set prv.key</code>), time zone, clock sync, history import.</li>
-<li><b>Screen dumps.</b> <code>screen</code> prints the screen model exactly as the terminal shows it, row by row, with every attribute; <code>screen watch</code> streams dumps with the firmware's own timing. <code>tools/screenshot/</code> turns a dump into a photo-realistic picture of a Minitel 2 (PNG or animated GIF), and this site draws the same dumps as live text.</li>
-<li><b>Driving.</b> <code>key</code>, <code>type</code>, <code>typehex</code>, <code>wait idle</code>, <code>ui state</code>, <code>ui reset</code>: any keyboard action, from a script, through the same handling as real keys. It even works with the Minitel off: the screen model is kept up to date and the terminal is redrawn when it comes back.</li>
-<li><b>The tour.</b> <code>tools/tour/tour.py</code> walks every page in both modes with those commands, only visiting pages (it never sends on the radio), and rebuilds the <a href="screens.html">gallery</a>.</li>
+<li><b>Sauvegarde de l'identité</b> (<code>get prv.key</code> / <code>set prv.key</code>), fuseau horaire, réglage de l'horloge, import d'historique.</li>
+<li><b>Relevés d'écran.</b> <code>screen</code> sort le modèle d'écran exactement tel que le terminal l'affiche, rangée par rangée, avec tous les attributs ; <code>screen watch</code> en enchaîne au rythme du micrologiciel. <code>tools/screenshot/</code> en tire une image photographique d'un Minitel 2 (PNG ou GIF animé), et ce site redessine les mêmes relevés en texte.</li>
+<li><b>Pilotage.</b> <code>key</code>, <code>type</code>, <code>typehex</code>, <code>wait idle</code>, <code>ui state</code>, <code>ui reset</code> : toute action du clavier, depuis un script, traitée exactement comme une vraie touche. Cela marche même Minitel éteint : le modèle d'écran reste à jour et le terminal est redessiné à son retour.</li>
+<li><b>La visite.</b> <code>tools/tour/tour.py</code> parcourt toutes les pages dans les deux modes avec ces commandes, sans jamais rien émettre sur la radio, et reconstruit la <a href="screens.html">galerie</a>.</li>
 </ul>
-<p>The full list is in the <a href="reference.html#usb">reference</a>.</p>
+<p>La liste complète est dans la <a href="reference.html#usb">référence</a>.</p>
 
-<h2 id="crash">Crash capture</h2>
-<p>The firmware replaces the core's fault handlers (HardFault, MemManage, BusFault, UsageFault) with ones that save the faulting PC and LR, xPSR, the fault status registers (CFSR, HFSR, MMFAR, BFAR), the FreeRTOS task and the uptime in RAM that survives the reset. At the next boot the record is shown by USB <code>boot</code> and on the État page, and kept in flash until <code>boot clear</code>. Since every build keeps its ELF, <code>crash2line.sh &lt;pc&gt; &lt;lr&gt;</code> turns the record into a file and line. Réglages 11 also shows the loop task's unused stack and the free heap.</p>
+<h2 id="crash">Capture des plantages</h2>
+<p>Le micrologiciel remplace les gestionnaires d'erreur du cœur (HardFault, MemManage, BusFault, UsageFault) par les siens, qui gardent le compteur ordinal et le registre de lien fautifs, xPSR, les registres d'état d'erreur (CFSR, HFSR, MMFAR, BFAR), la tâche FreeRTOS et la durée de fonctionnement dans une mémoire qui survit au redémarrage. Au démarrage suivant, l'enregistrement s'affiche avec la commande USB <code>boot</code> et sur la page État, et reste en flash jusqu'à <code>boot clear</code>. Comme chaque compilation garde son ELF, <code>crash2line.sh &lt;pc&gt; &lt;lr&gt;</code> retrouve le fichier et la ligne. Réglages 11 indique aussi la pile jamais utilisée de la tâche principale et le tas libre.</p>
 
-<h2 id="link">The link, standby and the répertoire</h2>
-<p>The Minitel talks 7E1; the nRF52840's UART has no 7-bit mode, so the port runs 8N1 with the even parity put in bit 7 in software (same 10 bits on the wire). A non-blocking state machine probes 9600, 1200, 4800 then 300 baud, reads the ROM id, switches the terminal to 9600, sets Mixte 80 or Vidéotex 40 columns, turns the local echo off and checks the status. Output goes through a 1 KB queue in DMA chunks and only changed rows are sent, so the mesh never waits for the Minitel.</p>
-<p>When the Minitel is switched on or wakes from standby it is back at 1200 baud in Vidéotex, on its local menu. The firmware notices (a status query unanswered, a reset acknowledgement, bad parity, a key after a long silence), starts again and shows the welcome page. If the terminal answers nothing at all (typically the répertoire), it tries the protocol reset once per outage; by hand, <kbd class="k">Fnct</kbd>+<kbd class="k">Sommaire</kbd> leaves the répertoire and <kbd class="k">Fnct</kbd>+<kbd class="k">E</kbd> then <kbd class="k">A</kbd> disables the automatic standby. USB <code>link log</code> shows what happened.</p>
+<h2 id="link">La liaison, la veille et le répertoire</h2>
+<p>Le Minitel parle en 7E1 ; l'UART du nRF52840 n'a pas de mode 7 bits, donc le port tourne en 8N1 et la parité paire est mise dans le bit 7 par logiciel (les mêmes 10 bits sur le fil). Un automate non bloquant essaie 9600, 1200, 4800 puis 300 bauds, lit l'identifiant de la ROM, passe le terminal à 9600 bauds, choisit Mixte 80 ou Vidéotex 40 colonnes, coupe l'écho local et vérifie l'état. La sortie passe par une file de 1 Ko envoyée par DMA, et seules les rangées modifiées partent : le réseau n'attend jamais le Minitel.</p>
+<p>Quand on l'allume ou qu'il sort de veille, le Minitel revient à 1200 bauds en Vidéotex, sur son menu local. Le micrologiciel s'en aperçoit (demande d'état sans réponse, acquittement de réinitialisation, parité fausse, touche après un long silence), recommence et affiche la page d'accueil. Si le terminal ne répond plus du tout (le plus souvent, le répertoire), il tente une fois la réinitialisation par le protocole ; à la main, <kbd class="k">Fnct</kbd>+<kbd class="k">Sommaire</kbd> sort du répertoire et <kbd class="k">Fnct</kbd>+<kbd class="k">E</kbd> puis <kbd class="k">A</kbd> désactive la mise en veille automatique. La commande USB <code>link log</code> montre ce qui s'est passé.</p>

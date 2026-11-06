@@ -5,14 +5,14 @@
     python3 -I tools/tour/tour.py run --modes 80 --only home,convlist --no-site
     python3 -I tools/tour/tour.py simulate            # offline test against a fake device
     python3 -I tools/tour/tour.py import x.dump       # add a real dump taken by hand
-    python3 -I tools/tour/tour.py render              # render the manifest's missing images
+    python3 -I tools/tour/tour.py render              # optional photo renders of the dumps
 
 `run` drives the companion firmware's USB local CLI (115200 baud, CR line ends) with
 `ui reset`, `type`, `key`, `wait idle`, `ui state`, `screen`, `screen watch` and `splash scene`. For each
 mode (Réglages 10 switches 40/80 columns) it walks the pages below from the Sommaire,
 saves each `screen` dump to gallery/dumps/<mode>/<shot>.dump, writes gallery/manifest.json
-(page, mode, title, description), renders each dump with tools/screenshot/minitel_render.py
---screen-only into gallery/renders/, then runs site/build.py. The original 40/80 mode is
+(page, mode, title, description), then runs site/build.py, which draws the dumps as text.
+`--render` also makes photo-realistic PNGs with tools/screenshot/minitel_render.py (optional). The original 40/80 mode is
 restored at the end and the UI is left on the Sommaire.
 
 Safety: the tour only VISITS pages.
@@ -680,7 +680,7 @@ def load_manifest(out=GALLERY):
         return {"version": 1, "screens": [], "animations": []}
 
 
-def write_manifest(screens, anims, source, out=GALLERY, keep_synthetic_anims=False, note=""):
+def write_manifest(screens, anims, source, out=GALLERY, keep_synthetic_anims=False, note="", firmware=None):
     old = load_manifest(out)
     if keep_synthetic_anims and not anims:
         anims = [a for a in old.get("animations", []) if a.get("synthetic")]
@@ -691,6 +691,7 @@ def write_manifest(screens, anims, source, out=GALLERY, keep_synthetic_anims=Fal
         "generated": datetime.datetime.now().astimezone().isoformat(timespec="seconds"),
         "source": source,
         "note": note,
+        "firmware": firmware or old.get("firmware"),
         "screens": screens,
         "animations": anims,
     }
@@ -981,20 +982,21 @@ def main(argv=None):
     r.add_argument("--only", help="comma-separated shot ids: " + ",".join(SHOT_IDS))
     r.add_argument("--no-splash-anim", action="store_true",
                    help="don't record the welcome page animation (screen watch)")
-    r.add_argument("--no-render", action="store_true")
+    r.add_argument("--render", action="store_true",
+                   help="also make photo-realistic PNG/GIF renders (minitel_render.py; not used by the site)")
     r.add_argument("--no-site", action="store_true")
     r.add_argument("--yes", action="store_true", help="don't ask before starting")
     r.add_argument("--log", help="write the raw CLI replies to this file")
     r.add_argument("--out", default=GALLERY)
+    r.add_argument("--firmware", help="firmware commit flashed on the device, shown in the gallery (e.g. 1017dacf)")
     s = sub.add_parser("simulate", help="offline test against a fake device")
     s.add_argument("--out", help="output directory (default: a temporary one)")
     s.add_argument("--real", action="append", default=[], help="a real dump to serve (repeatable)")
     p = sub.add_parser("import", help="add real dumps captured by hand to the gallery (no synthetic samples)")
     p.add_argument("real", nargs="+", help="dump files from the device")
     p.add_argument("--out", default=GALLERY)
-    p.add_argument("--no-render", action="store_true")
     p.add_argument("--no-site", action="store_true")
-    rd = sub.add_parser("render", help="render the manifest's missing images")
+    rd = sub.add_parser("render", help="photo-realistic renders of the manifest's dumps (optional, not used by the site)")
     rd.add_argument("--force", action="store_true")
     rd.add_argument("--out", default=GALLERY)
     sub.add_parser("list", help="list the shots")
@@ -1013,8 +1015,6 @@ def main(argv=None):
     if a.cmd == "import":
         m = import_real(a.out, a.real)
         print(f"{len(m['screens'])} screens, {len(m['animations'])} animations -> {manifest_path(a.out)}")
-        if not a.no_render:
-            render_missing(m, a.out)
         if not a.no_site:
             build_site()
         return
@@ -1048,12 +1048,12 @@ def main(argv=None):
         got = {e["id"] for e in screens}
         screens = [e for e in old.get("screens", []) if e["id"] not in got and not e.get("synthetic")] + screens
         anims = anims or [x for x in old.get("animations", []) if not x.get("synthetic")]
-    m = write_manifest(screens, anims, "tour", a.out)
+    m = write_manifest(screens, anims, "tour", a.out, firmware=a.firmware)
     print(f"{len(m['screens'])} screens, {len(m['animations'])} animations -> {manifest_path(a.out)}")
     for f in failures:
         print("  not captured:", f)
-    if not a.no_render:
-        render_missing(m, a.out, force=True if not only else False)
+    if a.render:
+        render_missing(m, a.out, force=not only)
     if not a.no_site:
         build_site()
 

@@ -1,38 +1,36 @@
-<!-- title: Accueil | nav: 0 | label: Sommaire | desc: 3615 MESHCORE: a MeshCore LoRa mesh companion whose screen and keyboard are a French Minitel 2. -->
+<!-- title: Accueil | nav: 0 | label: Sommaire | desc: 3615 MESHCORE : la messagerie radio LoRa MeshCore sur un vrai Minitel 2, écran et clavier compris. -->
 <p class="big3615">3615 MESHCORE</p>
-<p class="lede">A <a href="https://github.com/meshcore-dev/MeshCore">MeshCore</a> companion radio whose screen and keyboard are a real French <b>Minitel 2</b>. A Seeed XIAO nRF52840 with a Wio-SX1262 LoRa module sits behind the terminal, wired to its DIN port through a one-transistor interface. Read the mesh, write to it, and look after your repeaters from a 1980s Télétel terminal.</p>
+<p class="lede">Un compagnon radio <a href="https://github.com/meshcore-dev/MeshCore">MeshCore</a> dont l'écran et le clavier sont un vrai <b>Minitel 2</b>. Derrière le terminal, un Seeed XIAO nRF52840 et son module LoRa Wio-SX1262, branchés sur la prise péri-informatique par une interface à un transistor. On y lit le réseau maillé, on y écrit, on y surveille ses relais, depuis un terminal Télétel des années 80.</p>
 
 <figure class="hero">
-<img src="img/hero.jpg" alt="A Minitel 2 on a desk showing the 3615 MESHCORE conversation list: channels and private conversations with the time and the last message" width="1600" height="1200">
-<figcaption>The conversation list, rendered from a real <code>screen</code> dump of the device by the photo-realistic renderer (a render, not a photograph).</figcaption>
+<img src="img/hero.jpg" alt="Un Minitel 2 posé sur un bureau affiche la liste des conversations de 3615 MESHCORE : canaux et messages privés, avec l'heure et le dernier message" width="1600" height="1200">
+<figcaption>La liste des conversations, calculée à partir d'un vrai relevé <code>screen</code> de l'appareil par le moteur de rendu photographique (c'est une image de synthèse, pas une photo).</figcaption>
 </figure>
 
-<h2 id="what">What it is</h2>
-<p>The XIAO runs MeshCore's BLE companion firmware with an extra user interface: the Minitel. The phone app keeps working alongside it, with the same identity, contacts and channels, and the Minitel never consumes or changes the app's offline queue. On the Minitel you get:</p>
+<h2 id="quoi">De quoi s'agit-il ?</h2>
+<p>Le XIAO fait tourner le micrologiciel compagnon BLE de MeshCore, avec une interface de plus : le Minitel. L'application du téléphone continue de fonctionner à côté, avec la même identité, les mêmes contacts et les mêmes canaux ; le Minitel ne vide ni ne modifie jamais sa file de messages en attente. Sur le Minitel, vous avez :</p>
 <ul>
-<li>conversations on channels, direct messages and rooms, with a history kept in flash, delivery marks and the hops and SNR of every received message;</li>
-<li>contacts, stations heard on the air, nearby stations by distance and bearing, contact sheets with path reset, trace and sharing;</li>
-<li>repeater and room administration, down to a remote console;</li>
-<li>French flood regions named the Gaulix way, suggested from your département;</li>
-<li>radio graphs drawn in Vidéotex mosaics, an animated welcome page, emoji turned into ASCII, accents typed the Minitel way;</li>
-<li>a USB command line to back up the identity, back-fill the history, take screen dumps and drive the whole UI from a script.</li>
+<li>les conversations sur les canaux, en message privé et dans les salons, avec un historique en mémoire flash, les accusés de réception, les répétitions entendues de vos messages, et le nombre de sauts et le SNR de chaque message reçu ;</li>
+<li>les contacts, les stations entendues, les stations proches avec distance et cap, des fiches avec réinitialisation du chemin, trace et partage ;</li>
+<li>l'administration des relais et des salons, jusqu'à une console à distance ;</li>
+<li>les régions de diffusion françaises nommées à la façon Gaulix, suggérées d'après votre département ;</li>
+<li>des graphiques radio en mosaïque Vidéotex, une page d'accueil animée, les émojis transcrits en ASCII, les accents tapés à la manière du Minitel ;</li>
+<li>une ligne de commande USB pour sauvegarder l'identité, rapatrier l'historique, relever l'écran et piloter toute l'interface par script.</li>
 </ul>
-<p>Everything works in the Minitel's two modes: <b>Vidéotex, 40 columns</b> (double-size titles, G1 mosaics) and <b>Mixte, 80 columns</b> (more on each line, ISO 6429 attributes).</p>
+<p>Tout fonctionne dans les deux modes du Minitel : <b>Vidéotex, 40 colonnes</b> (titres en double taille, mosaïques G1) et <b>Mixte, 80 colonnes</b> (plus de place sur chaque ligne).</p>
 
-<h2 id="esprit">The 3615 spirit</h2>
-<p>From 1982 to 2012 the Minitel brought online services into French homes: you dialled 3615, typed a service name, and pages came down the phone line at 1200 baud in white on black. The pages had a grammar of their own: a service line on top, inverse title bars, a <i>Sommaire</i> (the main menu) reached with its own key, choices typed as a number then <kbd class="k envoi">Envoi</kbd>, and <kbd class="k">Suite</kbd>, <kbd class="k">Retour</kbd>, <kbd class="k">Guide</kbd> and <kbd class="k">Répétition</kbd> for the rest.</p>
-<p>3615 MESHCORE follows that grammar. There is no phone line any more: the "service" is a LoRa mesh, run by its users, with no operator and no subscription, carried from node to node. The Minitel is again a window onto a network of people, only this time the network is in the neighbours' attics.</p>
+<h2 id="esprit">L'esprit du 3615</h2>
+<p>De 1982 à 2012, le Minitel a fait entrer les services en ligne dans les foyers français : on composait le 3615, on tapait le nom du service, et les pages arrivaient par la ligne téléphonique à 1200 bauds, en blanc sur noir. Ces pages avaient leur grammaire : une ligne de service en haut, des bandeaux de titre en vidéo inverse, un <i>Sommaire</i> accessible par sa propre touche, des choix tapés par leur numéro suivi de <kbd class="k envoi">Envoi</kbd>, et <kbd class="k">Suite</kbd>, <kbd class="k">Retour</kbd>, <kbd class="k">Guide</kbd>, <kbd class="k">Répétition</kbd> pour le reste.</p>
+<p>3615 MESHCORE reprend cette grammaire. Plus de ligne téléphonique : le « service » est un réseau maillé LoRa, tenu par ses utilisateurs, sans opérateur ni abonnement, de proche en proche. Le Minitel redevient une fenêtre sur un réseau de gens, sauf que cette fois le réseau est dans les greniers des voisins.</p>
 
-<h2 id="liens">Quick links</h2>
+<h2 id="liens">Accès directs</h2>
 <ul class="links">
-<li><a href="screens.html"><b><span class="n">1</span>Écrans</b>Every page, as live text or as a photo render.</a></li>
-<li><a href="features.html"><b><span class="n">2</span>Fonctions</b>What the service does, grouped by topic.</a></li>
-<li><a href="build.html"><b><span class="n">3</span>Montage</b>Parts, the interface, wiring, flashing, first boot.</a></li>
-<li><a href="reference.html"><b><span class="n">4</span>Référence</b>Sommaire map, keys, USB commands, dump format, host tools.</a></li>
-<li><a href="troubleshooting.html"><b><span class="n">5</span>Dépannage</b>Répertoire, no answer, parity errors, crashes.</a></li>
-<li><a href="credits.html"><b><span class="n">6</span>Crédits</b>MeshCore, the font, the data, the interface, the licences.</a></li>
+<li><a href="screens.html"><b><span class="n">1</span>Écrans</b>Toutes les pages, en texte ou en image.</a></li>
+<li><a href="features.html"><b><span class="n">2</span>Fonctions</b>Ce que fait le service, rubrique par rubrique.</a></li>
+<li><a href="build.html"><b><span class="n">3</span>Montage</b>Matériel, interface, câblage, programmation, premier démarrage.</a></li>
+<li><a href="reference.html"><b><span class="n">4</span>Référence</b>Sommaire, touches, commandes USB, format des relevés, outils.</a></li>
+<li><a href="troubleshooting.html"><b><span class="n">5</span>Dépannage</b>Répertoire, pas de réponse, erreurs de parité, plantages.</a></li>
+<li><a href="credits.html"><b><span class="n">6</span>Crédits</b>MeshCore, la police, les données, l'interface, les licences.</a></li>
 </ul>
 
-<h2 id="apercu">A glimpse</h2>
-<p>The Sommaire in 40 columns, drawn by your browser from a dump. Switch to <b>Image</b> for the renderer's picture of the same dump.</p>
-{{shot:home-40}}
+{{shot:home-80}}

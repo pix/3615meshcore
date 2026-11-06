@@ -6,7 +6,7 @@
 <p>À la mise sous tension et après une veille, le Minitel 2 revient à 1200 bauds en Vidéotex 40 colonnes, sur son menu local, le <i>répertoire</i>. Dans cet état, il ne répond à aucune demande du protocole : le micrologiciel ne peut pas le reprendre seul.</p>
 <ul>
 <li>Appuyez sur <kbd class="k">Fnct</kbd> + <kbd class="k">Sommaire</kbd> pour sortir du répertoire. En quelques secondes, le micrologiciel retrouve le terminal, le reconfigure et affiche la page d'accueil.</li>
-<li>Appuyez sur <kbd class="k">Fnct</kbd> + <kbd class="k">E</kbd>, puis <kbd class="k">A</kbd>, pour désactiver la mise en veille automatique et ne plus y revenir.</li>
+<li>Appuyez sur <kbd class="k">Fnct</kbd> + <kbd class="k">E</kbd>, puis <kbd class="k">A</kbd>, pour désactiver la mise en veille automatique et ne plus y revenir. Le réglage est gardé en mémoire ; <kbd class="k">Fnct</kbd> + <kbd class="k">E</kbd>, puis <kbd class="k">M</kbd>, la réactive (veille après 3 heures sans activité). Ces deux commandes existent à partir des ROM CV5 et BV9.</li>
 <li>Une fois par panne, le micrologiciel envoie aussi la réinitialisation du protocole (<code>1B 39 7F</code>) à 1200 puis à 9600 bauds et réessaie ; <code>link log</code> indique si elle a été acquittée. Le guide du Minitel 2 dit qu'un périphérique peut commander la sortie de veille à partir de la ROM CV3/BV9, mais aucune source trouvée ne donne les codes.</li>
 </ul>
 <p>Rien n'est perdu entre-temps : le nœud continue de recevoir, de réessayer les messages privés et de servir l'appli du téléphone.</p>

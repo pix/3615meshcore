@@ -65,7 +65,7 @@
 <tr><td><kbd class="k">Correction</kbd></td><td>Effacer le dernier caractère</td></tr>
 <tr><td><kbd class="k">Annulation</kbd></td><td>Vider la ligne de saisie</td></tr>
 <tr><td><kbd class="k">Guide</kbd></td><td>Une fois : la ligne d'aide de la page. Deux fois : l'écran Guide (la page, ses touches, la saisie des accents dans ce mode)</td></tr>
-<tr><td><kbd class="k">Répétition</kbd></td><td>Redessiner tout l'écran (dans la console à distance : rappeler une commande)</td></tr>
+<tr><td><kbd class="k">Répétition</kbd></td><td>Passer de 40 à 80 colonnes et inversement, sur toutes les pages ; le choix est enregistré, comme Réglages 10 (dans la console à distance : rappeler une commande)</td></tr>
 <tr><td><kbd class="k">Connexion/Fin</kbd></td><td>Revenir en arrière : conversation → liste → Sommaire</td></tr>
 <tr><td>↑ ↓</td><td>Dans une conversation, choisir un message</td></tr>
 </tbody>
@@ -119,7 +119,7 @@
 <tr><td><code>link try &lt;octets hex&gt;</code></td><td>Envoyer jusqu'à 32 octets bruts à la vitesse en cours et afficher ce qui revient en 600 ms (<code>!</code> marque une erreur de parité). Les commandes de modem, de numérotation, de prise de ligne, de transparence et de téléchargement sont refusées.</td></tr>
 <tr><td><code>link txlog on|off|dump|clear</code></td><td>Garder les 2048 derniers octets envoyés au terminal ; <code>dump</code> les affiche en hexadécimal avec une colonne ASCII</td></tr>
 <tr><td><code>ui cursor none|csi|cof|dec</code></td><td>En 80 colonnes : comment cacher le curseur pendant le dessin (enregistré) ; le 40 colonnes utilise toujours COF/CON</td></tr>
-<tr><td><code>redraw</code></td><td>Effacer le terminal et renvoyer toute la page (comme <kbd class="k">Répétition</kbd>)</td></tr>
+<tr><td><code>redraw</code></td><td>Effacer le terminal et renvoyer toute la page</td></tr>
 </tbody>
 </table>
 <h3 id="usb-ui">Écran et pilotage</h3>

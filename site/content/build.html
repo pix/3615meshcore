@@ -88,7 +88,7 @@ pio run -e Xiao_nrf52_companion_minitel -t upload --upload-port /dev/ttyACM0</co
 <li>Le Minitel démarre sur son répertoire local. Sortez-en avec <kbd class="k">Fnct</kbd> + <kbd class="k">Sommaire</kbd> (voir plus bas). Le micrologiciel essaie 9600, 1200, 4800 et 300 bauds toutes les 3 s, trouve le terminal, le passe à 9600 bauds, choisit 80 ou 40 colonnes et coupe l'écho local. La page d'accueil apparaît ; n'importe quelle touche fait entrer dans le service.</li>
 <li>Appairez l'application MeshCore du téléphone par Bluetooth si vous voulez l'utiliser à côté : le code d'appairage par défaut est <code>123456</code>, modifiable en Réglages 15.</li>
 <li>Réglez l'heure (Sommaire 6, ou laissez faire l'appli ou deux nœuds d'accord), le nom et la position du nœud (Réglages 1 et 2), et votre département pour les régions (Réglages 6).</li>
-<li>40 ou 80 colonnes : Réglages 10. Le choix est enregistré.</li>
+<li>40 ou 80 colonnes : <kbd class="k">Répétition</kbd> sur n'importe quelle page, ou Réglages 10. Le choix est enregistré.</li>
 </ol>
 
 <h2 id="keys">Les touches propres au Minitel</h2>
@@ -97,7 +97,8 @@ pio run -e Xiao_nrf52_companion_minitel -t upload --upload-port /dev/ttyACM0</co
 <thead><tr><th>Touches</th><th>Effet</th></tr></thead>
 <tbody>
 <tr><td><kbd class="k">Fnct</kbd> + <kbd class="k">Sommaire</kbd></td><td>Sortir du répertoire (la page locale après mise sous tension ou veille).</td></tr>
-<tr><td><kbd class="k">Fnct</kbd> + <kbd class="k">E</kbd>, puis <kbd class="k">A</kbd></td><td>Désactiver la mise en veille automatique.</td></tr>
+<tr><td><kbd class="k">Fnct</kbd> + <kbd class="k">E</kbd>, puis <kbd class="k">A</kbd></td><td>Désactiver la mise en veille automatique (A comme arrêt). Le réglage est gardé en mémoire, même hors tension.</td></tr>
+<tr><td><kbd class="k">Fnct</kbd> + <kbd class="k">E</kbd>, puis <kbd class="k">M</kbd></td><td>Réactiver la mise en veille automatique (M comme marche) : le Minitel se met en veille après 3 heures sans touche ni échange avec la prise péri-informatique.</td></tr>
 <tr><td><kbd class="k">Fnct</kbd> + <kbd class="k">T</kbd>, puis <kbd class="k">V</kbd></td><td>Revenir en Vidéotex depuis le mode Téléinformatique (où le protocole se tait).</td></tr>
 </tbody>
 </table>

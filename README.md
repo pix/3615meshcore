@@ -76,7 +76,7 @@ pio run -e Xiao_nrf52_companion_minitel -t upload --upload-port /dev/ttyACM0
 
 Flashing keeps the file system (identity, contacts, channels, history). If the 1200-baud reset touch misses, retry, or double-tap the XIAO's reset and upload to the bootloader.
 
-First boot: the Minitel starts on its local *répertoire*: leave it with **Fnct + Sommaire**, and disable its automatic standby with **Fnct + E, then A**. The firmware finds the terminal, switches it to 9600 baud and shows the welcome page. 40/80 columns: Réglages 10. The Bluetooth pairing code defaults to `123456` (Réglages 15).
+First boot: the Minitel starts on its local *répertoire*: leave it with **Fnct + Sommaire**, and disable its automatic standby with **Fnct + E, then A** (**Fnct + E, then M** turns it back on; kept in EEPROM, ROM CV5/BV9 and later). The firmware finds the terminal, switches it to 9600 baud and shows the welcome page. 40/80 columns: RÉPÉTITION on any page, or Réglages 10. The Bluetooth pairing code defaults to `123456` (Réglages 15).
 
 ### Back up the identity
 

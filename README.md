@@ -8,7 +8,7 @@ A Seeed XIAO nRF52840 with a Wio-SX1262 sits behind the terminal, wired to its D
 
 *The conversation list, rendered from a real `screen` dump of the device by `tools/screenshot/minitel_render.py` (a render, not a photograph).*
 
-Website (in French): **https://HOST/PATH/**, built from `site/`: every screen of the service, features, build guide, reference.
+Website (in French): **https://pix.github.io/3615meshcore/**, built from `site/`: every screen of the service, features, build guide, reference.
 
 > **En français.** 3615 MESHCORE est un compagnon radio MeshCore dont l'écran et le clavier sont un vrai Minitel 2, piloté par un Seeed XIAO nRF52840 et un Wio-SX1262 branchés sur la prise péri-informatique. Toute la documentation (écrans, fonctions, montage, référence, dépannage) est en français sur le site ; ce README en donne l'essentiel en anglais.
 
@@ -66,17 +66,28 @@ The build guide on the website (*Montage* page) has the schematic and the DIN dr
 
 ## Firmware
 
-The firmware is MeshCore's companion radio with a Minitel UI, on the `companion-minitel` branch of the firmware fork (code in `examples/companion_radio/ui-minitel/`, env `Xiao_nrf52_companion_minitel` in `variants/xiao_nrf52/platformio.ini`).
+The firmware and its source are published as a [GitHub release](https://github.com/pix/3615meshcore/releases/latest):
+
+| File | |
+|---|---|
+| `3615meshcore-xiao_nrf52.uf2` | XIAO nRF52840: double-tap reset, copy it to the USB drive that appears |
+| `3615meshcore-xiao_nrf52-dfu.zip` | the same, for serial DFU (`adafruit-nrfutil dfu serial … --touch 1200`) |
+| `3615meshcore-firmware-src.tar.gz` | the source: MeshCore's companion radio with the Minitel UI |
+| `SHA256SUMS` | checksums |
+
+The UF2 is the application only, for the XIAO's stock bootloader (S140 v7), like any MeshCore XIAO build.
+
+To build it yourself (code in `examples/companion_radio/ui-minitel/`, env `Xiao_nrf52_companion_minitel` in `variants/xiao_nrf52/platformio.ini`, full notes in `docs/companion-minitel.md`):
 
 ```sh
-git clone -b companion-minitel <firmware repository> meshcore-minitel
-cd meshcore-minitel
+tar xzf 3615meshcore-firmware-src.tar.gz
+cd 3615meshcore-firmware
 pio run -e Xiao_nrf52_companion_minitel -t upload --upload-port /dev/ttyACM0
 ```
 
 Flashing keeps the file system (identity, contacts, channels, history). If the 1200-baud reset touch misses, retry, or double-tap the XIAO's reset and upload to the bootloader.
 
-First boot: the Minitel starts on its local *répertoire*: leave it with **Fnct + Sommaire**, and disable its automatic standby with **Fnct + E, then A** (**Fnct + E, then M** turns it back on; kept in EEPROM, ROM CV5/BV9 and later). The firmware finds the terminal, switches it to 9600 baud and shows the welcome page. 40/80 columns: RÉPÉTITION on any page, or Réglages 10. The Bluetooth pairing code defaults to `123456` (Réglages 15).
+First boot: the Minitel starts on its local *répertoire*: leave it with **Fnct + Sommaire**, and disable its automatic standby with **Fnct + E, then A** (**Fnct + E, then M** turns it back on; kept in EEPROM, ROM CV5/BV9 and later). The firmware finds the terminal, switches it to 9600 baud and shows the welcome page. 40/80 columns: RÉPÉTITION on any page, or Réglages 10. The Bluetooth pairing code is drawn at random at each boot and shown on the Minitel when a phone pairs; a fixed one can be set in Réglages 15 (`0` = random again).
 
 ### Back up the identity
 

@@ -39,7 +39,7 @@ DIST = os.path.join(HERE, "dist")
 GALLERY = os.path.join(ROOT, "gallery")
 CONTENT = os.path.join(HERE, "content")
 SITE_TITLE = "3615 MESHCORE"
-REPO_URL = "https://github.com/OWNER/3615-meshcore"   # set when the repository is published
+REPO_URL = "https://github.com/pix/3615meshcore"
 
 GROUP_ORDER = ["Accueil", "Sommaire", "Conversations", "Contacts et stations", "Réglages", "Graphiques", "Autres"]
 GROUP_INTRO = {
@@ -111,8 +111,16 @@ class Gallery:
         return [e for e in self.screens if e.get("shot") == shot]
 
 
-def mode_tag(e):
-    return f'<span class="tag">{e["mode"]} col.</span>'
+def shot_key(e):
+    """The screen an entry belongs to, whatever its mode (animations have no "shot")."""
+    return e.get("shot") or re.sub(r"-(40|80)$", "", e["id"])
+
+
+def variants(gal, e):
+    """The same screen in every captured mode, e's own mode first."""
+    k = shot_key(e)
+    vs = [x for x in gal.anims + gal.screens if shot_key(x) == k]
+    return sorted(vs, key=lambda x: (x is not e, -x["mode"]))
 
 
 def frames_of(gal, e):
@@ -131,8 +139,8 @@ def frames_of(gal, e):
     return out
 
 
-def shot_html(gal, e, heading="h3", anchor=True):
-    """Un écran : légende et rendu texte du relevé (police Minitel)."""
+def tube_html(gal, e):
+    """One capture: the text render of its dump (Minitel font), and the player bar of an animation."""
     label = f'{e["title"]}, {e["mode"]} colonnes'
     if "frames" in e:
         scrs = frames_of(gal, e)
@@ -146,15 +154,38 @@ def shot_html(gal, e, heading="h3", anchor=True):
             scr = mtscreen.load_dump(os.path.join(gal.path, e["dump"]))
         except (OSError, ValueError) as ex:
             print(f"warning: {e['id']}: {ex}", file=sys.stderr)
-            return ""
+            return None
         text = mtscreen.screen_html(scr, label)
         bar = ""
-    ida = f' id="{esc(e["id"])}"' if anchor else ""
-    link = f'<a href="#{esc(e["id"])}">{esc(e["title"])}</a>' if anchor else esc(e["title"])
+    return f'<div class="tube">{text}</div>{bar}'
+
+
+def shot_html(gal, e, heading="h3", anchor=True):
+    """Un écran : légende, bascule 40/80 colonnes, et le rendu de chaque mode relevé (un seul visible)."""
+    parts = []
+    for v in variants(gal, e):
+        t = tube_html(gal, v)
+        if t is None:
+            continue
+        ida = f' id="{esc(v["id"])}"' if anchor else ""
+        hid = " hidden" if parts else ""
+        parts.append((v, f'<div class="variant" data-mode="{v["mode"]}"{ida}{hid}>{t}</div>'))
+    if not parts:
+        return ""
+    first = parts[0][0]
+    if len(parts) > 1:
+        modes = "".join(f'<button type="button" data-mode="{v["mode"]}" aria-pressed="{"true" if i == 0 else "false"}">'
+                        f'{v["mode"]} col.</button>' for i, (v, _) in enumerate(parts))
+        modes = f'<span class="modes" role="group" aria-label="Colonnes">{modes}</span>'
+    else:
+        modes = f'<span class="tag">{first["mode"]} col.</span>'
+    k = shot_key(first)
+    ida = f' id="{esc(k)}"' if anchor else ""
+    link = f'<a href="#{esc(k)}">{esc(first["title"])}</a>' if anchor else esc(first["title"])
     return (f'<figure class="shot"{ida}><figcaption>'
-            f'<{heading}>{link}{mode_tag(e)}</{heading}>'
-            f'<p>{esc(e.get("description", ""))}</p></figcaption>'
-            f'<div class="tube">{text}</div>{bar}</figure>')
+            f'<{heading}>{link}{modes}</{heading}>'
+            f'<p>{esc(first.get("description", ""))}</p></figcaption>'
+            + "".join(h for _, h in parts) + '</figure>')
 
 
 def gallery_page(gal):
@@ -173,13 +204,16 @@ def gallery_page(gal):
         parts.append(f'<h2 id="{slug(g)}">{esc(g)}</h2>')
         if GROUP_INTRO.get(g):
             parts.append(f'<p>{esc(GROUP_INTRO[g])}</p>')
+        seen = set()
         for e in groups[g]:
-            parts.append(shot_html(gal, e))
+            if shot_key(e) not in seen:
+                seen.add(shot_key(e))
+                parts.append(shot_html(gal, e))
     return "\n".join(parts)
 
 
 def gallery_status(gal):
-    n = len(gal.screens)
+    n = len({shot_key(e) for e in gal.screens})
     if n == 0:
         return "Pas encore d'écran : lancez <code>tools/tour/tour.py run</code>."
     when = gal.m.get("generated", "")[:10]
@@ -190,7 +224,7 @@ def gallery_status(gal):
         when = f"{'1er' if d == 1 else d} {mois[mo - 1]} {y}"
     fw = gal.m.get("firmware")
     s = "écran" if n == 1 else "écrans"
-    out = f"{n} {s}, tous relevés sur l'appareil"
+    out = f"{n} {s}, chacun en 40 et en 80 colonnes, tous relevés sur l'appareil"
     if gal.m.get("source") == "tour":
         out += " par le script de visite"
     if when:
@@ -229,10 +263,9 @@ def expand(text, gal):
     def see(m):
         links = []
         for key in m.group(1).split(","):
-            key = key.strip()
-            es = [gal.by_id[key]] if key in gal.by_id else sorted(gal.all_for(key), key=lambda x: -x["mode"])
-            for e in es:
-                links.append(f'<a href="screens.html#{esc(e["id"])}">{esc(e["title"])} ({e["mode"]} col.)</a>')
+            e = gal.find(key.strip())
+            if e:
+                links.append(f'<a href="screens.html#{esc(shot_key(e))}">{esc(e["title"])}</a>')
         if not links:
             return ''
         return '<span class="muted">À l\'écran :</span> ' + ", ".join(links)

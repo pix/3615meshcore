@@ -1,0 +1,31 @@
+# Build the French documentation site (site/build.py, standard library only)
+# and publish site/dist to the gh-pages branch, served by GitHub Pages.
+name: Site
+on:
+  push:
+    branches: [main]
+    paths: ["site/**", "gallery/**", "docs/img/**", ".github/workflows/site.yml"]
+  workflow_dispatch:
+permissions:
+  contents: write
+concurrency:
+  group: site
+  cancel-in-progress: true
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build and check links
+        run: python3 -I site/build.py --check
+      - name: Publish to gh-pages
+        env:
+          TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          cd site/dist
+          touch .nojekyll
+          git init -q -b gh-pages
+          git add -A
+          git -c user.name="github-actions[bot]" -c user.email="41898282+github-actions[bot]@users.noreply.github.com" \
+            commit -q -m "Site from ${GITHUB_SHA::8}"
+          git push -f "https://x-access-token:${TOKEN}@github.com/${GITHUB_REPOSITORY}.git" gh-pages

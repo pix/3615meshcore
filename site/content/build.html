@@ -7,7 +7,7 @@
 <li><a href="#din">La fiche DIN</a></li>
 <li><a href="#wiring">Le câblage au XIAO</a></li>
 <li><a href="#test">Essai de la liaison (facultatif)</a></li>
-<li><a href="#firmware">Compiler et programmer</a></li>
+<li><a href="#firmware">Programmer (fichier tout prêt ou compilation)</a></li>
 <li><a href="#boot">Premier démarrage</a></li>
 <li><a href="#keys">Les touches propres au Minitel</a></li>
 <li><a href="#identity">Sauvegarder l'identité</a></li>
@@ -70,10 +70,16 @@
 pio run -t upload --upload-port /dev/ttyACM0</code></pre>
 <p>Vérifié sur un Minitel 2 Philips (ROM <code>Bv9</code>) : identification de la ROM, état et vitesse, texte à l'écran et clavier à 1200 bauds en Vidéotex ; puis <code>speed 9600</code>, <code>mixte</code>, <code>echo off</code> pour le 80 colonnes à 9600 bauds, clavier propre et sans erreur de parité. L'acquittement de vitesse arrive pendant le redémarrage de l'UART et perd ses premiers octets : <code>speed</code> confirme donc par une nouvelle demande de vitesse. La commande <code>sense</code> indique à quelle broche de la DIN D7 est reliée.</p>
 
-<h2 id="firmware">Compiler et programmer</h2>
-<p>Le micrologiciel est le compagnon radio de MeshCore avec l'interface Minitel, sur la branche <code>companion-minitel</code> de la version dérivée (code dans <code>examples/companion_radio/ui-minitel/</code>). Avec <a href="https://platformio.org/">PlatformIO</a> :</p>
-<pre><code>git clone -b companion-minitel &lt;dépôt du micrologiciel&gt; meshcore-minitel
-cd meshcore-minitel
+<h2 id="firmware">Programmer le micrologiciel</h2>
+<p>Le micrologiciel et ses sources sont publiés en <a href="{{repo}}/releases/latest">version sur GitHub</a> :</p>
+<ul>
+<li><a href="{{repo}}/releases/latest/download/3615meshcore-xiao_nrf52.uf2">3615meshcore-xiao_nrf52.uf2</a> : appuyez deux fois sur le bouton reset du XIAO, un disque USB apparaît, copiez-y le fichier. Le XIAO redémarre seul sur le nouveau micrologiciel.</li>
+<li><a href="{{repo}}/releases/latest/download/3615meshcore-xiao_nrf52-dfu.zip">3615meshcore-xiao_nrf52-dfu.zip</a> : le même, pour <code>adafruit-nrfutil dfu serial</code>.</li>
+<li><a href="{{repo}}/releases/latest/download/3615meshcore-firmware-src.tar.gz">3615meshcore-firmware-src.tar.gz</a> : les sources, le compagnon radio de MeshCore avec l'interface Minitel (code dans <code>examples/companion_radio/ui-minitel/</code>).</li>
+</ul>
+<p>Avant une première programmation, sauvegardez l'identité du nœud (voir <a href="#identity">plus bas</a>). Pour compiler vous-même avec <a href="https://platformio.org/">PlatformIO</a> :</p>
+<pre><code>tar xzf 3615meshcore-firmware-src.tar.gz
+cd 3615meshcore-firmware
 pio run -e Xiao_nrf52_companion_minitel -t upload --upload-port /dev/ttyACM0</code></pre>
 <ul>
 <li>La programmation conserve le système de fichiers : identité, contacts, canaux et historique du Minitel survivent à une mise à jour.</li>
@@ -86,7 +92,7 @@ pio run -e Xiao_nrf52_companion_minitel -t upload --upload-port /dev/ttyACM0</co
 <ol>
 <li>Branchez le câble DIN au Minitel, alimentez le XIAO, allumez le Minitel.</li>
 <li>Le Minitel démarre sur son répertoire local. Sortez-en avec <kbd class="k">Fnct</kbd> + <kbd class="k">Sommaire</kbd> (voir plus bas). Le micrologiciel essaie 9600, 1200, 4800 et 300 bauds toutes les 3 s, trouve le terminal, le passe à 9600 bauds, choisit 80 ou 40 colonnes et coupe l'écho local. La page d'accueil apparaît ; n'importe quelle touche fait entrer dans le service.</li>
-<li>Appairez l'application MeshCore du téléphone par Bluetooth si vous voulez l'utiliser à côté : le code d'appairage par défaut est <code>123456</code>, modifiable en Réglages 15.</li>
+<li>Appairez l'application MeshCore du téléphone par Bluetooth si vous voulez l'utiliser à côté : le code d'appairage est tiré au hasard à chaque démarrage et s'affiche sur le Minitel quand le téléphone s'appaire ; un code fixe se choisit en Réglages 15 (<code>0</code> = de nouveau aléatoire).</li>
 <li>Réglez l'heure (Sommaire 6, ou laissez faire l'appli ou deux nœuds d'accord), le nom et la position du nœud (Réglages 1 et 2), et votre département pour les régions (Réglages 6).</li>
 <li>40 ou 80 colonnes : <kbd class="k">Répétition</kbd> sur n'importe quelle page, ou Réglages 10. Le choix est enregistré.</li>
 </ol>

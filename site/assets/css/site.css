@@ -191,6 +191,13 @@ footer p { margin: .3em auto; }
 .animbar button { font: 12px/1.25 var(--mt); background: var(--bg2); color: var(--ink); border: 1px solid var(--line);
                   border-radius: 5px; padding: 6px 10px; cursor: pointer; }
 
+/* ---------- 40/80 column toggle */
+.modes { display: inline-flex; gap: 4px; vertical-align: .15em; margin-left: .5em; }
+.modes button { font: 12px/1.25 var(--mt); background: var(--bg2); color: var(--muted); border: 1px solid var(--line);
+                border-radius: 4px; padding: 3px 7px; cursor: pointer; }
+.modes button[aria-pressed="true"] { background: var(--bg3); color: var(--ink); border-color: var(--go); }
+.variant[hidden] { display: none; }
+
 /* ---------- screens index */
 .groups { display: flex; flex-wrap: wrap; gap: 6px 8px; padding: 0; list-style: none; }
 .groups a { font: 12px/1.25 var(--mt); text-decoration: none; background: var(--bg2); border: 1px solid var(--line);

@@ -1,0 +1,82 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Dépannage · 3615 MESHCORE</title>
+<meta name="description" content="Dépannage de 3615 MESHCORE : répertoire et veille, pas de réponse du Minitel, erreurs de parité et parasites, plantages, messages privés qui n&#x27;arrivent pas.">
+<meta name="color-scheme" content="dark">
+<meta name="theme-color" content="#0c0d10">
+<link rel="preload" href="assets/fonts/minitel40.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="assets/css/site.css">
+<link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+</head>
+<body>
+<a class="skip" href="#main">Aller au contenu</a>
+<header class="top">
+<div class="svc"><a href="index.html">3615 MESHCORE</a><span class="here">Dépannage</span></div>
+<nav aria-label="Sommaire"><ul class="menu"><li><a href="index.html"><span class="n">SOMMAIRE</span></a></li><li><a href="screens.html"><span class="n">1</span>Ecrans</a></li><li><a href="features.html"><span class="n">2</span>Fonctions</a></li><li><a href="build.html"><span class="n">3</span>Montage</a></li><li><a href="reference.html"><span class="n">4</span>Référence</a></li><li><a href="troubleshooting.html" aria-current="page"><span class="n">5</span>Dépannage</a></li><li><a href="credits.html"><span class="n">6</span>Crédits</a></li></ul></nav>
+</header>
+<main id="main">
+<h1>Dépannage</h1>
+<p class="lede">La plupart des problèmes se voient avec deux commandes USB : <code>link log</code> côté Minitel, <code>boot</code> côté XIAO.</p>
+
+<h2 id="repertoire">Le Minitel affiche son répertoire, ou se met en veille</h2>
+<p>À la mise sous tension et après une veille, le Minitel 2 revient à 1200 bauds en Vidéotex 40 colonnes, sur son menu local, le <i>répertoire</i>. Dans cet état, il ne répond à aucune demande du protocole : le micrologiciel ne peut pas le reprendre seul.</p>
+<ul>
+<li>Appuyez sur <kbd class="k">Fnct</kbd> + <kbd class="k">Sommaire</kbd> pour sortir du répertoire. En quelques secondes, le micrologiciel retrouve le terminal, le reconfigure et affiche la page d'accueil.</li>
+<li>Appuyez sur <kbd class="k">Fnct</kbd> + <kbd class="k">E</kbd>, puis <kbd class="k">A</kbd>, pour désactiver la mise en veille automatique et ne plus y revenir. Le réglage est gardé en mémoire ; <kbd class="k">Fnct</kbd> + <kbd class="k">E</kbd>, puis <kbd class="k">M</kbd>, la réactive (veille après 3 heures sans activité). Ces deux commandes existent à partir des ROM CV5 et BV9.</li>
+<li>Une fois par panne, le micrologiciel envoie aussi la réinitialisation du protocole (<code>1B 39 7F</code>) à 1200 puis à 9600 bauds et réessaie ; <code>link log</code> indique si elle a été acquittée. Le guide du Minitel 2 dit qu'un périphérique peut commander la sortie de veille à partir de la ROM CV3/BV9, mais aucune source trouvée ne donne les codes.</li>
+</ul>
+<p>Rien n'est perdu entre-temps : le nœud continue de recevoir, de réessayer les messages privés et de servir l'appli du téléphone.</p>
+
+<h2 id="noanswer">Le Minitel ne répond pas</h2>
+<ul>
+<li><b>Le mode.</b> En mode Téléinformatique (<kbd class="k">Fnct</kbd>+<kbd class="k">T</kbd>, <kbd class="k">A</kbd>), le protocole est coupé par construction : pas d'état, pas de changement de vitesse, et les touches peuvent ne pas atteindre la prise DIN. Revenez-en avec <kbd class="k">Fnct</kbd>+<kbd class="k">T</kbd>, <kbd class="k">V</kbd>.</li>
+<li><b>La vitesse.</b> Le micrologiciel essaie 9600, 1200, 4800 et 300 bauds toutes les 3 s ; <code>link log</code> liste chaque tour sans réponse. Si aucune vitesse ne répond jamais, vérifiez d'abord le câblage.</li>
+<li><b>Le câblage.</b> D6 va à l'émetteur du transistor, D7 au point commun 220 kΩ / DIN 3 à travers 9,1 kΩ, l'interface est alimentée en <b>3V3</b>, DIN 2 va à la masse. Avec le programme d'essai (<code>firmware/minitel-test/</code>), <code>sense</code> dit si D7 voit la sortie du Minitel (tirée vers le bas par la résistance interne de la broche : BAS) ou son entrée (maintenue HAUTE par le Minitel) : de quoi repérer deux fils inversés.</li>
+<li><b>La numérotation des broches.</b> Mesurez la broche 5 : 8,5 à 15 V par rapport à la broche 2, Minitel allumé. Si vous la trouvez ailleurs, vous regardez la fiche dans le mauvais sens.</li>
+<li><b>À la main.</b> <code>link try 1B 39 74</code> envoie la demande de vitesse à la vitesse en cours et affiche la réponse.</li>
+</ul>
+
+<h2 id="parity">Erreurs de parité, parasites sur D7</h2>
+<p>La sortie du Minitel est à collecteur ouvert, avec seulement la résistance de rappel de 220 kΩ derrière, et le tube cathodique est juste à côté : au repos, D7 reçoit des centaines de parasites très brefs. L'UART les filtre à 1200 bauds ; à 9600, certains passent sous forme d'octets à la parité fausse, comptés par <code>link log</code> (<code>parity_err</code>). Ces octets sont jetés, et une rafale d'entre eux est prise pour une réinitialisation du terminal.</p>
+<ul>
+<li>Descendez la résistance de rappel R3 de 220 kΩ vers <b>10 kΩ</b>.</li>
+<li>Gardez le câble DIN court et une masse bien franche.</li>
+</ul>
+
+<h2 id="crash">Plantages et redémarrages</h2>
+<ul>
+<li><code>boot</code> donne la raison du dernier redémarrage du XIAO (mise sous tension, bouton reset, chien de garde, blocage, redémarrage logiciel, plantages compris) et affiche le dernier plantage : <code>pc</code>, <code>lr</code>, les registres d'erreur, la tâche et la durée de fonctionnement. La page État (Réglages 11) l'affiche aussi.</li>
+<li>Retrouvez la ligne en cause avec l'ELF de la compilation qui a planté : <code>examples/companion_radio/ui-minitel/tools/crash2line.sh &lt;pc&gt; &lt;lr&gt; firmware-&lt;commit&gt;.elf</code>.</li>
+<li><code>stack</code> indique la part jamais utilisée de la pile de 4 Ko de la tâche principale ; un petit nombre veut dire qu'elle a frôlé le débordement.</li>
+<li><code>boot clear</code> oublie l'enregistrement une fois traité.</li>
+</ul>
+
+<h2 id="dm">Les messages privés n'arrivent pas</h2>
+<p>Un message privé est chiffré pour une paire de clés. Si l'expéditeur n'est pas dans vos contacts, le nœud ne peut pas déchiffrer ses messages : ils sont perdus sans laisser de trace, et vous ne pouvez pas lui écrire non plus.</p>
+<ul>
+<li>Demandez à l'autre de faire une annonce, ou ajoutez son nœud vous-même : Contacts, <code>N</code>, sa clé publique de 64 chiffres, le type et un nom.</li>
+<li>Vérifiez l'ajout automatique (Réglages 7) : s'il est coupé pour ce type, les annonces ne créent pas de contact.</li>
+<li>Donnez votre propre clé à vos correspondants depuis Réglages 13 (Mon identité).</li>
+<li>Un <code>?</code> dans la colonne des sauts veut dire qu'aucun chemin n'est connu : les messages partent en diffusion. <i>Oublier le chemin</i> sur la fiche en fait apprendre un nouveau.</li>
+</ul>
+
+<h2 id="other">En vrac</h2>
+<ul>
+<li><b>Envoi impossible : « heure non réglée ».</b> Réglez l'heure (Sommaire 6), laissez l'appli la régler, ou activez « envoyer sans heure ».</li>
+<li><b>Les accents s'affichent mal en 80 colonnes.</b> Le jeu français du mode Mixte n'a que à é è ù ç ° £ § ; les autres lettres accentuées partent correctement mais s'affichent sans accent.</li>
+<li><b>« /r » est parti tel quel.</b> Les anciennes commandes à barre oblique n'existent plus : sur une ligne vide, <kbd class="k envoi">Envoi</kbd> ouvre la page Actions.</li>
+<li><b>La programmation échoue.</b> Le toucher à 1200 bauds rate parfois : recommencez, ou appuyez deux fois sur le reset du XIAO et programmez sur le port du chargeur d'amorçage.</li>
+<li><b>L'identité a changé après une programmation.</b> Le système de fichiers a été effacé. Restaurez la clé avec <code>set prv.key</code> et redémarrez (voir la <a href="build.html#identity">sauvegarde de l'identité</a>).</li>
+</ul>
+
+</main>
+<footer>
+<p>3615 MESHCORE : un compagnon MeshCore sur Minitel 2. Micrologiciel, outils et licences : voir les <a href="credits.html">crédits</a>.</p>
+<p>Projet indépendant, sans lien avec Orange, France Télécom ni le projet MeshCore. Le nom « Minitel » ne sert qu'à désigner le terminal.</p>
+</footer>
+<script src="assets/js/site.js" defer></script>
+</body>
+</html>

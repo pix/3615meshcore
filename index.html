@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>3615 MESHCORE</title>
+<meta name="description" content="3615 MESHCORE : la messagerie radio LoRa MeshCore sur un vrai Minitel 2, écran et clavier compris.">
+<meta name="color-scheme" content="dark">
+<meta name="theme-color" content="#0c0d10">
+<link rel="preload" href="assets/fonts/minitel40.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="assets/css/site.css">
+<link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+</head>
+<body>
+<a class="skip" href="#main">Aller au contenu</a>
+<header class="top">
+<div class="svc"><a href="index.html">3615 MESHCORE</a><span class="here">Messagerie LoRa sur Minitel</span></div>
+<nav aria-label="Sommaire"><ul class="menu"><li><a href="index.html" aria-current="page"><span class="n">SOMMAIRE</span></a></li><li><a href="screens.html"><span class="n">1</span>Ecrans</a></li><li><a href="features.html"><span class="n">2</span>Fonctions</a></li><li><a href="build.html"><span class="n">3</span>Montage</a></li><li><a href="reference.html"><span class="n">4</span>Référence</a></li><li><a href="troubleshooting.html"><span class="n">5</span>Dépannage</a></li><li><a href="credits.html"><span class="n">6</span>Crédits</a></li></ul></nav>
+</header>
+<main id="main">
+<p class="big3615">3615 MESHCORE</p>
+<p class="lede">Un compagnon radio <a href="https://github.com/meshcore-dev/MeshCore">MeshCore</a> dont l'écran et le clavier sont un vrai <b>Minitel 2</b>. Derrière le terminal, un Seeed XIAO nRF52840 et son module LoRa Wio-SX1262, branchés sur la prise péri-informatique par une interface à un transistor. On y lit le réseau maillé, on y écrit, on y surveille ses relais, depuis un terminal Télétel des années 80.</p>
+
+<figure class="hero">
+<img src="img/hero.jpg" alt="Un Minitel 2 posé sur un bureau affiche la liste des conversations de 3615 MESHCORE : canaux et messages privés, avec l'heure et le dernier message" width="1600" height="1200">
+<figcaption>La liste des conversations, calculée à partir d'un vrai relevé <code>screen</code> de l'appareil par le moteur de rendu photographique (c'est une image de synthèse, pas une photo).</figcaption>
+</figure>
+
+<h2 id="quoi">De quoi s'agit-il ?</h2>
+<p>Le XIAO fait tourner le micrologiciel compagnon BLE de MeshCore, avec une interface de plus : le Minitel. L'application du téléphone continue de fonctionner à côté, avec la même identité, les mêmes contacts et les mêmes canaux ; le Minitel ne vide ni ne modifie jamais sa file de messages en attente. Sur le Minitel, vous avez :</p>
+<ul>
+<li>les conversations sur les canaux, en message privé et dans les salons, avec un historique en mémoire flash, les accusés de réception, les répétitions entendues de vos messages, et le nombre de sauts et le SNR de chaque message reçu ;</li>
+<li>les contacts, les stations entendues, les stations proches avec distance et cap, des fiches avec réinitialisation du chemin, trace et partage ;</li>
+<li>l'administration des relais et des salons, jusqu'à une console à distance ;</li>
+<li>les régions de diffusion françaises nommées à la façon Gaulix, suggérées d'après votre département ;</li>
+<li>des graphiques radio en mosaïque Vidéotex, une page d'accueil animée, les émojis transcrits en ASCII, les accents tapés à la manière du Minitel ;</li>
+<li>une ligne de commande USB pour sauvegarder l'identité, rapatrier l'historique, relever l'écran et piloter toute l'interface par script.</li>
+</ul>
+<p>Tout fonctionne dans les deux modes du Minitel : <b>Vidéotex, 40 colonnes</b> (titres en double taille, mosaïques G1) et <b>Mixte, 80 colonnes</b> (plus de place sur chaque ligne).</p>
+
+<h2 id="esprit">L'esprit du 3615</h2>
+<p>De 1982 à 2012, le Minitel a fait entrer les services en ligne dans les foyers français : on composait le 3615, on tapait le nom du service, et les pages arrivaient par la ligne téléphonique à 1200 bauds, en blanc sur noir. Ces pages avaient leur grammaire : une ligne de service en haut, des bandeaux de titre en vidéo inverse, un <i>Sommaire</i> accessible par sa propre touche, des choix tapés par leur numéro suivi de <kbd class="k envoi">Envoi</kbd>, et <kbd class="k">Suite</kbd>, <kbd class="k">Retour</kbd>, <kbd class="k">Guide</kbd>, <kbd class="k">Répétition</kbd> pour le reste.</p>
+<p>3615 MESHCORE reprend cette grammaire. Plus de ligne téléphonique : le « service » est un réseau maillé LoRa, tenu par ses utilisateurs, sans opérateur ni abonnement, de proche en proche. Le Minitel redevient une fenêtre sur un réseau de gens, sauf que cette fois le réseau est dans les greniers des voisins.</p>
+
+<h2 id="liens">Accès directs</h2>
+<ul class="links">
+<li><a href="screens.html"><b><span class="n">1</span>Ecrans</b>Toutes les pages, en texte ou en image.</a></li>
+<li><a href="features.html"><b><span class="n">2</span>Fonctions</b>Ce que fait le service, rubrique par rubrique.</a></li>
+<li><a href="build.html"><b><span class="n">3</span>Montage</b>Matériel, interface, câblage, programmation, premier démarrage.</a></li>
+<li><a href="reference.html"><b><span class="n">4</span>Référence</b>Sommaire, touches, commandes USB, format des relevés, outils.</a></li>
+<li><a href="troubleshooting.html"><b><span class="n">5</span>Dépannage</b>Répertoire, pas de réponse, erreurs de parité, plantages.</a></li>
+<li><a href="credits.html"><b><span class="n">6</span>Crédits</b>MeshCore, la police, les données, l'interface, les licences.</a></li>
+</ul>
+
+<figure class="shot"><figcaption><h3>Sommaire<span class="modes" role="group" aria-label="Colonnes"><button type="button" data-mode="80" aria-pressed="true">80 col.</button><button type="button" data-mode="40" aria-pressed="false">40 col.</button></span></h3><p>Le menu principal : nœud, batterie, Bluetooth, les huit rubriques, la dernière touche et l&#x27;état de la liaison.</p></figcaption><div class="variant" data-mode="80"><div class="tube"><div class="mt mt80" role="group" aria-label="Sommaire, 80 colonnes"><div class="mr">                                                                                </div><div class="mr"><span class="f0 k7"> </span><span class="f0 k7 w">3615 MESHCORE</span><span class="f0 k7">                              </span><span class="f0 k7 b">4</span><span class="f0 k7"> non lus  BLE libre  4.15 V  19:43 </span></div><div class="mr"><span class="f0 k7 w"> Sommaire </span><span class="u">                                                       Messagerie LoRa</span></div><div class="mr">                                                                                </div><div class="mr"> Noeud     : FR35-Minitel-PiX                                                   </div><div class="mr"> Batterie  : 4159 mV        Bluetooth : non connecté        Non lus : 4         </div><div class="mr">                                                                                </div><div class="mr">                                                                                </div><div class="mr">   <span class="f0 k7"> 1 </span> Conversations  (4 non lus)          <span class="f0 k7"> 5 </span> Envoyer une annonce              </div><div class="mr">                                                                                </div><div class="mr">   <span class="f0 k7"> 2 </span> Dernières nouvelles                 <span class="f0 k7"> 6 </span> Date et heure                    </div><div class="mr">                                                                                </div><div class="mr">   <span class="f0 k7"> 3 </span> Contacts et stations entendues      <span class="f0 k7"> 7 </span> Page d'accueil 3615 MESHCORE     </div><div class="mr">                                                                                </div><div class="mr">   <span class="f0 k7"> 4 </span> Réglages et identité                <span class="f0 k7"> 8 </span> Graphiques                       </div><div class="mr">                                                                                </div><div class="mr">                                                                                </div><div class="mr">                                                                                </div><div class="mr">                                                                                </div><div class="mr"> Clavier : Envoi                                                                </div><div class="mr">           [13 41]                                                              </div><div class="mr"> Minitel : 9600 bauds, Mixte 80 col, ROM Bv9, statut 4B, réinit 0, err 1        </div><div class="mr">                                                                                </div><div class="mr">Votre choix puis <span class="f0 k7"> ENVOI </span>   <span class="f0 k7"> GUIDE </span> aide   <span class="f0 k7"> SOMMAIRE </span> ce menu                    </div><div class="mr">Votre choix : .<span class="f0 k7 cu" style="--cf:var(--c7);--cb:var(--c0)">.</span>                                                                </div></div></div></div><div class="variant" data-mode="40" hidden><div class="tube"><div class="mt mt40" role="group" aria-label="Sommaire, 40 colonnes"><div class="mr">                                        </div><div class="mr"><span class="f0 k7"> 3615 MESHCORE     </span><span class="f0 k7 b">5</span><span class="f0 k7"> msg ble 3.7V 19:42 </span></div><div class="mr">                                        </div><div class="mr"><span class="f0 k7 dh"> </span><span class="f0 k7 dh">S</span><span class="f0 k7 dh">o</span><span class="f0 k7 dh">m</span><span class="f0 k7 dh">m</span><span class="f0 k7 dh">a</span><span class="f0 k7 dh">i</span><span class="f0 k7 dh">r</span><span class="f0 k7 dh">e</span><span class="f0 k7 dh"> </span>                              </div><div class="mr"><span class="m" aria-hidden="true">🬂🬂🬂🬂🬂🬂🬂🬂🬂🬂🬂🬂🬂🬂🬂🬂🬂🬂🬂🬂🬂🬂🬂🬂🬂🬂🬂🬂🬂🬂🬂🬂🬂🬂🬂🬂🬂🬂🬂🬂</span></div><div class="mr"> Noeud     : FR35-Minitel-PiX           </div><div class="mr"> Batterie  : 3783 mV                    </div><div class="mr"> Bluetooth : non connecté               </div><div class="mr"><span class="m" aria-hidden="true">🬭🬭🬭🬭🬭🬭🬭🬭🬭🬭🬭🬭🬭🬭🬭🬭🬭🬭🬭🬭🬭🬭🬭🬭🬭🬭🬭🬭🬭🬭🬭🬭🬭🬭🬭🬭🬭🬭🬭🬭</span></div><div class="mr">  <span class="f0 k7"> 1 </span> Conversations  (5 non lus)        </div><div class="mr">  <span class="f0 k7"> 2 </span> Dernières nouvelles               </div><div class="mr">  <span class="f0 k7"> 3 </span> Contacts et stations              </div><div class="mr">  <span class="f0 k7"> 4 </span> Réglages et identité              </div><div class="mr">  <span class="f0 k7"> 5 </span> Envoyer une annonce               </div><div class="mr">  <span class="f0 k7"> 6 </span> Date et heure                     </div><div class="mr">  <span class="f0 k7"> 7 </span> Page d'accueil 3615 MESHCORE      </div><div class="mr">  <span class="f0 k7"> 8 </span> Graphiques                        </div><div class="mr">                                        </div><div class="mr"> Clavier : Envoi                        </div><div class="mr">           [13 41]                      </div><div class="mr"> 9600bd 40c ROM Bv9 st40 ri0 e1         </div><div class="mr">                                        </div><div class="mr">                                        </div><div class="mr">Choix + <span class="f0 k7"> ENVOI </span>  <span class="f0 k7"> GUIDE </span> aide           </div><div class="mr">Choix : .<span class="f0 k7 cu" style="--cf:var(--c7);--cb:var(--c0)">.</span>                              </div></div></div></div></figure>
+
+</main>
+<footer>
+<p>3615 MESHCORE : un compagnon MeshCore sur Minitel 2. Micrologiciel, outils et licences : voir les <a href="credits.html">crédits</a>.</p>
+<p>Projet indépendant, sans lien avec Orange, France Télécom ni le projet MeshCore. Le nom « Minitel » ne sert qu'à désigner le terminal.</p>
+</footer>
+<script src="assets/js/site.js" defer></script>
+</body>
+</html>

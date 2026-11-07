@@ -1,0 +1,253 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Montage · 3615 MESHCORE</title>
+<meta name="description" content="Construire son 3615 MESHCORE : le matériel, l&#x27;interface à un transistor, le câblage au XIAO, la programmation, le premier démarrage et les touches du Minitel.">
+<meta name="color-scheme" content="dark">
+<meta name="theme-color" content="#0c0d10">
+<link rel="preload" href="assets/fonts/minitel40.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="assets/css/site.css">
+<link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+</head>
+<body>
+<a class="skip" href="#main">Aller au contenu</a>
+<header class="top">
+<div class="svc"><a href="index.html">3615 MESHCORE</a><span class="here">Montage</span></div>
+<nav aria-label="Sommaire"><ul class="menu"><li><a href="index.html"><span class="n">SOMMAIRE</span></a></li><li><a href="screens.html"><span class="n">1</span>Ecrans</a></li><li><a href="features.html"><span class="n">2</span>Fonctions</a></li><li><a href="build.html" aria-current="page"><span class="n">3</span>Montage</a></li><li><a href="reference.html"><span class="n">4</span>Référence</a></li><li><a href="troubleshooting.html"><span class="n">5</span>Dépannage</a></li><li><a href="credits.html"><span class="n">6</span>Crédits</a></li></ul></nav>
+</header>
+<main id="main">
+<h1>Montage</h1>
+<p class="lede">Une soirée de travail : un Minitel 2, un XIAO nRF52840 et sa carte LoRa, un transistor, quatre résistances et une fiche DIN. Le Minitel lui-même n'est pas modifié.</p>
+<ol class="toc">
+<li><a href="#parts">Le matériel</a></li>
+<li><a href="#interface">L'interface</a></li>
+<li><a href="#din">La fiche DIN</a></li>
+<li><a href="#wiring">Le câblage au XIAO</a></li>
+<li><a href="#test">Essai de la liaison (facultatif)</a></li>
+<li><a href="#firmware">Programmer (fichier tout prêt ou compilation)</a></li>
+<li><a href="#boot">Premier démarrage</a></li>
+<li><a href="#keys">Les touches propres au Minitel</a></li>
+<li><a href="#identity">Sauvegarder l'identité</a></li>
+</ol>
+
+<h2 id="parts">Le matériel</h2>
+<table>
+<thead><tr><th>Pièce</th><th>Remarques</th></tr></thead>
+<tbody>
+<tr><td>Minitel 2</td><td>Mis au point et essayé sur un Minitel 2 Philips, ROM <code>Bv9</code>, le seul modèle testé à ce jour. Il faut la prise DIN à cinq broches « péri-informatique » à l'arrière. Le Minitel 1B a la même prise et le mode 80 colonnes, mais s'arrête à 4800 bauds alors que le micrologiciel veut 9600 : non testé.</td></tr>
+<tr><td>Seeed Studio XIAO nRF52840</td><td>Version simple ou Sense. Environnement du micrologiciel : <code>Xiao_nrf52_companion_minitel</code>.</td></tr>
+<tr><td>Wio-SX1262 pour XIAO</td><td>La radio LoRa (D1–D5, D8–D10), avec une antenne pour votre bande (868 MHz en Europe).</td></tr>
+<tr><td>Transistor NPN 2N2222A</td><td>En boîtier TO-92 ou TO-18. La plupart des 2N2222A/PN2222A en TO-92 sont E-B-C : vérifiez le vôtre au testeur de diode du multimètre.</td></tr>
+<tr><td>Résistances</td><td>10 kΩ, 22 kΩ, 220 kΩ (ou 10 kΩ, voir la remarque sur la parité) et 9,1 kΩ en série sur D7.</td></tr>
+<tr><td>Fiche DIN mâle 5 broches à 180°</td><td>Le modèle « MIDI », avec un câble court.</td></tr>
+<tr><td>Alimentation du XIAO</td><td>Par l'USB-C (n'importe quel chargeur 5 V) ou par un accu LiPo sur les pastilles batterie du XIAO. Le Minitel n'alimente pas le XIAO : sa broche 5 n'est pas utilisée.</td></tr>
+<tr><td>Bout de plaque à bandes, fils</td><td>La carte d'arduiblog, ou les mêmes cinq composants sur une chute de plaque.</td></tr>
+</tbody>
+</table>
+
+<h2 id="interface">L'interface</h2>
+<p>La prise du Minitel est une liaison série de l'époque du 5 V : sa sortie (broche 3) est à collecteur ouvert, son entrée (broche 1) est tirée au niveau haut à l'intérieur du Minitel. L'interface est le montage classique à un transistor publié par <b>arduiblog</b> dans <a href="https://arduiblog.com/2019/04/29/ressuscitez-le-minitel/">« Ressuscitez le Minitel »</a> (2019), repris tel quel à deux détails près : il est alimenté par le <b>3V3</b> du XIAO, pas en 5 V, et une résistance de <b>9,1 kΩ</b> est ajoutée en série sur la ligne qui va à D7.</p>
+<figure class="fig">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 860 420" role="img" aria-labelledby="sch-t sch-d" font-family="system-ui, sans-serif" font-size="15">
+<title id="sch-t">Schéma de l'interface : du XIAO nRF52840 à la prise DIN du Minitel</title>
+<desc id="sch-d">Réception : la broche 3 du Minitel (sortie à collecteur ouvert) est tirée au 3V3 par 220 kilohms et rejoint D7 du XIAO à travers 9,1 kilohms. Émission : un 2N2222A en base commune, base polarisée par 10 kilohms vers le 3V3 et 22 kilohms vers la masse ; D6 du XIAO attaque l'émetteur, le collecteur tire la broche 1 du Minitel (entrée) vers le bas. La broche 2 est la masse ; les broches 4 et 5 ne sont pas reliées.</desc>
+<g fill="none" stroke="#dfe6f2" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+  <!-- XIAO block -->
+  <rect x="30" y="80" width="150" height="260" rx="8" stroke="#5fd39a"/>
+  <!-- Minitel block -->
+  <rect x="690" y="80" width="140" height="260" rx="8" stroke="#f2c46d"/>
+
+  <!-- receive path: 3V3 flag, R3 220k, node, R4 9,1k to D7 -->
+  <path d="M560 40 v14"/><path d="M548 40 h24"/>
+  <rect x="551" y="54" width="18" height="56"/>
+  <path d="M560 110 v20"/>
+  <path d="M560 130 H690"/>
+  <path d="M560 130 H492"/>
+  <rect x="412" y="121" width="80" height="18"/>
+  <path d="M412 130 H180"/>
+
+  <!-- transmit path: Q1 2N2222A, common base -->
+  <path d="M405 250 h60" stroke-width="4"/>
+  <path d="M418 250 L392 224 H180"/>
+  <path d="M452 250 L478 224 H690"/>
+  <path d="M435 250 v40"/>
+  <!-- base bias: R1 10k to a 3V3 flag, R2 22k to ground -->
+  <path d="M435 290 H470"/>
+  <rect x="470" y="281" width="80" height="18"/>
+  <path d="M550 290 h24"/><path d="M574 278 v24"/>
+  <path d="M435 290 v12"/>
+  <rect x="426" y="302" width="18" height="56"/>
+  <path d="M435 358 v14"/><path d="M421 372 h28"/><path d="M426 378 h18"/><path d="M431 384 h8"/>
+
+  <!-- XIAO 3V3 and GND -->
+  <path d="M180 290 h40"/><path d="M220 278 v24"/>
+  <path d="M180 318 h30 v14"/><path d="M196 332 h28"/><path d="M201 338 h18"/><path d="M206 344 h8"/>
+  <!-- DIN 2 ground -->
+  <path d="M690 300 h-30 v18"/><path d="M646 318 h28"/><path d="M651 324 h18"/><path d="M656 330 h8"/>
+</g>
+<!-- emitter arrow (NPN: pointing away from the base) -->
+<path d="M397 229 L407.6 232.6 L400.5 239.6 Z" fill="#dfe6f2"/>
+<!-- junction dots -->
+<g fill="#dfe6f2"><circle cx="560" cy="130" r="4.5"/><circle cx="435" cy="290" r="4.5"/></g>
+
+<g fill="#e4e7ed">
+  <text x="105" y="70" text-anchor="middle" fill="#5fd39a" font-weight="600">XIAO nRF52840</text>
+  <text x="105" y="104" text-anchor="middle" font-size="12" fill="#a7adb8">+ Wio-SX1262</text>
+  <text x="172" y="135" text-anchor="end">D7 (RX)</text>
+  <text x="172" y="229" text-anchor="end">D6 (TX)</text>
+  <text x="172" y="295" text-anchor="end">3V3</text>
+  <text x="172" y="323" text-anchor="end">masse</text>
+  <text x="228" y="295" font-size="13" fill="#a7adb8">3V3</text>
+
+  <text x="760" y="70" text-anchor="middle" fill="#f2c46d" font-weight="600">Minitel DIN</text>
+  <text x="698" y="135">3 sortie</text>
+  <text x="698" y="229">1 entrée</text>
+  <text x="698" y="305">2 masse</text>
+  <text x="760" y="252" text-anchor="middle" font-size="12" fill="#a7adb8">4 PT, 5 +8,5–15 V :</text>
+  <text x="760" y="268" text-anchor="middle" font-size="12" fill="#a7adb8">non reliées</text>
+
+  <text x="560" y="32" text-anchor="middle" font-size="13" fill="#a7adb8">3V3</text>
+  <text x="578" y="80">R3 220k</text>
+  <text x="540" y="84" text-anchor="end" font-size="12" fill="#a7adb8">(10k si erreurs de parité)</text>
+  <text x="452" y="114" text-anchor="middle">R4 9,1k</text>
+  <text x="452" y="158" text-anchor="middle" font-size="12" fill="#a7adb8">en série, côté XIAO</text>
+  <text x="435" y="200" text-anchor="middle">Q1 2N2222A</text>
+  <text x="384" y="246" text-anchor="end" font-size="12" fill="#a7adb8">E</text>
+  <text x="486" y="246" font-size="12" fill="#a7adb8">C</text>
+  <text x="444" y="278" font-size="12" fill="#a7adb8">B</text>
+  <text x="510" y="275" text-anchor="middle">R1 10k</text>
+  <text x="582" y="294" font-size="13" fill="#a7adb8">3V3</text>
+  <text x="452" y="335">R2 22k</text>
+  <text x="300" y="214" text-anchor="middle" font-size="12" fill="#a7adb8">XIAO → Minitel (non inversé)</text>
+  <text x="300" y="122" text-anchor="middle" font-size="12" fill="#a7adb8">Minitel → XIAO</text>
+</g>
+</svg>
+
+<figcaption>L'interface telle que câblée pour ce projet. Le montage est celui d'arduiblog (cité plus haut) ; le dessin est le nôtre. R4 est l'ajout pour le XIAO.</figcaption>
+</figure>
+<ul>
+<li><b>Minitel → XIAO.</b> R3 tire la sortie à collecteur ouvert du Minitel au 3V3 : le XIAO ne voit jamais que 0 à 3,3 V. R4 (9,1 kΩ) limite le courant dans D7 en cas de problème.</li>
+<li><b>XIAO → Minitel.</b> Q1 est monté en base commune : sa base est maintenue à une tension fixe par R1 et R2. Quand D6 passe à l'état bas, l'émetteur descend, Q1 conduit et tire l'entrée du Minitel à l'état bas. Quand D6 est haut (3,3 V), Q1 est bloqué et c'est le rappel interne du Minitel qui maintient la ligne haute. L'étage <b>n'inverse pas</b> le signal, et c'est important : l'UART du nRF52840 ne sait pas inverser.</li>
+<li><b>Masse.</b> Broche 2 de la DIN à la masse du XIAO. Les broches 4 et 5 restent en l'air. Sur le Minitel 2, la broche 5 est une sortie d'alimentation (8,5 à 15 V) : isolez-la et tenez-la loin du XIAO.</li>
+</ul>
+<div class="note"><p><b>Erreurs de parité à 9600 bauds ?</b> La résistance de rappel de 220 kΩ est faible et D7 capte des parasites du tube (des centaines d'impulsions de moins de 20 µs toutes les 200 ms ont été mesurées). L'UART les filtre à 1200 bauds. Si <code>link log</code> signale des erreurs de parité à 9600, descendez R3 vers 10 kΩ.</p></div>
+
+<h2 id="din">La fiche DIN</h2>
+<figure class="fig">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 760 340" role="img" aria-labelledby="din-t din-d" font-family="system-ui, sans-serif" font-size="15">
+<title id="din-t">Brochage de la prise DIN 5 broches du Minitel</title>
+<desc id="din-d">La prise DIN à cinq broches du Minitel vue de l'arrière du Minitel, c'est-à-dire votre fiche vue côté soudures : broches sur l'arc du haut, de gauche à droite, 3, 5, 2, 4, 1, détrompeur en bas. Broche 1 : entrée du Minitel ; 2 : masse ; 3 : sortie du Minitel, à collecteur ouvert ; 4 : PT ; 5 : sortie d'alimentation de 8,5 à 15 volts.</desc>
+<circle cx="210" cy="170" r="120" fill="#1b1e25" stroke="#dfe6f2" stroke-width="2.5"/>
+<circle cx="210" cy="170" r="104" fill="none" stroke="#2a2e38" stroke-width="2"/>
+<rect x="196" y="262" width="28" height="30" fill="#0c0d10" stroke="#dfe6f2" stroke-width="2"/>
+<circle cx="132.0" cy="170.0" r="13" fill="#0c0d10" stroke="#5fd39a" stroke-width="3"/>
+<text x="132.0" y="175.0" text-anchor="middle" fill="#e4e7ed" font-weight="700">3</text>
+<circle cx="154.8" cy="114.8" r="13" fill="#0c0d10" stroke="#f2c46d" stroke-width="3"/>
+<text x="154.8" y="119.8" text-anchor="middle" fill="#e4e7ed" font-weight="700">5</text>
+<circle cx="210.0" cy="92.0" r="13" fill="#0c0d10" stroke="#dfe6f2" stroke-width="3"/>
+<text x="210.0" y="97.0" text-anchor="middle" fill="#e4e7ed" font-weight="700">2</text>
+<circle cx="265.2" cy="114.8" r="13" fill="#0c0d10" stroke="#6e737b" stroke-width="3"/>
+<text x="265.2" y="119.8" text-anchor="middle" fill="#e4e7ed" font-weight="700">4</text>
+<circle cx="288.0" cy="170.0" r="13" fill="#0c0d10" stroke="#5fd39a" stroke-width="3"/>
+<text x="288.0" y="175.0" text-anchor="middle" fill="#e4e7ed" font-weight="700">1</text>
+<text x="210" y="318" text-anchor="middle" font-size="12" fill="#a7adb8">détrompeur en bas</text>
+<text x="390" y="70" fill="#5fd39a" font-weight="700">1</text>
+<text x="414" y="70" fill="#e4e7ed">RX : entrée du Minitel</text>
+<text x="414" y="89" fill="#a7adb8" font-size="13">→ collecteur de Q1</text>
+<text x="390" y="122" fill="#dfe6f2" font-weight="700">2</text>
+<text x="414" y="122" fill="#e4e7ed">Masse</text>
+<text x="414" y="141" fill="#a7adb8" font-size="13">→ masse du XIAO</text>
+<text x="390" y="174" fill="#5fd39a" font-weight="700">3</text>
+<text x="414" y="174" fill="#e4e7ed">TX : sortie du Minitel</text>
+<text x="414" y="193" fill="#a7adb8" font-size="13">→ R3 220k, R4 9,1k</text>
+<text x="390" y="226" fill="#a7adb8" font-weight="700">4</text>
+<text x="414" y="226" fill="#e4e7ed">PT</text>
+<text x="414" y="245" fill="#a7adb8" font-size="13">non reliée</text>
+<text x="390" y="278" fill="#f2c46d" font-weight="700">5</text>
+<text x="414" y="278" fill="#e4e7ed">sortie +8,5–15 V</text>
+<text x="414" y="297" fill="#a7adb8" font-size="13">non reliée : à isoler</text>
+<text x="380" y="330" font-size="12" fill="#a7adb8">Vue de l'arrière du Minitel = votre fiche côté soudures.</text>
+</svg>
+
+<figcaption>La prise du Minitel vue de l'arrière du Minitel, c'est-à-dire votre fiche vue côté soudures.</figcaption>
+</figure>
+<div class="warn"><p><b>Vérifiez avant de brancher le XIAO.</b> Minitel allumé, le multimètre entre les broches 2 et 5 indique 8,5 à 15 V. Cela confirme le sens de la numérotation, et c'est la broche à ne jamais câbler.</p></div>
+
+<h2 id="wiring">Le câblage au XIAO</h2>
+<table>
+<thead><tr><th>Fil de l'interface</th><th>Broche du XIAO</th><th>Micrologiciel</th></tr></thead>
+<tbody>
+<tr><td>La patte extérieure libre de Q1 (l'émetteur)</td><td><b>D6</b></td><td>P1.11, <code>PIN_SERIAL1_TX</code></td></tr>
+<tr><td>Le point commun de R3 220k et de la broche DIN 3, <b>à travers 9,1 kΩ</b></td><td><b>D7</b></td><td>P1.12, <code>PIN_SERIAL1_RX</code></td></tr>
+<tr><td>Alimentation : R3 et R1</td><td><b>3V3</b></td><td>pas le 5 V</td></tr>
+<tr><td>Masse : R2 et DIN 2</td><td><b>GND</b></td><td></td></tr>
+</tbody>
+</table>
+<ul>
+<li><b>L'I2C passe sur les pastilles NFC.</b> La variante XIAO met normalement l'I2C sur D6/D7. L'environnement Minitel retire ces définitions et compile avec <code>-D CONFIG_NFCT_PINS_AS_GPIOS -D PIN_WIRE_SDA=30 -D PIN_WIRE_SCL=31</code>. Le premier démarrage écrit l'UICR pour que les deux pastilles NFC (P0.09, P0.10) deviennent des entrées-sorties ordinaires ; c'est définitif pour cette puce, et le NFC n'est plus utilisable sur cette carte. Les éventuels capteurs I2C se branchent sur ces deux pastilles, au dos du XIAO.</li>
+<li><b>Personne d'autre n'utilise Serial1.</b> Le GPS est retiré de la compilation. Le port USB porte la ligne de commande locale.</li>
+<li>Gardez le câble DIN court.</li>
+</ul>
+
+<h2 id="test">Essai de la liaison (facultatif)</h2>
+<p>Avant de programmer MeshCore, le petit programme autonome de <code>firmware/minitel-test/</code> vérifie la liaison seule : il affiche chaque octet envoyé par le Minitel et accepte des commandes par USB (115200 bauds, tapez <code>help</code>).</p>
+<pre><code>cd firmware/minitel-test
+pio run -t upload --upload-port /dev/ttyACM0</code></pre>
+<p>Vérifié sur un Minitel 2 Philips (ROM <code>Bv9</code>) : identification de la ROM, état et vitesse, texte à l'écran et clavier à 1200 bauds en Vidéotex ; puis <code>speed 9600</code>, <code>mixte</code>, <code>echo off</code> pour le 80 colonnes à 9600 bauds, clavier propre et sans erreur de parité. L'acquittement de vitesse arrive pendant le redémarrage de l'UART et perd ses premiers octets : <code>speed</code> confirme donc par une nouvelle demande de vitesse. La commande <code>sense</code> indique à quelle broche de la DIN D7 est reliée.</p>
+
+<h2 id="firmware">Programmer le micrologiciel</h2>
+<p>Le micrologiciel et ses sources sont publiés en <a href="https://github.com/pix/3615meshcore/releases/latest">version sur GitHub</a> :</p>
+<ul>
+<li><a href="https://github.com/pix/3615meshcore/releases/latest/download/3615meshcore-xiao_nrf52.uf2">3615meshcore-xiao_nrf52.uf2</a> : appuyez deux fois sur le bouton reset du XIAO, un disque USB apparaît, copiez-y le fichier. Le XIAO redémarre seul sur le nouveau micrologiciel.</li>
+<li><a href="https://github.com/pix/3615meshcore/releases/latest/download/3615meshcore-xiao_nrf52-dfu.zip">3615meshcore-xiao_nrf52-dfu.zip</a> : le même, pour <code>adafruit-nrfutil dfu serial</code>.</li>
+<li><a href="https://github.com/pix/3615meshcore/releases/latest/download/3615meshcore-firmware-src.tar.gz">3615meshcore-firmware-src.tar.gz</a> : les sources, le compagnon radio de MeshCore avec l'interface Minitel (code dans <code>examples/companion_radio/ui-minitel/</code>).</li>
+</ul>
+<p>Avant une première programmation, sauvegardez l'identité du nœud (voir <a href="#identity">plus bas</a>). Pour compiler vous-même avec <a href="https://platformio.org/">PlatformIO</a> :</p>
+<pre><code>tar xzf 3615meshcore-firmware-src.tar.gz
+cd 3615meshcore-firmware
+pio run -e Xiao_nrf52_companion_minitel -t upload --upload-port /dev/ttyACM0</code></pre>
+<ul>
+<li>La programmation conserve le système de fichiers : identité, contacts, canaux et historique du Minitel survivent à une mise à jour.</li>
+<li>Le « toucher » à 1200 bauds qui fait passer le XIAO en chargeur d'amorçage échoue parfois : recommencez, ou appuyez deux fois sur le bouton reset du XIAO et programmez sur le port du chargeur.</li>
+<li>Chaque compilation garde son ELF sous <code>.pio/build/Xiao_nrf52_companion_minitel/firmware-&lt;commit&gt;.elf</code>, pour retrouver plus tard la ligne de code d'un plantage (voir la <a href="features.html#crash">capture des plantages</a>).</li>
+<li>Tests unitaires sur PC (googletest) : <code>pio test -e native -f test_minitel</code> et <code>-f test_minitel_emoji</code>.</li>
+</ul>
+
+<h2 id="boot">Premier démarrage</h2>
+<ol>
+<li>Branchez le câble DIN au Minitel, alimentez le XIAO, allumez le Minitel.</li>
+<li>Le Minitel démarre sur son répertoire local. Sortez-en avec <kbd class="k">Fnct</kbd> + <kbd class="k">Sommaire</kbd> (voir plus bas). Le micrologiciel essaie 9600, 1200, 4800 et 300 bauds toutes les 3 s, trouve le terminal, le passe à 9600 bauds, choisit 80 ou 40 colonnes et coupe l'écho local. La page d'accueil apparaît ; n'importe quelle touche fait entrer dans le service.</li>
+<li>Appairez l'application MeshCore du téléphone par Bluetooth si vous voulez l'utiliser à côté : le code d'appairage est tiré au hasard à chaque démarrage et s'affiche sur le Minitel quand le téléphone s'appaire ; un code fixe se choisit en Réglages 15 (<code>0</code> = de nouveau aléatoire).</li>
+<li>Réglez l'heure (Sommaire 6, ou laissez faire l'appli ou deux nœuds d'accord), le nom et la position du nœud (Réglages 1 et 2), et votre département pour les régions (Réglages 6).</li>
+<li>40 ou 80 colonnes : <kbd class="k">Répétition</kbd> sur n'importe quelle page, ou Réglages 10. Le choix est enregistré.</li>
+</ol>
+
+<h2 id="keys">Les touches propres au Minitel</h2>
+<p>Certaines choses se font au clavier du Minitel lui-même, pas par le micrologiciel. Pour les combinaisons <kbd class="k">Fnct</kbd> : appuyez sur Fnct avec la lettre, relâchez les deux, puis appuyez sur la touche suivante.</p>
+<table>
+<thead><tr><th>Touches</th><th>Effet</th></tr></thead>
+<tbody>
+<tr><td><kbd class="k">Fnct</kbd> + <kbd class="k">Sommaire</kbd></td><td>Sortir du répertoire (la page locale après mise sous tension ou veille).</td></tr>
+<tr><td><kbd class="k">Fnct</kbd> + <kbd class="k">E</kbd>, puis <kbd class="k">A</kbd></td><td>Désactiver la mise en veille automatique (A comme arrêt). Le réglage est gardé en mémoire, même hors tension.</td></tr>
+<tr><td><kbd class="k">Fnct</kbd> + <kbd class="k">E</kbd>, puis <kbd class="k">M</kbd></td><td>Réactiver la mise en veille automatique (M comme marche) : le Minitel se met en veille après 3 heures sans touche ni échange avec la prise péri-informatique.</td></tr>
+<tr><td><kbd class="k">Fnct</kbd> + <kbd class="k">T</kbd>, puis <kbd class="k">V</kbd></td><td>Revenir en Vidéotex depuis le mode Téléinformatique (où le protocole se tait).</td></tr>
+</tbody>
+</table>
+<p>Quand le Minitel est éteint ou en veille, le nœud continue de travailler : les messages vont dans l'historique, les messages privés sont réessayés et l'appli reste servie. Au retour du terminal, le micrologiciel le détecte, le reconfigure et affiche la page d'accueil.</p>
+
+<h2 id="identity">Sauvegarder l'identité</h2>
+<p>L'identité du nœud, c'est sa clé privée. Si le système de fichiers est un jour effacé, le nœud reçoit une nouvelle clé et vos correspondants voient un nœud inconnu. Sauvegardez-la une fois pour toutes par USB (115200 bauds, fin de ligne CR) :</p>
+<pre><code>get prv.key        # affiche 128 chiffres hexadécimaux : gardez-les hors ligne
+set prv.key &lt;hex&gt;  # restauration, puis redémarrage</code></pre>
+<div class="warn"><p><b>La clé privée est un secret.</b> Qui la détient peut se faire passer pour votre nœud et lire ses messages privés. Ne la collez jamais dans une discussion, un ticket, un journal ou une capture d'écran ; gardez-la hors ligne, lisible par vous seul. Le Minitel lui-même n'affiche, n'importe et ne fabrique jamais de clé.</p></div>
+
+</main>
+<footer>
+<p>3615 MESHCORE : un compagnon MeshCore sur Minitel 2. Micrologiciel, outils et licences : voir les <a href="credits.html">crédits</a>.</p>
+<p>Projet indépendant, sans lien avec Orange, France Télécom ni le projet MeshCore. Le nom « Minitel » ne sert qu'à désigner le terminal.</p>
+</footer>
+<script src="assets/js/site.js" defer></script>
+</body>
+</html>

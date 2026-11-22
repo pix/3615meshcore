@@ -1,6 +1,8 @@
-// Upload and read-back flow against a mock MeshCore device (navigator.bluetooth replaced in the page),
-// which answers the custom CLI frames as UITaskSaver.cpp does: C0 'C' <cmd> in,
-// 70 'C' <more> <text> out (long replies split over several notifications).
+// Upload, read-back and preview against a mock MeshCore device (navigator.bluetooth replaced
+// in the page), which answers as UITaskSaver.cpp / UITaskTerm.cpp do: C0 <sub> <seq> <payload>
+// in, 70 <sub> <seq> <fields> out (CLI replies over several 172-byte frames), pushes
+// F0 <sub> <pseq> <payload>; every notification doubled 0-50 ms later, late copies of
+// earlier replies and pushes.
 //   NODE_PATH=<dir with playwright> node test/ble-mock-test.js [screenshot dir]
 'use strict';
 const path = require('path');
@@ -13,34 +15,57 @@ fs.mkdirSync(shots, { recursive: true });
 const url = 'file://' + path.join(__dirname, '..', 'index.html');
 
 function mockDevice() {
+  // speaks UITaskTerm.cpp's frames: C0 <sub> <seq> <payload> in; 70 <sub> <seq> <fields> and
+  // F0 <sub> <pseq> <payload> out. Like BlueZ at its worst: every notification may come twice
+  // (the copy 0-50 ms later, st.dup), and copies of earlier replies / pushes come late (st.late).
   const NUS = '6e400001-b5a3-f393-e0a9-e50e24dcca9e';
-  const st = { slides: {}, up: null, frames: [], maxFrame: 0, maxCmd: 0, splash: 600, off: 3600, hist: 40 };
+  const st = { slides: {}, up: null, frames: [], maxFrame: 0, maxCmd: 0, splash: 600, off: 3600, hist: 40,
+    dup: true, late: true, silent: false, seqs: [], lateSent: 0, dupSent: 0 };
   window.__mock = st;
-  let notify = null;
-  // one notification; st.dup = true delivers each one twice back to back, as BlueZ over D-Bus did
-  const fire = (bytes) => {
-    if (!notify) return;
-    const one = () => notify({ target: { value: new DataView(Uint8Array.from(bytes).buffer) } });
-    one();
-    if (st.dup) one();
+  let notify = null, gone = null, pseq = 0;
+  let rs = 12345;
+  const rnd = () => { rs = (rs * 1103515245 + 12345) & 0x7FFFFFFF; return rs / 0x80000000; };
+  const deliver = (bytes) => { if (notify) notify({ target: { value: new DataView(Uint8Array.from(bytes).buffer) } }); };
+  const history = [];   // earlier reply frames, for late copies
+  const fire = (bytes, isReply) => {
+    deliver(bytes);
+    if (st.dup) { st.dupSent++; setTimeout(() => deliver(bytes), Math.floor(rnd() * 51)); }
+    if (isReply) {
+      if (st.late && history.length && rnd() < 0.35) {   // a copy of an earlier reply, late
+        const old = history[Math.floor(rnd() * history.length)];
+        st.lateSent++;
+        setTimeout(() => deliver(old), 20 + Math.floor(rnd() * 130));
+      }
+      history.push(bytes);
+      if (history.length > 12) history.shift();
+    }
   };
-  const raw = (bytes, delay) => setTimeout(() => fire(bytes), delay);
-  window.__mockPush = (bytes) => fire(bytes);
+  const raw = (bytes, delay) => setTimeout(() => fire(bytes, bytes[0] === 0x70), delay);
+  const reply = (sub, seq, fields, delay = 5) => raw([0x70, sub.charCodeAt(0), seq, ...fields], delay);
+  // a push: F0 <sub> <pseq> <payload>; the test gives [F0, sub, payload...]
+  const push = (bytes) => {
+    const f = [0xF0, bytes[1], (pseq = (pseq + 1) & 0xFF), ...bytes.slice(2)];
+    fire(f, false);
+    if (st.late) setTimeout(() => deliver(f), 250);   // and a copy, late
+  };
+  window.__mockPush = push;
+  window.__mockDrop = () => { dev.gatt.connected = false; if (gone) gone(); };
   // the terminal channel (preview): mode, generation, what the Minitel received per mode
   st.term = { open: false, cols: 80, gen: 7, switching: false, recv: { 40: [], 80: [] }, dGens: [], dCount: 0, stalls: 0, stalled: false, maxD: 0, xReq: 0, opens: 0, notReady: false };
+  const CH = 172;   // text per CLI reply frame (MAX_FRAME_SIZE - 4)
+  let cliSeq = 0;
   const send = (text) => {
     const b = new TextEncoder().encode(text);
     const parts = [];
-    for (let i = 0; i < b.length; i += 40) parts.push(b.subarray(i, i + 40));
+    for (let i = 0; i < b.length; i += CH) parts.push(b.subarray(i, i + CH));
     parts.forEach((p, k) => {
-      const f = new Uint8Array(p.length + 3);
-      f[0] = 0x70; f[1] = 0x43; f[2] = k < parts.length - 1 ? 1 : 0;
-      f.set(p, 3);
+      const f = new Uint8Array(p.length + 4);
+      f[0] = 0x70; f[1] = 0x43; f[2] = cliSeq; f[3] = k < parts.length - 1 ? 1 : 0;
+      f.set(p, 4);
       setTimeout(() => {
-        // a stray push frame first, which the client must ignore
-        if (k === 0) fire([0x83, 1, 2]);
-        fire(f);
-      }, 5 + k);
+        if (k === 0) deliver([0x83, 1, 2]);   // a stray frame of another kind, to be ignored
+        fire(Array.from(f), true);
+      }, 5 + 15 * k);   // frames a BLE connection interval apart: copies land in between
     });
   };
   const cli = (c) => {
@@ -96,42 +121,45 @@ function mockDevice() {
     writeValueWithoutResponse: async (buf) => {
       const f = new Uint8Array(buf.buffer || buf);
       st.maxFrame = Math.max(st.maxFrame, f.length);
-      if (f[0] !== 0xC0) { raw([1], 5); return; }
-      const T = st.term, body = f.subarray(2), sub = String.fromCharCode(f[1]);
+      if (st.silent) return;   // the link is gone without a word
+      if (f[0] !== 0xC0 || f.length < 3) { raw([1], 5); return; }
+      const T = st.term, sub = String.fromCharCode(f[1]), seq = f[2], body = f.subarray(3);
+      st.seqs.push(seq);
       if (sub === 'O') {   // open: the node clears the screen
-        if (T.notReady) { raw([0x70, 0x4F, 1, 0, 0, 0], 5); return; }
+        if (T.notReady) { reply('O', seq, [1, 0, 0, 0]); return; }
         T.open = true; T.opens++;
-        raw([0x70, 0x4F, 0, T.cols, 24, T.gen], 5);
+        reply('O', seq, [0, T.cols, 24, T.gen]);
         return;
       }
       if (sub === 'M') {   // switch mode: reply, then the push with the new generation
         const v = body[0];
-        raw([0x70, 0x4D, 0], 5);
+        reply('M', seq, [0]);
         T.switching = true;
-        setTimeout(() => { T.cols = v; T.gen = (T.gen + 1) & 0xFF; T.switching = false; fire([0xF0, 0x4D, v, 24, T.gen]); }, 60);
+        setTimeout(() => { T.cols = v; T.gen = (T.gen + 1) & 0xFF; T.switching = false; push([0xF0, 0x4D, v, 24, T.gen]); }, 60);
         return;
       }
       if (sub === 'D') {   // screen bytes: all, or 0 when the queue is full (every 4th frame, once)
         const gen = body[0], data = Array.from(body.subarray(1));
         T.maxD = Math.max(T.maxD, data.length);
-        if (gen !== T.gen || T.switching || !T.open) { raw([0x70, 0x44, 1, 0, 0, 0], 5); return; }
-        if (++T.dCount % 4 === 0 && !T.stalled) { T.stalled = true; T.stalls++; raw([0x70, 0x44, 0, 0, 0, 0], 5); return; }
+        if (gen !== T.gen || T.switching || !T.open) { reply('D', seq, [1, 0, 0, 0]); return; }
+        if (++T.dCount % 4 === 0 && !T.stalled) { T.stalled = true; T.stalls++; reply('D', seq, [0, 0, 0, 0]); return; }
         T.stalled = false;
         T.recv[T.cols].push(...data);
         T.dGens.push(gen);
-        raw([0x70, 0x44, 0, data.length, 0x00, 0x04], 5);
+        reply('D', seq, [0, data.length, 0x00, 0x04]);
         return;
       }
-      if (sub === 'X') { T.open = false; T.xReq++; raw([0x70, 0x58, 0], 5); return; }
+      if (sub === 'X') { T.open = false; T.xReq++; reply('X', seq, [0]); return; }
       if (sub !== 'C') { raw([1], 5); return; }
-      const c = new TextDecoder().decode(f.subarray(2));
+      const c = new TextDecoder().decode(body);
       st.maxCmd = Math.max(st.maxCmd, c.length);
+      cliSeq = seq;
       cli(c);
     },
   };
   const svc = { getCharacteristic: async (u) => (u.startsWith('6e400002') ? rx : tx) };
   const dev = {
-    name: 'MeshCore-Mock', id: 'mock', addEventListener() {},
+    name: 'MeshCore-Mock', id: 'mock', addEventListener(t, f) { if (t === 'gattserverdisconnected') gone = f; },
     gatt: { connected: false, async connect() { this.connected = true; return { getPrimaryService: async (u) => { if (u !== NUS) throw new Error('svc'); return svc; } }; }, disconnect() { this.connected = false; } },
   };
   Object.defineProperty(navigator, 'bluetooth', { configurable: true, value: { requestDevice: async (o) => { st.request = o; return dev; } } });
@@ -283,7 +311,7 @@ function mockDevice() {
   check('preview: one key = one step (duplicate dropped)', /Showing 80 col/.test(await pvText()), await pvText());
   check('preview: 80 col bytes = encoded, after a second switch', JSON.stringify(T.recv[80]) === JSON.stringify(want80) && T.cols === 80 && T.gen === ((gen0 + 2) & 255));
   await page.evaluate(() => window.__mockPush([0xF0, 0x4B, 0x0D]));
-  await waitText(/Preview over/);
+  await waitText(/Preview over\. The Minitel/);
   T = await term();
   check('preview: closed with X after the last key', T.xReq === 1 && !T.open, `${T.xReq}`);
   check('preview: Preview enabled again', !(await page.isDisabled('#pvGo')));
@@ -295,7 +323,7 @@ function mockDevice() {
   await page.click('#pvNext');
   await waitText(/Showing 80 col/);
   await page.click('#pvStop');
-  await waitText(/Preview stopped/);
+  await waitText(/Preview stopped\. The Minitel/);
   T = await term();
   check('preview: Next then Stop sends X', T.xReq === 2 && !T.open && JSON.stringify(T.recv[80]) === JSON.stringify(want80), `${T.xReq}`);
 
@@ -336,6 +364,57 @@ function mockDevice() {
   const stored = await page.evaluate(() => window.__mock.frames.filter(f => f.startsWith('slide begin')).length);
   check('preview stored nothing (2 slide begin, both from the upload)', stored === 2, stored);
   await page.screenshot({ path: path.join(shots, 'designer-preview.png') });
+
+  // ---- the seq protocol itself (enough requests to wrap the seq at least once) ----
+  for (let k = 0; k < 90; k++) await page.evaluate(() => { document.querySelector('#conCmd').value = 'saver'; document.querySelector('#conForm').requestSubmit(); });
+  await page.waitForFunction(() => window.__mock.seqs.length >= 270, null, { timeout: 20000 });
+  await page.waitForTimeout(300);
+  const ms = await page.evaluate(() => ({ seqs: window.__mock.seqs, dup: window.__mock.dupSent, late: window.__mock.lateSent }));
+  const steps = ms.seqs.slice(1).every((q, k) => q === ((ms.seqs[k] + 1) & 255));
+  check('seq: +1 per request, wrapping at 255', steps && ms.seqs.length > 256 && ms.seqs.includes(0) && ms.seqs.includes(255), `${ms.seqs.length} requests`);
+  check('copies were sent (doubled + late)', ms.dup > 100 && ms.late > 20, `${ms.dup} doubled, ${ms.late} late`);
+
+  // end reason 3: the device gave up waiting for the PC
+  await page.selectOption('#pvVer', 'both');
+  await page.click('#pvGo');
+  await waitText(/Showing 40 col/);
+  await page.evaluate(() => window.__mockPush([0xF0, 0x58, 3]));
+  await waitText(/Ended on the Minitel/);
+  check('preview: end reason 3 shown', /did not come back/.test(await pvText()), await pvText());
+
+  // the device goes silent (link lost without a word): Stop must not hang
+  await page.click('#pvGo');
+  await waitText(/Showing 40 col/);
+  await page.evaluate(() => { window.__mock.silent = true; });
+  let t0 = Date.now();
+  await page.click('#pvStop');
+  await waitText(/No answer to close/, 8000);
+  check('silent device: Stop ends within the close timeout', Date.now() - t0 < 4000 && await page.isDisabled('#pvStop') && !(await page.isDisabled('#pvGo')), `${Date.now() - t0} ms`);
+  // ... and while opening: Stop cuts the retries short
+  await page.click('#pvGo');
+  await page.waitForTimeout(400);
+  t0 = Date.now();
+  await page.click('#pvStop');
+  await waitText(/Preview stopped/, 8000);
+  check('silent device: Stop while opening', Date.now() - t0 < 4500 && await page.isDisabled('#pvStop'), `${Date.now() - t0} ms`);
+  await page.evaluate(() => { window.__mock.silent = false; });
+
+  // the link drops during a preview: the UI resets by itself
+  await page.click('#pvGo');
+  await waitText(/Showing 40 col/);
+  await page.evaluate(() => window.__mockDrop());
+  await waitText(/link was lost/, 5000);
+  check('link lost: preview reset', await page.isDisabled('#pvStop') && /Not connected/.test(await page.textContent('#bleState')), await page.textContent('#bleState'));
+  // reconnect: everything works again
+  await page.click('#bleConnect');
+  await page.waitForFunction(() => /Connected/.test(document.querySelector('#bleState').textContent));
+  await page.click('#pvGo');
+  await waitText(/Showing 40 col/);
+  await page.click('#pvNext');
+  await waitText(/Showing 80 col/);
+  await page.evaluate(() => window.__mockPush([0xF0, 0x4B, 0x0D]));
+  await waitText(/Preview over\. The Minitel has its page back/);
+  check('after reconnecting: a full preview again', /page back/.test(await pvText()), await pvText());
 
   check('no console errors', errors.length === 0, errors.join('\n'));
   await browser.close();

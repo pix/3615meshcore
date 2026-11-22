@@ -37,14 +37,18 @@ func mustUUID(s string) bluetooth.UUID {
 }
 
 type BLE struct {
-	dev     bluetooth.Device
-	rx      bluetooth.DeviceCharacteristic
-	wmu     sync.Mutex
-	replies chan []byte
-	Pushes  chan []byte
+	adapter  *bluetooth.Adapter
+	target   bluetooth.Address
+	dev      bluetooth.Device
+	rx       bluetooth.DeviceCharacteristic
+	wmu      sync.Mutex
+	seq      byte
+	replies  chan []byte
+	Pushes   chan []byte // 0xF0 <sub> <payload>: the push counter already taken out
+	mu       sync.Mutex
+	pushSeen []byte // the last push counters seen (a late copy may come after the next push)
 }
 
-// ConnectBLE: by address (AA:BB:..), or the first device whose name contains name.
 // The adapter: -hci, else the first one the system has (hci0 is not always there: a USB
 // adapter or a toggled radio comes back as hci1...).
 var hciName string
@@ -66,25 +70,24 @@ func pickAdapter() *bluetooth.Adapter {
 	return bluetooth.NewAdapter(name)
 }
 
+// ConnectBLE: by address (AA:BB:..), or the first device whose name contains name.
 func ConnectBLE(addr, name string, verbose bool) (*BLE, error) {
 	adapter := pickAdapter()
 	if err := adapter.Enable(); err != nil {
 		return nil, fmt.Errorf("bluetooth: %w (rfkill unblock bluetooth? bluetoothd running?)", err)
 	}
-	var target bluetooth.Address
-	found := false
+	b := &BLE{adapter: adapter, replies: make(chan []byte, 32), Pushes: make(chan []byte, 256)}
 	if addr != "" {
 		mac, err := bluetooth.ParseMAC(addr)
 		if err != nil {
 			return nil, fmt.Errorf("address %q: %w", addr, err)
 		}
-		target.MACAddress = bluetooth.MACAddress{MAC: mac}
-		found = true
+		b.target.MACAddress = bluetooth.MACAddress{MAC: mac}
 	} else {
 		if verbose {
 			fmt.Fprintf(os.Stderr, "mtl: scanning for %q...\n", name)
 		}
-		done := make(chan struct{})
+		found := false
 		go func() {
 			time.Sleep(15 * time.Second)
 			adapter.StopScan()
@@ -92,7 +95,7 @@ func ConnectBLE(addr, name string, verbose bool) (*BLE, error) {
 		err := adapter.Scan(func(a *bluetooth.Adapter, r bluetooth.ScanResult) {
 			n := r.LocalName()
 			if n != "" && strings.Contains(strings.ToLower(n), strings.ToLower(name)) {
-				target = r.Address
+				b.target = r.Address
 				found = true
 				if verbose {
 					fmt.Fprintf(os.Stderr, "mtl: found %s (%s)\n", n, r.Address.String())
@@ -100,89 +103,120 @@ func ConnectBLE(addr, name string, verbose bool) (*BLE, error) {
 				a.StopScan()
 			}
 		})
-		close(done)
 		if err != nil {
-			return nil, fmt.Errorf("scan: %w", err)
+			return nil, fmt.Errorf("scan: %w (another scan running? give the address with -addr)", err)
 		}
 		if !found {
 			return nil, fmt.Errorf("no device named like %q (is an app connected to it? only one at a time)", name)
 		}
 	}
-	dev, err := adapter.Connect(target, bluetooth.ConnectionParams{})
+	if err := b.connect(); err != nil {
+		return nil, err
+	}
+	return b, nil
+}
+
+// connect: to b.target, the UART service, its notifications (again after a lost link)
+func (b *BLE) connect() error {
+	dev, err := b.adapter.Connect(b.target, bluetooth.ConnectionParams{})
 	if err != nil {
-		return nil, fmt.Errorf("connect %s: %w", target.String(), err)
+		return fmt.Errorf("connect %s: %w", b.target.String(), err)
 	}
 	svcs, err := dev.DiscoverServices([]bluetooth.UUID{nusService})
 	if err != nil || len(svcs) == 0 {
 		dev.Disconnect()
-		return nil, fmt.Errorf("no UART service: %v", err)
+		return fmt.Errorf("no UART service: %v", err)
 	}
 	chars, err := svcs[0].DiscoverCharacteristics([]bluetooth.UUID{nusRX, nusTX})
 	if err != nil {
 		dev.Disconnect()
-		return nil, fmt.Errorf("characteristics: %w", err)
+		return fmt.Errorf("characteristics: %w", err)
 	}
-	b := &BLE{dev: dev, replies: make(chan []byte, 32), Pushes: make(chan []byte, 256)}
-	var tx bluetooth.DeviceCharacteristic
-	nrx, ntx := 0, 0
-	for _, c := range chars {
-		switch c.UUID() {
+	var rx, tx *bluetooth.DeviceCharacteristic
+	for i := range chars {
+		switch chars[i].UUID() {
 		case nusRX:
-			b.rx = c
-			nrx++
+			rx = &chars[i]
 		case nusTX:
-			tx = c
-			ntx++
+			tx = &chars[i]
 		}
 	}
-	if nrx == 0 || ntx == 0 {
+	if rx == nil || tx == nil {
 		dev.Disconnect()
-		return nil, errors.New("UART characteristics missing")
+		return errors.New("UART characteristics missing")
 	}
-	debug := os.Getenv("MTL_DEBUG") != ""
-	t0 := time.Now()
-	var prev []byte
-	var prevAt time.Time
-	err = tx.EnableNotifications(func(buf []byte) {
-		f := append([]byte(nil), buf...)
-		if len(f) == 0 {
+	if err := tx.EnableNotifications(b.notified); err != nil {
+		dev.Disconnect()
+		return fmt.Errorf("notifications: %w (not paired? bluetoothctl pair %s, PIN on the Minitel)", err, b.target.String())
+	}
+	b.wmu.Lock()
+	b.dev, b.rx = dev, *rx
+	b.wmu.Unlock()
+	b.mu.Lock()
+	b.pushSeen = nil // a rebooted node counts from 0 again
+	b.mu.Unlock()
+	return nil
+}
+
+// Reconnect: drop the link and make it again, to the same device (no scan)
+func (b *BLE) Reconnect() error {
+	b.dev.Disconnect()
+	time.Sleep(500 * time.Millisecond)
+	return b.connect()
+}
+
+var debugBLE = os.Getenv("MTL_DEBUG") != ""
+var t0BLE = time.Now()
+
+func debugFrame(dir string, f []byte) {
+	n := len(f)
+	if n > 24 {
+		n = 24
+	}
+	fmt.Fprintf(os.Stderr, "[%6dms] %s %3d: % x\n", time.Since(t0BLE).Milliseconds(), dir, len(f), f[:n])
+}
+
+// notified: one frame from the node. Replies carry the request's seq (a copy, or a late
+// one, is told apart by Request); pushes carry a counter: a counter already seen is a copy
+// (BlueZ was seen handing notifications over twice) and is dropped here.
+func (b *BLE) notified(buf []byte) {
+	f := append([]byte(nil), buf...)
+	if len(f) == 0 {
+		return
+	}
+	if debugBLE {
+		debugFrame("rx", f)
+	}
+	switch f[0] {
+	case extReply, respErr:
+		select {
+		case b.replies <- f:
+		default:
+		}
+	case extPush:
+		if len(f) < 3 {
 			return
 		}
-		// BlueZ over D-Bus can hand the same notification over twice, back to back: one
-		// frame identical to the one before it within a few ms is that copy (the node never
-		// sends two identical frames so close: one reply per request, keys tens of ms apart)
-		if prev != nil && time.Since(prevAt) < 5*time.Millisecond && string(prev) == string(f) {
-			if debug {
-				fmt.Fprintf(os.Stderr, "[%6dms] rx %3d: duplicate dropped\n", time.Since(t0).Milliseconds(), len(f))
+		b.mu.Lock()
+		dup := false
+		for _, s := range b.pushSeen {
+			dup = dup || s == f[2]
+		}
+		if !dup {
+			b.pushSeen = append(b.pushSeen, f[2])
+			if len(b.pushSeen) > 16 {
+				b.pushSeen = b.pushSeen[1:]
 			}
+		}
+		b.mu.Unlock()
+		if dup {
 			return
 		}
-		prev, prevAt = f, time.Now()
-		if debug {
-			n := len(f)
-			if n > 24 {
-				n = 24
-			}
-			fmt.Fprintf(os.Stderr, "[%6dms] rx %3d: % x\n", time.Since(t0).Milliseconds(), len(f), f[:n])
+		select {
+		case b.Pushes <- append([]byte{f[0], f[1]}, f[3:]...):
+		default:
 		}
-		switch f[0] {
-		case extReply, respErr:
-			select {
-			case b.replies <- f:
-			default:
-			}
-		case extPush:
-			select {
-			case b.Pushes <- f:
-			default:
-			}
-		}
-	})
-	if err != nil {
-		dev.Disconnect()
-		return nil, fmt.Errorf("notifications: %w (not paired? bluetoothctl pair %s, PIN on the Minitel)", err, target.String())
 	}
-	return b, nil
 }
 
 func (b *BLE) Close() { b.dev.Disconnect() }
@@ -190,19 +224,15 @@ func (b *BLE) Close() { b.dev.Disconnect() }
 func (b *BLE) write(f []byte) error {
 	b.wmu.Lock()
 	defer b.wmu.Unlock()
-	if os.Getenv("MTL_DEBUG") != "" {
-		n := len(f)
-		if n > 24 {
-			n = 24
-		}
-		fmt.Fprintf(os.Stderr, "          tx %3d: % x\n", len(f), f[:n])
+	if debugBLE {
+		debugFrame("tx", f)
 	}
 	_, err := b.rx.WriteWithoutResponse(f)
 	return err
 }
 
-// Request: one 0xC0 sub frame, then the reply frames of that sub (more: wait for the rest
-// while the reply's "more" byte says so, CLI only).
+// Request: C0 <sub> <seq> <payload>; returns the reply's fields (after 70 <sub> <seq>).
+// Replies to other requests (late ones, copies) are skipped.
 func (b *BLE) Request(sub byte, payload []byte, timeout time.Duration) ([]byte, error) {
 	for {
 		select {
@@ -212,8 +242,9 @@ func (b *BLE) Request(sub byte, payload []byte, timeout time.Duration) ([]byte, 
 		}
 		break
 	}
-	f := append([]byte{cmdAppExt, sub}, payload...)
-	if err := b.write(f); err != nil {
+	b.seq++
+	seq := b.seq
+	if err := b.write(append([]byte{cmdAppExt, sub, seq}, payload...)); err != nil {
 		return nil, err
 	}
 	deadline := time.After(timeout)
@@ -223,8 +254,8 @@ func (b *BLE) Request(sub byte, payload []byte, timeout time.Duration) ([]byte, 
 			if r[0] == respErr {
 				return nil, errors.New("the node does not know this command (firmware without the Minitel extensions?)")
 			}
-			if len(r) >= 2 && r[1] == sub {
-				return r[2:], nil
+			if len(r) >= 3 && r[1] == sub && r[2] == seq {
+				return r[3:], nil
 			}
 		case <-deadline:
 			return nil, fmt.Errorf("no reply to %q", sub)
@@ -233,12 +264,17 @@ func (b *BLE) Request(sub byte, payload []byte, timeout time.Duration) ([]byte, 
 }
 
 // Cli: a USB CLI command run over BLE (slide, saver, hist keep, screen, ui state).
+// The reply comes in frames 70 'C' <seq> <more> <text>.
 func (b *BLE) Cli(cmd string) (string, error) {
 	r, err := b.Request('C', []byte(cmd), 5*time.Second)
 	if err != nil {
 		return "", err
 	}
+	seq := b.seq
 	var out strings.Builder
+	// a late copy of a frame of this reply has the same seq: a frame identical to one already
+	// taken is that copy (two real ones never are: all but the last are full, the last ends OK)
+	taken := map[string]bool{string(r): true}
 	for {
 		if len(r) < 1 {
 			break
@@ -251,8 +287,9 @@ func (b *BLE) Cli(cmd string) (string, error) {
 		for next == nil {
 			select {
 			case f := <-b.replies:
-				if len(f) >= 3 && f[1] == 'C' {
-					next = f[2:]
+				if len(f) >= 4 && f[1] == 'C' && f[2] == seq && !taken[string(f[3:])] {
+					next = f[3:]
+					taken[string(next)] = true
 				}
 			case <-time.After(3 * time.Second):
 				return out.String(), errors.New("reply cut short")

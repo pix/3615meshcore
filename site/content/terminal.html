@@ -38,7 +38,15 @@ bluetoothctl
 ./mtl term -cols 40 -- htop                    # passe d'abord en 40 colonnes
 ./mtl -addr AA:BB:CC:DD:EE:FF term             # sans chercher l'appareil
 ./mtl term -native                             # le terminfo du Minitel, voir plus bas</pre>
-<p>Le Minitel efface l'écran et le programme s'y affiche. La session se termine quand le programme s'arrête, avec <b>CONNEXION/FIN</b> sur le Minitel, avec Ctrl-C sur le PC, ou si la liaison Bluetooth tombe. Le Minitel retrouve alors la page où il était et le choix 40/80 colonnes enregistré.</p>
+<p>Le Minitel efface l'écran et le programme s'y affiche. La session se termine quand le programme s'arrête, avec <b>CONNEXION/FIN</b> sur le Minitel ou avec Ctrl-C sur le PC. Le Minitel retrouve alors la page où il était et le choix 40/80 colonnes enregistré.</p>
+<p><b>Si la liaison Bluetooth tombe</b> (portée, PC en veille, Bluetooth relancé), le programme continue de tourner sur le PC :</p>
+<ul>
+<li><code>mtl</code> se reconnecte tout seul, toutes les 2 secondes, à la même adresse et sans recherche ;</li>
+<li>il rouvre la session et redessine tout l'écran ;</li>
+<li>pendant ce temps, le Minitel garde l'écran de la session 20 secondes, puis reprend ses pages ;</li>
+<li>une fois reconnecté, la session reprend dans tous les cas.</li>
+</ul>
+<p>Les touches tapées pendant la coupure sont perdues. Pour remarquer une coupure même quand rien ne s'affiche, <code>mtl</code> interroge le XIAO toutes les 5 secondes.</p>
 
 <h2 id="keys">Les touches</h2>
 <table>
@@ -124,5 +132,5 @@ bluetoothctl
 <li><b>« scan: Operation already in progress »</b> : une recherche tourne déjà, par exemple <code>scan on</code> dans bluetoothctl. Donnez l'adresse avec <code>-addr</code> : il n'y a alors rien à chercher.</li>
 <li><b>« no device named like… »</b> : une autre appli est connectée au XIAO (le téléphone), ou il est hors de portée.</li>
 <li><b>« the Minitel is not ready »</b> : le Minitel est éteint, ou le XIAO ne l'a pas encore trouvé. La commande USB <code>link log</code> en dit plus.</li>
-<li><b>Notifications ou caractères étranges</b> : <code>MTL_DEBUG=1 ./mtl …</code> affiche chaque trame Bluetooth échangée. Avec BlueZ, chaque notification arrive deux fois : <code>mtl</code> jette les doubles.</li>
+<li><b>Notifications ou caractères étranges</b> : <code>MTL_DEBUG=1 ./mtl …</code> affiche chaque trame Bluetooth échangée. Avec BlueZ, une notification peut arriver deux fois, parfois avec du retard. Chaque requête porte un numéro que sa réponse reprend, et chaque envoi du XIAO un compteur : <code>mtl</code> reconnaît les doubles à coup sûr et les jette.</li>
 </ul>

@@ -1228,24 +1228,37 @@
   const SUB = (c) => c.charCodeAt(0);
   let pv = null;   // {ctl: AbortController, waiting, last, ended}
   const sleep = (ms, signal) => new Promise((res, rej) => {
+    if (signal && signal.aborted) { rej(signal.reason); return; }
     const t = setTimeout(res, ms);
     if (signal) signal.addEventListener('abort', () => { clearTimeout(t); rej(signal.reason); }, { once: true });
+  });
+  // a request that Stop does not wait for (its reply, if any, is dropped by seq later)
+  const abortable = (promise, signal) => new Promise((res, rej) => {
+    if (signal.aborted) { rej(signal.reason); return; }
+    signal.addEventListener('abort', () => rej(signal.reason), { once: true });
+    promise.then(res, rej);
   });
   class Ended extends Error {}
 
   async function pvOpen() {
     let err;
     for (let i = 0; i < 3; i++) {
-      try { return await link.request('O', [], 3000); } catch (e) { err = e; if (!link.connected || /does not know/.test(e.message)) break; }
+      try { return await abortable(link.request('O', [], 3000), pv.ctl.signal); } catch (e) {
+        if (pv.ctl.signal.aborted) throw e;
+        err = e;
+        if (!link.connected || /does not know/.test(e.message)) break;
+      }
       await sleep(1000, pv.ctl.signal);
     }
     throw new Error('no answer to open: ' + (err && err.message));
   }
   // the end of the session pushed by the Minitel, else the value fn finds
   const endOr = (fn) => (p) => {
-    if (p.length >= 2 && p[1] === SUB('X')) return 'ended';
+    if (p.length >= 2 && p[1] === SUB('X')) { if (pv) pv.endReason = p[2]; return 'ended'; }
     return fn(p);
   };
+  const END_REASONS = { 1: 'CONNEXION/FIN on the Minitel', 2: 'the Minitel left the page', 3: 'the PC did not come back in time' };
+  class LinkLost extends Error {}
   async function pvSend(gen, bytes, label) {
     const fill = $('#pvFill');
     let off = 0, stalls = 0;
@@ -1312,23 +1325,29 @@
           new Promise((res) => next.signal.addEventListener('abort', () => res(next.signal.reason === 'next' ? 'next' : 'stop'), { once: true })),
           new Promise((res) => pv.ctl.signal.addEventListener('abort', () => res('stop'), { once: true })),
           link.waitPush(endOr((p) => (p.length >= 2 && p[1] === SUB('K') ? 'key' : undefined)), 0, next.signal),
-        ]).catch(() => 'stop');
+        ]).catch(() => (link.connected ? 'stop' : 'lost'));
         next.abort('done');
         pv.waiting = false;
         updateBle();
         if (key === 'ended') throw new Ended();
+        if (key === 'lost') throw new LinkLost();
         if (key === 'stop') { outcome = 'Preview stopped.'; break; }
       }
       if (!outcome) outcome = 'Preview over.';
     } catch (e) {
-      if (e instanceof Ended) { closeIt = false; outcome = 'Ended on the Minitel (CONNEXION/FIN).'; }
+      if (e instanceof Ended) { closeIt = false; outcome = `Ended on the Minitel (${END_REASONS[pv.endReason] || 'reason ' + pv.endReason}).`; }
+      else if (e instanceof LinkLost || !link.connected) { outcome = 'The Bluetooth link was lost.'; setMsg(outcome, 'err'); }
       else if (pv.ctl.signal.aborted) outcome = 'Preview stopped.';
       else { outcome = 'Preview failed: ' + (e.message || e); setMsg(outcome, 'err'); }
     } finally {
+      // close: the session ends now; without an answer (or a link) the Minitel takes its
+      // pages back by itself 20 s after it lost the PC
+      let closed = false;
       if (closeIt && link.connected) {
-        try { await link.request('X', [], 2000); } catch (e) { outcome += ' (no answer to close)'; }
+        pvState(outcome + ' Closing…');
+        try { await link.request('X', [], 2000); closed = true; } catch (e) { /* below */ }
       }
-      pvState(outcome + (closeIt ? ' The Minitel has its page back.' : ''));
+      pvState(outcome + (!closeIt ? '' : closed ? ' The Minitel has its page back.' : ' No answer to close: the Minitel takes its pages back within 20 s.'));
       $('#pvProg').hidden = true;
       pv = null;
       busy = false;
@@ -1336,7 +1355,12 @@
     }
   }
   function previewNext() { if (pv && pv.next) pv.next.abort('next'); }
-  function previewStop() { if (pv) { if (pv.next) pv.next.abort('stop'); pv.ctl.abort(new Error('stopped')); } }
+  function previewStop() {
+    if (!pv) return;
+    pvState('Stopping…');
+    if (pv.next) pv.next.abort('stop');
+    pv.ctl.abort(new Error('stopped'));
+  }
   function updatePreviewChoice() {
     const s = slide();
     const o = $('#pvVer').options;

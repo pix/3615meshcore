@@ -119,8 +119,29 @@ func RunTerm(b *BLE, o TermOpts) error {
 	}
 	var pending []byte
 	free := 1023
+	lastReq := time.Now()
 	tick := time.NewTicker(20 * time.Millisecond)
 	defer tick.Stop()
+	// the link lost or misbehaving: reconnect, open the session again, redraw everything; the
+	// program keeps running all along. false: stop (the program ended, or Ctrl-C)
+	relinkNow := func() (bool, error) {
+		nc, ng, stop, perr := relink(b, o.Verbose, exited, sig)
+		if stop {
+			c.Process.Signal(syscall.SIGHUP)
+			return false, perr
+		}
+		gen, pending, free, ready, lastReq = ng, nil, 1023, true, time.Now()
+		if nc != rend.sent.cols {
+			vt.Resize(nc, 24)
+			pty.Setsize(ptmx, &pty.Winsize{Rows: 24, Cols: uint16(nc)})
+		}
+		rend.Reset(nc)
+		mu.Lock()
+		dirty = true
+		firstDirty = time.Now()
+		mu.Unlock()
+		return true, nil
+	}
 	for {
 		select {
 		case p := <-b.Pushes:
@@ -180,6 +201,15 @@ func RunTerm(b *BLE, o TermOpts) error {
 		if !ready {
 			continue
 		}
+		if len(pending) == 0 && time.Since(lastReq) > 5*time.Second { // keepalive: is the link still there?
+			lastReq = time.Now()
+			if _, _, err := sendChunk(b, gen, nil); err != nil {
+				if ok, perr := relinkNow(); !ok {
+					return perr
+				}
+				continue
+			}
+		}
 		// one frame of bytes at a time; the next screen when the Minitel has room for it
 		if len(pending) == 0 {
 			mu.Lock()
@@ -194,8 +224,13 @@ func RunTerm(b *BLE, o TermOpts) error {
 				vt.Unlock()
 				pending = rend.Frame(s, cr, cc, vis)
 			} else if free < lowWater {
+				lastReq = time.Now()
 				f, st, err := sendChunk(b, gen, nil)
-				if err == nil && st == 0 {
+				if err != nil {
+					if ok, perr := relinkNow(); !ok {
+						return perr
+					}
+				} else if st == 0 {
 					free = f.free
 				}
 				continue
@@ -207,9 +242,13 @@ func RunTerm(b *BLE, o TermOpts) error {
 		if n > chunk {
 			n = chunk
 		}
+		lastReq = time.Now()
 		f, st, err := sendChunk(b, gen, pending[:n])
 		if err != nil {
-			return err
+			if ok, perr := relinkNow(); !ok {
+				return perr
+			}
+			continue
 		}
 		if st != 0 { // the Minitel is switching modes: an 'M' push follows
 			pending = nil
@@ -225,6 +264,48 @@ func RunTerm(b *BLE, o TermOpts) error {
 }
 
 type dataReply struct{ acc, free int }
+
+// relink: the BLE link is gone or misbehaves. Reconnect to the same device and open the
+// session again (the node keeps the session's screen 20 s for that, then its pages come back:
+// opening again works either way), every 2 s until it works. Returns the Minitel's width and
+// the session's gen; stop: the program ended (perr: its error) or Ctrl-C, meanwhile.
+func relink(b *BLE, verbose bool, exited <-chan error, sig <-chan os.Signal) (cols int, gen byte, stop bool, perr error) {
+	if verbose {
+		fmt.Fprintln(os.Stderr, "mtl: link lost, reconnecting (the program keeps running; Ctrl-C to stop)...")
+	}
+	for attempt := 1; ; attempt++ {
+		select {
+		case err := <-exited:
+			return 0, 0, true, err
+		case <-sig:
+			return 0, 0, true, nil
+		default:
+		}
+		err := b.Reconnect()
+		if err == nil {
+			var r []byte
+			if r, err = openTerm(b); err == nil {
+				if len(r) >= 4 && r[0] == 0 {
+					if verbose {
+						fmt.Fprintf(os.Stderr, "mtl: reconnected (%d col)\n", r[1])
+					}
+					return int(r[1]), r[3], false, nil
+				}
+				err = errors.New("the Minitel is not ready")
+			}
+		}
+		if verbose && (attempt == 1 || attempt%10 == 0) {
+			fmt.Fprintf(os.Stderr, "mtl: still trying (%v)\n", err)
+		}
+		select {
+		case err := <-exited:
+			return 0, 0, true, err
+		case <-sig:
+			return 0, 0, true, nil
+		case <-time.After(2 * time.Second):
+		}
+	}
+}
 
 // openTerm: 'O', tried again while the node is still busy with a connection just closed
 func openTerm(b *BLE) ([]byte, error) {

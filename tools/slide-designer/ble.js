@@ -1,9 +1,13 @@
-// Web Bluetooth link to the 3615 MESHCORE companion (MeshCore BLE companion, Nordic UART).
-// Custom CLI command: write C0 'C' <ASCII>; the reply is one or more notifications
-// 70 'C' <more 0|1> <text>, concatenated until more == 0. 01 ... = unknown command
-// (firmware without the Minitel extensions). Binary requests (terminal channel, used by
-// the preview): C0 <sub> <bytes> -> one reply 70 <sub> <bytes>; pushes F0 <sub> <bytes>.
-// One request at a time; a reply is matched by its sub byte.
+// Web Bluetooth link to the 3615 MESHCORE companion (MeshCore BLE companion, Nordic UART),
+// as tools/mtl/ble.go and the firmware's UITaskTerm.cpp:
+//   request  C0 <sub> <seq> <payload>     seq: a counter per request (0-255, wrapping)
+//   reply    70 <sub> <seq> <fields>      the request's seq echoed
+//   push     F0 <sub> <pseq> <payload>    pseq: the device's counter per push
+// 'C' <text> is a CLI command: its reply is 70 'C' <seq> <more> <text> frames, concatenated
+// until more == 0. 01 ... = unknown command (firmware without the Minitel extensions).
+// BlueZ was seen handing notifications over twice, sometimes late: a reply counts only when
+// its sub and seq are the pending request's (copies and late replies are dropped), and a push
+// whose pseq was just seen is a copy. One request at a time.
 (function (root) {
   'use strict';
   const NUS = '6e400001-b5a3-f393-e0a9-e50e24dcca9e';
@@ -19,8 +23,8 @@
       this.pending = null;     // {resolve, reject, sub, text, timer}
       this.pushes = [];        // F0 frames nobody waited for yet
       this.waiters = [];
-      this._prev = null;
-      this._prevAt = 0;
+      this.seq = 0;
+      this.recentPseq = [];    // the last pushes' pseq: a push seen again is a copy
       this.chain = Promise.resolve();
       this.onstate = () => {};
       this.onlog = () => {};
@@ -35,6 +39,8 @@
       const dev = await navigator.bluetooth.requestDevice({ filters: [{ namePrefix: 'MeshCore' }], optionalServices: [NUS] });
       this.device = dev;
       dev.addEventListener('gattserverdisconnected', this._onGone);
+      this.recentPseq = [];
+      this.pushes.length = 0;
       this.onstate('connecting');
       try {
         const server = await dev.gatt.connect();
@@ -92,32 +98,40 @@
       const v = ev.target.value;
       const f = new Uint8Array(v.buffer, v.byteOffset, v.byteLength).slice();
       if (f.length < 1) return;
-      // BlueZ over D-Bus can deliver the same notification twice, back to back (mtl saw
-      // it): a frame identical to the previous one within 5 ms is that copy. The node never
-      // sends two identical frames so close (one reply per request, keys tens of ms apart).
-      const now = performance.now();
-      const prev = this._prev;
-      this._prev = f;
-      const prevAt = this._prevAt;
-      this._prevAt = now;
-      if (prev && now - prevAt < 5 && prev.length === f.length && prev.every((b, i) => b === f[i])) return;
-      if (f[0] === 0xF0) { this._push(f); return; }
+      if (f[0] === 0xF0) {
+        if (f.length < 3) return;
+        if (this.recentPseq.includes(f[2])) return;   // a copy of a push already taken
+        this.recentPseq.push(f[2]);
+        if (this.recentPseq.length > 16) this.recentPseq.shift();
+        const p = new Uint8Array(f.length - 1);   // as mtl: F0 <sub> <payload> (pseq left out)
+        p[0] = 0xF0; p[1] = f[1];
+        p.set(f.subarray(3), 2);
+        this._push(p);
+        return;
+      }
       const p = this.pending;
       if (!p) return;
       if (f[0] === 0x01) {
         this._fail(new Error('the node does not know this command (firmware too old, without the Minitel extensions?)'));
         return;
       }
-      if (f[0] !== 0x70 || f.length < 2 || f[1] !== p.sub) return;   // not this request's reply
-      if (p.sub !== 0x43) {   // binary sub: one frame, the bytes after the sub
+      // not this request's reply (another sub, an earlier seq: a late reply or a copy)
+      if (f[0] !== 0x70 || f.length < 3 || f[1] !== p.sub || f[2] !== p.seq) return;
+      if (p.sub !== 0x43) {   // binary sub: one frame, the fields after the seq
         this.pending = null;
         clearTimeout(p.timer);
-        p.resolve(f.subarray(2));
+        p.resolve(f.subarray(3));
         return;
       }
-      if (f.length < 3) return;
-      p.text += new TextDecoder().decode(f.subarray(3));
-      if (f[2] === 0) {
+      if (f.length < 4) return;
+      // a CLI reply's frames carry no index: a frame identical to one already taken for this
+      // reply is a (late) copy. Two real frames of one reply are never identical: every frame
+      // but the last is a full 172 bytes of text, and replies are short.
+      const key = Array.prototype.join.call(f.subarray(3), ',');
+      if (p.seen.has(key)) return;
+      p.seen.add(key);
+      p.text += new TextDecoder().decode(f.subarray(4));
+      if (f[3] === 0) {
         this.pending = null;
         clearTimeout(p.timer);
         p.resolve(p.text);
@@ -169,12 +183,14 @@
 
     _write(sub, body, timeout) {
       if (!this.connected) return Promise.reject(new Error('not connected'));
-      if (body.length + 2 > MAX_FRAME) return Promise.reject(new Error('frame too long'));
-      const frame = new Uint8Array(body.length + 2);
-      frame[0] = 0xC0; frame[1] = sub;
-      frame.set(body, 2);
+      if (body.length + 3 > MAX_FRAME) return Promise.reject(new Error('frame too long'));
+      this.seq = (this.seq + 1) & 0xFF;
+      const seq = this.seq;
+      const frame = new Uint8Array(body.length + 3);
+      frame[0] = 0xC0; frame[1] = sub; frame[2] = seq;
+      frame.set(body, 3);
       return new Promise((resolve, reject) => {
-        const p = { resolve, reject, sub, text: '', timer: 0, timeout };
+        const p = { resolve, reject, sub, seq, text: '', seen: new Set(), timer: 0, timeout };
         this.pending = p;
         this._arm(p);
         const w = this.rx.writeValueWithoutResponse ? this.rx.writeValueWithoutResponse(frame) : this.rx.writeValue(frame);
@@ -187,7 +203,7 @@
       return r;
     }
 
-    // one binary request C0 <sub> <payload> -> the reply's bytes after 70 <sub>
+    // one binary request C0 <sub> <seq> <payload> -> the reply's fields (after 70 <sub> <seq>)
     request(sub, payload, timeout = 3000) {
       const s = typeof sub === 'string' ? sub.charCodeAt(0) : sub;
       return this._queue(() => this._write(s, Uint8Array.from(payload || []), timeout));

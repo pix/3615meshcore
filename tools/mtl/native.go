@@ -226,8 +226,27 @@ func RunNative(b *BLE, o TermOpts) error {
 	var pending []byte
 	ready := true
 	outCh := out
+	lastReq := time.Now()
 	tick := time.NewTicker(30 * time.Millisecond)
 	defer tick.Stop()
+	// the link lost: reconnect and open again (the program keeps running); its width is the
+	// session's, then ^L redraws. false: stop (the program ended, or Ctrl-C)
+	relinkNow := func() (bool, error) {
+		nc, ng, stop, perr := relink(b, o.Verbose, exited, sig)
+		if stop {
+			c.Process.Signal(syscall.SIGHUP)
+			return false, perr
+		}
+		gen, pending, lastReq = ng, nil, time.Now()
+		if nc != cols {
+			b.Request('M', []byte{byte(cols)}, 3*time.Second)
+			ready = false // the 'M' push puts it back, and sends ^L
+		} else {
+			ready = true
+			ptmx.Write([]byte{0x0C})
+		}
+		return true, nil
+	}
 	for {
 		var in chan []byte
 		if len(pending) == 0 && ready {
@@ -276,14 +295,27 @@ func RunNative(b *BLE, o TermOpts) error {
 			c.Process.Signal(syscall.SIGHUP)
 			return nil
 		}
+		if len(pending) == 0 && ready && time.Since(lastReq) > 5*time.Second { // keepalive
+			lastReq = time.Now()
+			if _, _, err := sendChunk(b, gen, nil); err != nil {
+				if ok, perr := relinkNow(); !ok {
+					return perr
+				}
+				continue
+			}
+		}
 		for len(pending) > 0 && ready {
 			n := len(pending)
 			if n > chunk {
 				n = chunk
 			}
+			lastReq = time.Now()
 			f, st, err := sendChunk(b, gen, pending[:n])
 			if err != nil {
-				return err
+				if ok, perr := relinkNow(); !ok {
+					return perr
+				}
+				break
 			}
 			if st != 0 {
 				pending = nil

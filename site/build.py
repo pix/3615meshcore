@@ -325,10 +325,15 @@ def build(out=DIST):
                           "nav": meta.get("nav"), "desc": meta.get("desc", ""), "body": body})
     pages.append({"file": "screens.html", "title": "Les écrans", "label": "Écrans", "nav": "1",
                   "desc": "Toutes les pages de 3615 MESHCORE, en texte et en rendu photographique.", "body": None})
+    # the slide designer (tools/slide-designer, copied to editeur/ above): a menu entry, no page
+    pages.append({"file": "editeur/index.html", "title": "Éditeur de diapositives", "label": "Éditeur", "nav": "6",
+                  "desc": "", "body": None, "link": True})
     pages.sort(key=lambda p: (p["nav"] is None, int(p["nav"]) if p["nav"] and p["nav"].isdigit() else 99))
 
     sizes = []
     for p in pages:
+        if p.get("link"):
+            continue
         body = gallery_page(gal) if p["body"] is None else expand(p["body"], gal)
         title = SITE_TITLE if p["file"] == "index.html" else f'{p["title"]} · {SITE_TITLE}'
         page = (base.replace("{{title}}", esc(title))

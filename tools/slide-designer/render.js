@@ -1,6 +1,8 @@
 // Minitel screen rendering, as tools/screenshot/minitel_screen.py draws it: 8x10 dot cells
-// (40 col) or 6x10 (80 col, glyph columns 1..6), the ROM font (Minitel.ttf, rasterised at
-// dot centres), G1 sextant mosaics, double height drawn over the row above, Minitel 2 grey
+// (40 col) or 6x10 (80 col, glyph columns 1..6), the ROM font rasterised at dot centres: the
+// website's own web font (site/assets/fonts/minitel40.woff2, built by site/tools/make_webfont.py
+// from the same dots as the screenshot renderer), or, opened as a local file where it cannot be
+// fetched, the embedded Minitel.ttf (font-data.js, loaded only then), G1 sextant mosaics, double height drawn over the row above, Minitel 2 grey
 // levels for the Vidéotex colours, bold = smear right, underline = bottom dot row.
 (function (root) {
   'use strict';
@@ -72,12 +74,57 @@
     return set;
   }
 
-  async function loadFont() {
-    const buf = b64ToBuf(root.MINITEL_TTF_B64);
-    cmap = readCmap(buf);
-    const face = new FontFace('MinitelROM', buf);
-    await face.load();
-    document.fonts.add(face);
+  // where the website's fonts are: next to the published editor (site: editeur/ beside
+  // assets/), or in the repository (tools/slide-designer/ served over HTTP)
+  const WEB_FONT_DIRS = /\/tools\/slide-designer\//.test(location.pathname)
+    ? ['../../site/assets/fonts/', '../assets/fonts/'] : ['../assets/fonts/', '../../site/assets/fonts/'];
+  let fontSource = '';
+
+  async function loadWebFont() {
+    if (location.protocol === 'file:') return false;   // no fetch from a local file
+    for (const dir of WEB_FONT_DIRS) {
+      try {
+        const [cov, woff] = await Promise.all([fetch(dir + 'coverage.txt'), fetch(dir + 'minitel40.woff2')]);
+        if (!cov.ok || !woff.ok) continue;
+        const set = new Set([0x20]);   // the code points the font draws (make_webfont.py writes the list)
+        for (const line of (await cov.text()).split('\n')) {
+          if (line.startsWith('#')) continue;
+          for (const h of line.trim().split(/\s+/)) if (h) set.add(parseInt(h, 16));
+        }
+        const face = new FontFace('MinitelROM', await woff.arrayBuffer());
+        await face.load();
+        document.fonts.add(face);
+        cmap = set;
+        fontSource = dir + 'minitel40.woff2';
+        return true;
+      } catch (e) { /* the next place, or the embedded font */ }
+    }
+    return false;
+  }
+
+  function loadScript(src) {
+    return new Promise((ok, ko) => {
+      const s = document.createElement('script');
+      s.src = src;
+      s.onload = ok;
+      s.onerror = () => ko(new Error('cannot load ' + src));
+      document.head.appendChild(s);
+    });
+  }
+
+  // opts.embedded: the embedded TTF even when the web font is there (tests compare the two)
+  async function loadFont(opts) {
+    if (fontReady) for (const f of [...document.fonts]) if (f.family.replace(/"/g, '') === 'MinitelROM') document.fonts.delete(f);
+    fontReady = false;
+    if ((opts && opts.embedded) || !(await loadWebFont())) {
+      if (!root.MINITEL_TTF_B64) await loadScript('font-data.js');
+      const buf = b64ToBuf(root.MINITEL_TTF_B64);
+      cmap = readCmap(buf);
+      const face = new FontFace('MinitelROM', buf);
+      await face.load();
+      document.fonts.add(face);
+      fontSource = 'Minitel.ttf (font-data.js)';
+    }
     fontReady = true;
     glyphs.clear();
   }
@@ -227,5 +274,6 @@
   root.MinitelRender = {
     loadFont, renderDots, paint, glyphFor, GREY, COLOUR_NAMES, CELL_H, MOS_BITS, MOS_Y,
     get fontReady() { return fontReady; },
+    get fontSource() { return fontSource; },
   };
 })(typeof self !== 'undefined' ? self : this);

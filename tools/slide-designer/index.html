@@ -1,0 +1,331 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Minitel Slide Designer</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header class="top">
+  <div class="brand"><span class="mt">3615 MESHCORE</span><span class="sub">slide designer</span></div>
+  <div class="project">
+    <input id="projName" class="name-input" spellcheck="false" title="Project name" aria-label="Project name">
+    <button id="btnNew" title="New project">New</button>
+    <button id="btnOpen" title="Open a project (.json)">Open…</button>
+    <button id="btnSave" title="Save the project as .json (Ctrl+S)">Save</button>
+    <span id="saveState" class="muted small"></span>
+  </div>
+  <button id="btnHelp" class="icon" title="Help">?</button>
+</header>
+
+<main class="layout">
+  <!-- slides -->
+  <aside class="slides panel">
+    <div class="panel-head">
+      <span>Slides</span>
+      <span class="grow"></span>
+      <button id="slideAdd" class="small" title="New blank slide">+ New</button>
+    </div>
+    <ul id="slideList" class="slide-list"></ul>
+    <div class="slide-actions">
+      <button id="slideDup" class="small" title="Duplicate this slide">Duplicate</button>
+      <button id="slideUp" class="small icon" title="Move up">↑</button>
+      <button id="slideDown" class="small icon" title="Move down">↓</button>
+      <span class="grow"></span>
+      <button id="slideDel" class="small danger" title="Delete this slide">Delete</button>
+    </div>
+  </aside>
+
+  <!-- stage -->
+  <section class="stage">
+    <div class="stage-bar">
+      <input id="slideName" class="name-input" spellcheck="false" aria-label="Slide name">
+      <div class="seg" id="verTabs" role="tablist">
+        <button data-v="40" role="tab">40 col <span class="muted">Vidéotex</span> <span class="sz" id="sz40"></span></button>
+        <button data-v="80" role="tab">80 col <span class="muted">Mixte</span> <span class="sz" id="sz80"></span></button>
+      </div>
+      <div class="conv">
+        <button id="conv4080" class="small" title="Make the 80 col version from the 40 col one">40 → 80</button>
+        <button id="conv8040" class="small" title="Make the 40 col version from the 80 col one">80 → 40</button>
+        <select id="convPlace" class="small" title="Where the 40 columns go in (or come from) the 80">
+          <option value="left">left</option>
+          <option value="centre" selected>centred</option>
+          <option value="right">right</option>
+        </select>
+        <button id="verDel" class="small danger" title="Remove this version from the slide">Remove</button>
+        <button id="pvQuick" class="small" title="Preview this slide on the Minitel now, without storing it (Minitel tab)">▶ Minitel</button>
+      </div>
+      <span class="grow"></span>
+      <label class="check" title="Preview blinking cells"><input type="checkbox" id="optBlink"> Blink</label>
+      <label class="check"><input type="checkbox" id="optGrid"> Grid</label>
+      <label class="check"><input type="checkbox" id="optCrt" checked> CRT</label>
+    </div>
+
+    <div class="screen-wrap" id="screenWrap">
+      <div class="bezel" id="bezel">
+        <div class="screen" id="screen" aria-label="Minitel screen editor">
+          <textarea id="kbd" class="kbd" autocomplete="off" autocapitalize="off" spellcheck="false" aria-label="Type on the Minitel screen"></textarea>
+          <canvas id="crt" width="960" height="720"></canvas>
+          <canvas id="overlay" width="960" height="720"></canvas>
+          <div id="empty" class="empty" hidden>
+            <p id="emptyText"></p>
+            <div class="row">
+              <button id="emptyBlank">Start blank</button>
+              <button id="emptyConv">Convert from the other version</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="status">
+      <span id="stPos" class="mono"></span>
+      <span id="stCell" class="muted"></span>
+      <span class="grow"></span>
+      <span id="stMsg"></span>
+      <div class="meter" title="Encoded size of this version; the firmware takes 12288 bytes at most">
+        <div class="bar"><div id="meterFill"></div></div>
+        <span id="meterText" class="mono small"></span>
+      </div>
+    </div>
+  </section>
+
+  <!-- tools -->
+  <aside class="tools panel">
+    <div class="tabs" role="tablist">
+      <button data-tab="design" class="on">Design</button>
+      <button data-tab="minitel">Minitel <span id="bleDot" class="dot"></span></button>
+    </div>
+
+    <div id="tab-design" class="tab-body">
+      <section class="box">
+        <h3>Tool</h3>
+        <div class="seg tools-seg" id="toolSeg">
+          <button data-tool="text" title="Type text; drag to select">Text</button>
+          <button data-tool="draw" title="Draw mosaic pixels (2×3 per cell); right button erases">Draw</button>
+          <button data-tool="erase" title="Erase mosaic pixels">Erase</button>
+          <button data-tool="paint" title="Paint the pen's attributes onto cells">Paint</button>
+          <button data-tool="pick" title="Take the pen from a cell">Pick</button>
+        </div>
+        <p id="toolHint" class="hint"></p>
+      </section>
+
+      <section class="box">
+        <h3>Pen</h3>
+        <div class="toggles" id="penToggles">
+          <button data-pen="inv" class="tog" title="Inverse video">Inverse</button>
+          <button data-pen="blink" class="tog" title="Blink">Blink</button>
+          <button data-pen="bold" class="tog only80" title="Bold (80 col)">Bold</button>
+          <button data-pen="ul" class="tog only80" title="Underline (80 col)">Underline</button>
+          <button data-pen="disjoint" class="tog only40" title="Disjoint (separated) mosaic pixels">Disjoint</button>
+        </div>
+        <div class="only40">
+          <div class="label">Size</div>
+          <div class="seg" id="sizeSeg">
+            <button data-size="0" title="Normal size">Normal</button>
+            <button data-size="1" title="Double height (covers the row above)">Height</button>
+            <button data-size="2" title="Double width">Width</button>
+            <button data-size="3" title="Double size">Double</button>
+          </div>
+          <div class="label">Ink colour <span class="muted small">(grey level on the Minitel)</span></div>
+          <div class="swatches" id="swatches"></div>
+          <div class="label">Mosaic background <span class="muted small">(new mosaic cells, Paint, Fill █)</span></div>
+          <div class="swatches" id="bgSwatches"></div>
+        </div>
+      </section>
+
+      <section class="box">
+        <h3>Characters</h3>
+        <div class="chars" id="charPalette"></div>
+      </section>
+
+      <section class="box">
+        <h3>Edit <span id="editTarget" class="muted small"></span></h3>
+        <div class="row">
+          <label class="small muted" for="fillChar">Fill with</label>
+          <input id="fillChar" class="char-input mono" maxlength="2" value="" placeholder="␠" title="Character to fill with (empty = space)">
+          <button id="actFill" class="small">Fill</button>
+          <button id="actFillMos" class="small only40" title="Fill with full mosaic blocks in the pen colour">Fill █</button>
+        </div>
+        <div class="row">
+          <button id="actAttr" class="small" title="Apply the pen's attributes (not the size)">Apply pen</button>
+          <button id="actClear" class="small">Clear</button>
+          <span class="grow"></span>
+          <button id="actUndo" class="small icon" title="Undo (Ctrl+Z)">↶</button>
+          <button id="actRedo" class="small icon" title="Redo (Ctrl+Y)">↷</button>
+        </div>
+      </section>
+
+      <section class="box">
+        <h3>Files</h3>
+        <div class="row">
+          <button id="actImport" class="small" title="Import a .vdt page, raw Mixte bytes or plain text into this slide">Import…</button>
+          <button id="actImage" class="small" title="Convert a picture (PNG, JPEG, GIF…) into mosaics (40 col) or characters (80 col)">Import image…</button>
+          <button id="actExport" class="small" title="Export this version's bytes">Export</button>
+        </div>
+        <p class="hint">Import: <b>.vdt</b> goes to the 40 col version, Mixte bytes to the 80, plain text to the version shown; pictures open the image dialog. Files can also be dropped on the screen. Export: 40 col as <b>.vdt</b>, 80 col as raw Mixte <b>.bin</b>.</p>
+      </section>
+    </div>
+
+    <div id="tab-minitel" class="tab-body" hidden>
+      <section class="box">
+        <h3>Connection</h3>
+        <div class="row">
+          <span id="bleState" class="grow">Not connected</span>
+          <button id="bleConnect">Connect</button>
+        </div>
+        <details class="notes">
+          <summary>Pairing and requirements</summary>
+          <ul>
+            <li>Chrome or Chromium, page opened from <code>file://</code> or <code>http://localhost</code>. On Linux, if Connect is unavailable, enable <code>chrome://flags/#enable-experimental-web-platform-features</code>.</li>
+            <li>The companion needs bonding with a PIN that the Minitel displays. On Linux, pair it first: <code>bluetoothctl</code>, <code>scan on</code>, <code>pair &lt;MAC&gt;</code>, enter the PIN shown on the Minitel, then <code>trust &lt;MAC&gt;</code>.</li>
+            <li>Only one central can be connected at a time: close the MeshCore phone app (or <code>mtl</code>) first.</li>
+          </ul>
+        </details>
+      </section>
+
+      <section class="box">
+        <h3>Preview on the Minitel <span class="muted small">· nothing is stored</span></h3>
+        <div class="row">
+          <select id="pvVer" class="small" title="Which version(s) to show">
+            <option value="cur">this version</option>
+            <option value="both">40 col, then 80 col</option>
+          </select>
+          <button id="pvGo" class="primary">Preview</button>
+          <button id="pvNext" class="small" disabled title="Go on to the next version (as a key on the Minitel does)">Next</button>
+          <button id="pvStop" class="small danger" disabled title="End the preview: the Minitel gets its page back">Stop</button>
+        </div>
+        <div class="progress" id="pvProg" hidden><div id="pvFill"></div></div>
+        <p id="pvText" class="hint">Sends what is in the editor straight to the screen, switching the Minitel's mode if needed. A key on the Minitel goes on to the next version; CONNEXION/FIN ends.</p>
+      </section>
+
+      <section class="box">
+        <h3>Upload this slide</h3>
+        <div class="row">
+          <label class="small muted" for="upSlot">Slot</label>
+          <select id="upSlot" class="small"></select>
+          <label class="small muted" for="upVer">as</label>
+          <select id="upVer" class="small">
+            <option value="40">40 col</option>
+            <option value="80">80 col</option>
+            <option value="both">both</option>
+          </select>
+          <button id="upGo" class="primary">Upload</button>
+        </div>
+        <div class="progress" id="upProg" hidden><div id="upFill"></div></div>
+        <p id="upText" class="hint"></p>
+      </section>
+
+      <section class="box">
+        <h3>Slots on the Minitel <span id="slotFree" class="muted small"></span></h3>
+        <table class="slots">
+          <thead><tr><th>#</th><th>40 col</th><th>80 col</th><th></th></tr></thead>
+          <tbody id="slotRows"></tbody>
+        </table>
+        <div class="row">
+          <button id="slotRefresh" class="small">Refresh</button>
+          <button id="slotLoadAll" class="small" title="Read every stored slide back into a new project">Load all slots…</button>
+          <span class="grow"></span>
+          <button id="slotDelAll" class="small danger">Delete all</button>
+        </div>
+        <div class="progress" id="ldProg" hidden><div id="ldFill"></div></div>
+        <p id="ldText" class="hint">⤓ loads a version back into the current slide; Load takes every version of the slot.</p>
+      </section>
+
+      <section class="box">
+        <h3>Settings</h3>
+        <div class="label">Screen saver <span class="muted small">(30s, 10m, 1h; 0 = never)</span></div>
+        <div class="row">
+          <label class="small muted" for="svSplash">Welcome page after</label>
+          <input id="svSplash" class="num-input mono" placeholder="10m">
+        </div>
+        <div class="row">
+          <label class="small muted" for="svOff">Black screen after</label>
+          <input id="svOff" class="num-input mono" placeholder="1h">
+          <span class="grow"></span>
+          <button id="svRead" class="small">Read</button>
+          <button id="svSet" class="small">Set</button>
+        </div>
+        <div class="label">Messages kept per conversation <span class="muted small">(10–160)</span></div>
+        <div class="row">
+          <input id="histKeep" class="num-input mono" type="number" min="10" max="160">
+          <span class="grow"></span>
+          <button id="histRead" class="small">Read</button>
+          <button id="histSet" class="small">Set</button>
+        </div>
+      </section>
+
+      <section class="box">
+        <h3>Console</h3>
+        <form id="conForm" class="row">
+          <input id="conCmd" class="grow mono" placeholder="slide list" spellcheck="false" autocomplete="off">
+          <button class="small">Send</button>
+        </form>
+        <pre id="log" class="log"></pre>
+      </section>
+    </div>
+  </aside>
+</main>
+
+<input type="file" id="fileImport" accept=".vdt,.txt,.bin,.mixte,.m80,text/plain,application/octet-stream,image/*" hidden>
+<input type="file" id="fileProject" accept=".json,application/json" hidden>
+<input type="file" id="fileImage" accept="image/*" hidden>
+
+<dialog id="imgDlg" class="img-dlg">
+  <h2>Import image <span id="imgName" class="muted small"></span></h2>
+  <div class="img-previews">
+    <figure id="imgFig40"><canvas id="imgCv40" width="640" height="480"></canvas><figcaption>40 col · mosaics · <span id="imgSz40" class="mono"></span></figcaption></figure>
+    <figure id="imgFig80"><canvas id="imgCv80" width="640" height="480"></canvas><figcaption>80 col · characters · <span id="imgSz80" class="mono"></span></figcaption></figure>
+  </div>
+  <div class="row">
+    <span class="small muted">Make</span>
+    <div class="seg" id="imgTarget">
+      <button data-t="40">40 col</button>
+      <button data-t="80">80 col</button>
+      <button data-t="both">both</button>
+    </div>
+    <label class="check"><input type="checkbox" id="imgDither"> Dither</label>
+    <label class="check"><input type="checkbox" id="imgContrast"> Contrast</label>
+    <label class="check">Gamma <input type="range" id="imgGamma" min="0.4" max="2.5" step="0.05" value="1"> <span id="imgGammaV" class="mono">1.00</span></label>
+  </div>
+  <p class="hint">The same conversion as <code>mtl slide encode</code> (same options, same picture). Pixel art reads best without dithering, photos with it; Contrast stretches the darkest..brightest to black..white, Gamma &gt; 1 brightens the mid tones. Applying replaces the chosen version(s) of the current slide (Undo brings them back); then edit, upload or preview as usual.</p>
+  <p id="imgNote" class="hint"></p>
+  <div class="row end">
+    <button id="imgCancel">Cancel</button>
+    <button id="imgApply" class="primary">Apply</button>
+  </div>
+</dialog>
+
+<dialog id="help">
+  <h2>Slide designer</h2>
+  <p>Extra welcome-page slides for the 3615 MESHCORE companion. Each slide may have a 40 col (Vidéotex) version, an 80 col (Mixte) version, or both; the Minitel plays the one for its current mode and skips the slide otherwise.</p>
+  <h3>Keyboard (click the screen first)</h3>
+  <ul>
+    <li>Type to write at the cursor with the pen's attributes; arrows move (Shift extends a selection), Enter goes to the next line, Backspace / Delete erase.</li>
+    <li>Ctrl+Z / Ctrl+Y undo / redo, Ctrl+A select all, Ctrl+C / X / V copy, cut, paste (cells, or plain text from elsewhere), Esc drops the selection, Ctrl+S saves the project.</li>
+  </ul>
+  <h3>Mouse</h3>
+  <ul>
+    <li>Text: click places the cursor, drag selects. Fill / Apply pen / Clear work on the selection, or on the whole screen when nothing is selected.</li>
+    <li>Draw / Erase: mosaic pixels, 2×3 per cell (40 col only). A cell has one colour: drawing in it gives it the pen colour. Right button erases while drawing.</li>
+    <li>Paint applies inverse / blink / colour (80 col: bold, underline too) to cells; Pick takes them from a cell.</li>
+  </ul>
+  <h3>Minitel limits</h3>
+  <ul>
+    <li>Double height is drawn on the cursor row and covers the row above; not on row 1.</li>
+    <li>No accented capitals (É becomes E); 80 col has only à é è ù ç £ § ° among the accents, others lose the accent.</li>
+    <li>The last cell of row 24 is never written (it would scroll the screen in Mixte).</li>
+    <li>Each version is at most 12288 bytes once encoded.</li>
+  </ul>
+  <form method="dialog"><button>Close</button></form>
+</dialog>
+
+<script src="font-data.js"></script>
+<script src="minitel.js"></script>
+<script src="image.js"></script>
+<script src="render.js"></script>
+<script src="ble.js"></script>
+<script src="app.js"></script>
+</body>
+</html>

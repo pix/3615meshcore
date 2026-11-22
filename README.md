@@ -129,6 +129,8 @@ Python 3, run with `python3 -I`. They find the XIAO as `/dev/serial/by-id/*3C0B5
 | `tools/screenshot/minitel_dump.py` | fetch a `screen` dump over USB |
 | `tools/screenshot/minitel_render.py` | photo-realistic render of a Minitel 2 showing a dump (PNG, GIF, CRT face only); numpy + Pillow. See its README. |
 | `tools/tour/tour.py` | walk every page in 40 and 80 columns, save the dumps and `gallery/manifest.json`, record the welcome animation (`screen watch`), rebuild the site. Visits pages only: never sends on the radio. `simulate` tests it offline; `--render` optionally makes photo renders. |
+| `tools/mtl/` | Go: a shell or a text browser of the PC on the Minitel over BLE (VT emulator, damage-only output, or the Minitel's own terminfo), slides (text, `.vdt`, images) to upload, preview, read back; screen saver and history settings. See its README. |
+| `tools/slide-designer/` | the slide designer, in the browser (also on the website, `editeur/`): 40/80 col editor in the Minitel font, image import, Web Bluetooth upload, preview and read-back |
 | `site/build.py` | build the website into `site/dist/` (plain files); standard library only |
 | `site/tools/make_webfont.py` | rebuild the Minitel web fonts (fontTools, numpy) |
 
@@ -151,6 +153,8 @@ gallery/             real screen dumps + manifest.json
 hardware/            earlier Heltec V3 interface (KiCad, generated)
 ref/                 protocol notes (third-party manuals are not included)
 site/                the website: build.py, content/, templates/, assets/ (fonts, CSS, JS)
+tools/mtl/           the PC side over BLE: terminal, slides, settings (Go)
+tools/slide-designer/  the slide designer (HTML/JS, Web Bluetooth); copied to the site as editeur/
 tools/screenshot/    dump fetcher, photo renderer, Minitel font
 tools/tour/          tour.py
 ```

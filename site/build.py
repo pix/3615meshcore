@@ -305,6 +305,9 @@ def build(out=DIST):
             shutil.rmtree(p) if os.path.isdir(p) else os.remove(p)
     os.makedirs(out, exist_ok=True)
     shutil.copytree(os.path.join(HERE, "assets"), os.path.join(out, "assets"))
+    # the slide designer, as it is in tools/ (its tests stay out)
+    shutil.copytree(os.path.join(ROOT, "tools", "slide-designer"), os.path.join(out, "editeur"),
+                    ignore=shutil.ignore_patterns("test", ".build"))
     os.makedirs(os.path.join(out, "img"), exist_ok=True)
     for name in ("hero.jpg",):
         src = os.path.join(ROOT, "docs", "img", name)

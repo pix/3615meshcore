@@ -15,6 +15,8 @@ ref/*.terminfo.src
 # Build outputs
 .pio/
 site/dist/
+tools/mtl/mtl
+tools/slide-designer/test/.build/
 
 # Renders: bulky and regenerable from the dumps (tools/tour/tour.py render)
 tools/screenshot/renders/

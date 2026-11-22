@@ -50,7 +50,8 @@
 <tr><td>5</td><td>Région par défaut</td><td>13</td><td>Mon identité</td></tr>
 <tr><td>6</td><td>Régions automatiques (<code>D</code> département, <code>T</code> tout appliquer)</td><td>14</td><td>Accents composés : <code>*</code>, <code>#</code> ou rien</td></tr>
 <tr><td>7</td><td>Ajout automatique des contacts, et permissions de télémesure (entrées 8 à 10)</td><td>15</td><td>Bluetooth et alimentation</td></tr>
-<tr><td>8</td><td>Répétition par le client, oui / non</td><td></td><td></td></tr>
+<tr><td>8</td><td>Répétition par le client, oui / non</td><td>16</td><td>Radio : <code>MHz kHz SF CR dBm</code></td></tr>
+<tr><td></td><td></td><td>17</td><td>Veille (accueil, écran noir), messages gardés par conversation, mémoire libre</td></tr>
 </tbody>
 </table>
 
@@ -136,9 +137,15 @@
 <tr><td><code>ui reset</code></td><td>Retour au Sommaire, question fermée</td></tr>
 <tr><td><code>splash scene &lt;0-3|off&gt;</code></td><td>Figer une scène complète de la page d'accueil (pour les relevés) ; <code>off</code> relance l'animation</td></tr>
 <tr><td><code>splash speed [&lt;ms par image&gt; [&lt;s par scène&gt;]]</code></td><td>Le rythme de la page d'accueil, 130 ms et 18 s par défaut (enregistré)</td></tr>
+<tr><td><code>saver [&lt;accueil&gt; &lt;écran noir&gt;]</code></td><td>La veille : délais sans touche avant la page d'accueil, puis avant l'écran noir (<code>30s</code>, <code>10m</code>, <code>1h</code>, un nombre seul = minutes, <code>0</code> = jamais ; 10 min et jamais par défaut, enregistré)</td></tr>
+<tr><td><code>hist keep [&lt;n&gt;]</code></td><td>Messages gardés par conversation, de 10 à 160 (40 par défaut, enregistré) ; les conversations plus longues sont raccourcies peu à peu</td></tr>
+<tr><td><code>slide list</code></td><td>Les diapositives : <code>&lt;n&gt; &lt;40|80&gt; &lt;octets&gt;</code> par version, puis la place libre</td></tr>
+<tr><td><code>slide begin &lt;n&gt; &lt;40|80&gt; &lt;octets&gt;</code>, <code>slide data &lt;hex&gt;</code>, <code>slide end</code></td><td>Envoyer une version de la diapositive n (1 à 8, 12 288 octets au plus, 74 octets par ligne <code>data</code>)</td></tr>
+<tr><td><code>slide read &lt;n&gt; &lt;40|80&gt; [&lt;début&gt; [&lt;nombre&gt;]]</code></td><td>Relire une version : <code>size … offset … data &lt;hex&gt;</code>, 240 octets au plus par appel</td></tr>
+<tr><td><code>slide del &lt;n|all&gt; [40|80]</code>, <code>slide show &lt;n&gt;</code></td><td>Supprimer (les deux versions sauf si l'une est nommée) ; montrer tout de suite sur la page d'accueil</td></tr>
 </tbody>
 </table>
-<p>Les touches injectées sont traitées exactement comme les vraies et peuvent tout faire, y compris envoyer des messages ; les confirmations sont toujours demandées. 63 touches au plus attendent dans la file : envoyez les longs textes en plusieurs fois, avec <code>wait idle</code> entre deux. Noms de page : <code>splash home convlist conv actions msginfo contacts contact advert settings clock status channels channel news regionpick autoreg autoadd trace admin console graphs graph quick nearby mykey device</code>.</p>
+<p>Les touches injectées sont traitées exactement comme les vraies et peuvent tout faire, y compris envoyer des messages ; les confirmations sont toujours demandées. 63 touches au plus attendent dans la file : envoyez les longs textes en plusieurs fois, avec <code>wait idle</code> entre deux. Noms de page : <code>splash home convlist conv actions msginfo contacts contact advert settings clock status channels channel news regionpick autoreg autoadd trace admin console graphs graph quick nearby mykey device saver term</code>. Les commandes <code>slide</code>, <code>saver</code>, <code>hist keep</code>, <code>screen</code> et <code>ui state</code> passent aussi par Bluetooth (voir <a href="diapos.html">Diapositives et terminal</a>).</p>
 <pre><code>ui reset
 type 4
 key envoi

@@ -1,8 +1,9 @@
 {
  "version": 1,
- "generated": "2026-11-06T19:46:04+01:00",
+ "generated": "2026-11-22T13:25:07+01:00",
  "source": "tour",
  "note": "",
+ "firmware": "1017dacf",
  "screens": [
   {
    "id": "splash-1-40",
@@ -467,7 +468,7 @@
    "mode": 40,
    "page": "settings",
    "title": "Réglages et identité",
-   "description": "Sommaire 4. Les quinze réglages : nom, position, heure, canaux, régions, ajout des contacts, répétition, sonnerie, 40/80 colonnes...",
+   "description": "Sommaire 4. Les dix-sept réglages : nom, position, heure, canaux, régions, ajout des contacts, répétition, sonnerie, 40/80 colonnes, radio, veille et mémoire (avec la place libre)...",
    "dump": "dumps/40/settings.dump",
    "image": "renders/40/settings.png",
    "synthetic": false
@@ -479,7 +480,7 @@
    "mode": 80,
    "page": "settings",
    "title": "Réglages et identité",
-   "description": "Sommaire 4. Les quinze réglages : nom, position, heure, canaux, régions, ajout des contacts, répétition, sonnerie, 40/80 colonnes...",
+   "description": "Sommaire 4. Les dix-sept réglages : nom, position, heure, canaux, régions, ajout des contacts, répétition, sonnerie, 40/80 colonnes, radio, veille et mémoire (avec la place libre)...",
    "dump": "dumps/80/settings.dump",
    "image": "renders/80/settings.png",
    "synthetic": false
@@ -698,6 +699,30 @@
    "description": "Réglages 15. État du Bluetooth, code d'appairage, batterie ; couper le Bluetooth, redémarrer, éteindre (jamais pressé par la visite).",
    "dump": "dumps/80/device.dump",
    "image": "renders/80/device.png",
+   "synthetic": false
+  },
+  {
+   "id": "saver-40",
+   "shot": "saver",
+   "group": "Réglages",
+   "mode": 40,
+   "page": "?",
+   "title": "Veille, historique, mémoire",
+   "description": "Réglages 17. Retour à l'accueil puis écran noir après un délai sans touche, messages gardés par conversation ; la mémoire flash utilisée et libre, la place de l'historique et des diapositives.",
+   "dump": "dumps/40/saver.dump",
+   "image": "renders/40/saver.png",
+   "synthetic": false
+  },
+  {
+   "id": "saver-80",
+   "shot": "saver",
+   "group": "Réglages",
+   "mode": 80,
+   "page": "?",
+   "title": "Veille, historique, mémoire",
+   "description": "Réglages 17. Retour à l'accueil puis écran noir après un délai sans touche, messages gardés par conversation ; la mémoire flash utilisée et libre, la place de l'historique et des diapositives.",
+   "dump": "dumps/80/saver.dump",
+   "image": "renders/80/saver.png",
    "synthetic": false
   },
   {
@@ -1026,6 +1051,5 @@
    "image": "renders/80/splash-anim.gif",
    "synthetic": false
   }
- ],
- "firmware": "1017dacf"
+ ]
 }

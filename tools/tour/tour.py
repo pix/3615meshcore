@@ -182,8 +182,8 @@ SHOTS = [
          "Sommaire 5. Annonce locale ou à tout le réseau, et l'heure de la dernière (simple visite).",
          [M("5")], "advert"),
     Shot("settings", G_SETTINGS, "Réglages et identité",
-         "Sommaire 4. Les quinze réglages : nom, position, heure, canaux, régions, ajout des contacts, "
-         "répétition, sonnerie, 40/80 colonnes...",
+         "Sommaire 4. Les dix-sept réglages : nom, position, heure, canaux, régions, ajout des contacts, "
+         "répétition, sonnerie, 40/80 colonnes, radio, veille et mémoire (avec la place libre)...",
          [M("4")], "settings"),
     Shot("channels", G_SETTINGS, "Canaux",
          "Réglages 4. Chaque canal avec son numéro et sa région d'envoi ; H et P en ajoutent.",
@@ -213,6 +213,10 @@ SHOTS = [
          "Réglages 15. État du Bluetooth, code d'appairage, batterie ; couper le Bluetooth, redémarrer, éteindre "
          "(jamais pressé par la visite).",
          [M("4"), M("15")], "device"),
+    Shot("saver", G_SETTINGS, "Veille, historique, mémoire",
+         "Réglages 17. Retour à l'accueil puis écran noir après un délai sans touche, messages gardés par "
+         "conversation ; la mémoire flash utilisée et libre, la place de l'historique et des diapositives.",
+         [M("4"), M("17")], "saver"),
     Shot("clock", G_SETTINGS, "Date et heure",
          "Sommaire 6. L'heure locale, réglée à la main, par l'appli, par USB ou par l'accord de deux nœuds ; "
          "le fuseau horaire.",
@@ -237,7 +241,7 @@ ACTION_OK = ("Détails", "Rechercher")
 # ENVOI is only ever pressed on these pages, with these inputs (pure navigation)
 ENVOI_OK = {
     "home": {str(n) for n in range(1, 9)},                    # the 8 services (5 = advert PAGE)
-    "settings": {"3", "4", "5", "6", "7", "11", "12", "13", "15"},  # pages only; 10 = mode, see below
+    "settings": {"3", "4", "5", "6", "7", "11", "12", "13", "15", "17"},  # pages only; 10 = mode, see below
     "contacts": {"E", "C", "P"},                              # + a list number (contact sheet)
     "contact": {"7"},                                         # administration page (no login)
     "graphs": {str(n) for n in range(1, 10)},

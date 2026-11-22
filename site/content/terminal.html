@@ -1,0 +1,128 @@
+<!-- title: Le terminal du PC | nav: 7 | label: Terminal | desc: mtl term : un shell, w3m, elinks ou lynx du PC sur le Minitel par Bluetooth. Installation, appairage, touches, les deux modes, comment il tient à 9600 bauds, options et dépannage. -->
+<h1>Le terminal du PC</h1>
+<p class="lede">Avec <code>mtl term</code>, le Minitel devient l'écran et le clavier d'un programme qui tourne sur votre ordinateur : un shell, un navigateur texte (w3m, elinks, lynx), une messagerie, htop… Les octets passent par le Bluetooth du XIAO, qui reste par ailleurs un compagnon MeshCore.</p>
+<ol class="toc">
+<li><a href="#install">Installer mtl</a></li>
+<li><a href="#pair">Appairer le PC</a></li>
+<li><a href="#run">Lancer une session</a></li>
+<li><a href="#keys">Les touches</a></li>
+<li><a href="#modes">Les deux modes : émulateur ou terminfo du Minitel</a></li>
+<li><a href="#how">Comment ça tient à 9600 bauds</a></li>
+<li><a href="#web">Le Web en mode texte</a></li>
+<li><a href="#options">Les options</a></li>
+<li><a href="#trouble">Dépannage</a></li>
+</ol>
+
+<div class="warn"><p>Le terminal demande un firmware récent (le terminal Bluetooth, commande 0xC0). Il ne fonctionne pas avec la version publiée.</p></div>
+
+<h2 id="install">Installer mtl</h2>
+<p><code>mtl</code> est un programme en Go, dans <code>tools/mtl</code> du dépôt. Il faut Go 1.26 ou plus récent et, sous Linux, BlueZ (le service <code>bluetoothd</code>) :</p>
+<pre>git clone https://github.com/pix/3615meshcore
+cd 3615meshcore/tools/mtl
+go build -o mtl .
+./mtl          # l'aide</pre>
+<p>Il a été essayé sous Linux. La bibliothèque Bluetooth gère aussi macOS et Windows, sans essai à ce jour.</p>
+
+<h2 id="pair">Appairer le PC</h2>
+<p>Le XIAO ne parle qu'à un appareil Bluetooth à la fois : fermez d'abord l'application MeshCore du téléphone. Il demande un code à six chiffres à la première connexion, et le Minitel l'affiche à ce moment-là. Une fois l'appairage fait, il est gardé des deux côtés.</p>
+<pre>rfkill unblock bluetooth       # si le Bluetooth du PC est coupé
+bluetoothctl
+  scan on                      # attendre MeshCore-&lt;nom du nœud&gt;, noter son adresse
+  pair AA:BB:CC:DD:EE:FF       # taper le code affiché par le Minitel
+  trust AA:BB:CC:DD:EE:FF
+  quit</pre>
+
+<h2 id="run">Lancer une session</h2>
+<pre>./mtl term                                     # votre shell ($SHELL -l)
+./mtl term -- w3m https://lite.duckduckgo.com/lite/
+./mtl term -cols 40 -- htop                    # passe d'abord en 40 colonnes
+./mtl -addr AA:BB:CC:DD:EE:FF term             # sans chercher l'appareil
+./mtl term -native                             # le terminfo du Minitel, voir plus bas</pre>
+<p>Le Minitel efface l'écran et le programme s'y affiche. La session se termine quand le programme s'arrête, avec <b>CONNEXION/FIN</b> sur le Minitel, avec Ctrl-C sur le PC, ou si la liaison Bluetooth tombe. Le Minitel retrouve alors la page où il était et le choix 40/80 colonnes enregistré.</p>
+
+<h2 id="keys">Les touches</h2>
+<table>
+<thead><tr><th>Minitel</th><th>Le programme reçoit</th></tr></thead>
+<tbody>
+<tr><td>ENVOI</td><td>Entrée</td></tr>
+<tr><td>CORRECTION</td><td>Effacement arrière (DEL)</td></tr>
+<tr><td>ANNULATION</td><td>Ctrl-U : efface la ligne</td></tr>
+<tr><td>GUIDE</td><td>Tabulation : complétion dans le shell, champ suivant dans un navigateur</td></tr>
+<tr><td>SOMMAIRE</td><td>Échap : les menus de w3m et d'elinks, vi</td></tr>
+<tr><td>RETOUR / SUITE</td><td>Page précédente / page suivante</td></tr>
+<tr><td>Flèches, Ctrl + lettre</td><td>Les mêmes (les flèches passent en mode application quand le programme le demande)</td></tr>
+<tr><td>RÉPÉTITION</td><td>Passe de 40 à 80 colonnes ou l'inverse : le programme est redimensionné (SIGWINCH) et l'écran redessiné</td></tr>
+<tr><td>CONNEXION/FIN</td><td>Fin de la session : le Minitel reprend sa page</td></tr>
+</tbody>
+</table>
+<p>Le clavier arrive au programme tel quel : pas d'accents composés avec <code>*</code>, et en 80 colonnes <code>^ ~ `</code> ne sont pas des accents morts. En 80 colonnes, les touches é, ù, è et ç du Minitel envoient <code>{ | } \</code> (jeu ISO 646), ce dont un shell a besoin. En 40 colonnes, les touches accent du Minitel donnent bien é, à, ç…</p>
+
+<h2 id="modes">Les deux modes : émulateur ou terminfo du Minitel</h2>
+<h3 id="emulator">Par défaut : un émulateur de terminal sur le PC</h3>
+<p>Le programme croit parler à un <code>xterm</code> (variable <code>TERM</code>, modifiable avec <code>-term</code>). <code>mtl</code> fait tourner l'émulateur : il interprète tout ce que le programme écrit (couleurs, zones de défilement, écran alternatif, longues séquences) et tient une image de l'écran. Il traduit ensuite cette image pour le Minitel :</p>
+<ul>
+<li><b>40 colonnes</b> (Vidéotex) : les couleurs deviennent les niveaux de gris du Minitel (sauf avec <code>-mono</code>) ; les pavés █ ▀ ▄ ▌ ▐ ░ ▒ ▓ deviennent des mosaïques ; les lignes de cadre deviennent le trait long du Minitel ; les accents passent par le jeu G2.</li>
+<li><b>80 colonnes</b> (Mixte) : pas de couleur, le texte coloré passe en gras et un fond coloré en inverse ; les lettres françaises passent par le jeu français (SO … SI) ; les autres caractères sont remplacés par l'ASCII le plus proche.</li>
+</ul>
+<p>C'est le mode à préférer pour les navigateurs texte et les programmes plein écran.</p>
+<h3 id="native">-native : le terminfo du Minitel</h3>
+<p>Sans émulateur. Le programme reçoit la description terminfo du Minitel lui-même : <code>minitel1b</code> en 40 colonnes (Vidéotex), <code>minitel1b-80</code> en 80 colonnes, ou celle donnée avec <code>-term</code> (par exemple <code>minitel2-80</code>). Ses octets passent tels quels.</p>
+<p><code>mtl</code> ne fait que trois choses :</p>
+<ul>
+<li>il convertit le texte UTF-8 en caractères du Minitel ;</li>
+<li>il traduit les touches selon cette description ;</li>
+<li>il remplace les tabulations par des espaces, parce qu'en Vidéotex une tabulation n'avance que d'une colonne.</li>
+</ul>
+<p>Le programme n'est lu qu'au rythme du Minitel : il attend plutôt que d'empiler sa sortie. La largeur reste fixe pendant la session, parce qu'un programme lancé ne peut pas changer de <code>TERM</code> : RÉPÉTITION est annulé, et Ctrl-L redessine l'écran. Ces descriptions sont livrées avec ncurses (<code>infocmp minitel1b</code>).</p>
+
+<h2 id="how">Comment ça tient à 9600 bauds</h2>
+<p>Le Minitel reçoit environ 960 caractères par seconde, et un écran de 80 colonnes plein en fait 1 920. En mode émulateur, <code>mtl</code> garde donc en mémoire ce que le Minitel affiche, et n'envoie que la différence :</p>
+<ul>
+<li>seules les cases qui ont changé partent, avec le déplacement du curseur le plus court ; quelques cases inchangées sont renvoyées quand c'est moins cher qu'un déplacement ;</li>
+<li>« effacer jusqu'à la fin de la rangée » pour les fins de ligne vides, et la répétition Vidéotex (REP) pour les suites de cases identiques ;</li>
+<li>quand l'écran (ou une zone, comme dans un pager) a défilé, c'est le Minitel qui décale ses rangées, avec les fonctions « supprimer » et « insérer une rangée » : une ligne qui défile coûte une cinquantaine d'octets au lieu de 1 600 en 80 colonnes, et une trentaine au lieu de 800 en 40 ;</li>
+<li>une image n'est préparée que quand le Minitel a de la place : si le programme écrit plus vite que la ligne, les images intermédiaires sont sautées, et l'écran montre toujours l'état le plus récent, sans retard qui s'accumule.</li>
+</ul>
+<p>Du côté du XIAO, la session passe par une commande Bluetooth du compagnon (0xC0), en trames de 150 octets au plus :</p>
+<ul>
+<li>Le XIAO écrit chaque trame en entier vers le Minitel, ou la refuse si la file est pleine.</li>
+<li>Pendant que le PC envoie, il suspend sa sonnerie et ses interrogations d'état du Minitel. Sinon, elles pourraient se glisser au milieu d'une séquence.</li>
+<li>Il retire toute commande de protocole (PRO1, PRO2, PRO3, réinitialisation) qui changerait la configuration du Minitel.</li>
+</ul>
+<p>Les touches reviennent au PC sous forme de séquences xterm. À chaque passage de 40 à 80 colonnes, le XIAO numérote la nouvelle configuration : le PC jette tout ce qui était prévu pour l'ancienne largeur et redessine.</p>
+
+<h2 id="web">Le Web en mode texte</h2>
+<p>elinks, w3m et lynx marchent bien, avec des pages légères :</p>
+<ul>
+<li><a href="https://lite.duckduckgo.com/lite/">lite.duckduckgo.com/lite</a> : la recherche DuckDuckGo en tableau simple, sans JavaScript ;</li>
+<li><a href="http://frogfind.com">frogfind.com</a> : un moteur de recherche fait pour les vieux ordinateurs, qui simplifie aussi les pages trouvées ;</li>
+<li><a href="https://wiby.me">wiby.me</a> et <a href="https://search.marginalia.nu">search.marginalia.nu</a> : des moteurs qui privilégient les sites simples ;</li>
+<li>Wikipédia s'affiche bien telle quelle.</li>
+</ul>
+<pre>./mtl term -- elinks https://lite.duckduckgo.com/lite/</pre>
+<p>Dans elinks, les flèches vont de lien en lien, ENVOI suit le lien, RETOUR et SUITE font défiler, SOMMAIRE ouvre le menu. Les pages se lisent mieux en 80 colonnes : RÉPÉTITION bascule pendant la navigation.</p>
+
+<h2 id="options">Les options</h2>
+<table>
+<thead><tr><th>Option</th><th>Effet</th></tr></thead>
+<tbody>
+<tr><td><code>-addr AA:BB:…</code></td><td>L'adresse Bluetooth du XIAO (sinon <code>mtl</code> cherche un nom contenant <code>-name</code>, « MeshCore » par défaut)</td></tr>
+<tr><td><code>-hci hci1</code></td><td>L'adaptateur Bluetooth du PC (par défaut, le premier qui existe)</td></tr>
+<tr><td><code>-cols 40|80</code></td><td>La largeur au démarrage (par défaut, celle du Minitel)</td></tr>
+<tr><td><code>-term NOM</code></td><td>Le <code>TERM</code> donné au programme (<code>xterm</code> par défaut ; en <code>-native</code>, <code>minitel1b</code> ou <code>minitel1b-80</code>)</td></tr>
+<tr><td><code>-native</code></td><td>Sans émulateur : le terminfo du Minitel</td></tr>
+<tr><td><code>-mono</code></td><td>Pas de couleurs en niveaux de gris en 40 colonnes</td></tr>
+<tr><td><code>-noscroll</code></td><td>Ne jamais faire décaler les rangées par le Minitel</td></tr>
+<tr><td><code>-trace FICHIER</code></td><td>Garde tous les octets envoyés au Minitel (à comparer avec la commande USB <code>link txlog</code>)</td></tr>
+<tr><td><code>-q</code></td><td>Sans messages de progression</td></tr>
+</tbody>
+</table>
+
+<h2 id="trouble">Dépannage</h2>
+<ul>
+<li><b>« adapter hci0 does not exist »</b> : le Bluetooth du PC est coupé (<code>rfkill unblock bluetooth</code>) ou porte un autre numéro (<code>-hci</code>).</li>
+<li><b>« scan: Operation already in progress »</b> : une recherche tourne déjà, par exemple <code>scan on</code> dans bluetoothctl. Donnez l'adresse avec <code>-addr</code> : il n'y a alors rien à chercher.</li>
+<li><b>« no device named like… »</b> : une autre appli est connectée au XIAO (le téléphone), ou il est hors de portée.</li>
+<li><b>« the Minitel is not ready »</b> : le Minitel est éteint, ou le XIAO ne l'a pas encore trouvé. La commande USB <code>link log</code> en dit plus.</li>
+<li><b>Notifications ou caractères étranges</b> : <code>MTL_DEBUG=1 ./mtl …</code> affiche chaque trame Bluetooth échangée. Avec BlueZ, chaque notification arrive deux fois : <code>mtl</code> jette les doubles.</li>
+</ul>

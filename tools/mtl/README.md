@@ -7,7 +7,7 @@
 - **Settings.** It sets the screen saver delays and how many messages are kept per conversation.
 
 ```sh
-go build -o mtl .            # Go 1.22+; BlueZ for BLE
+go build -o mtl .            # Go 1.26+; BlueZ for BLE (Linux)
 ./mtl term                   # $SHELL on the Minitel
 ./mtl term -- w3m https://example.org
 ./mtl term -cols 40 -- htop  # forces 40 columns first
@@ -38,6 +38,8 @@ rfkill unblock bluetooth
 bluetoothctl            # scan on, then: pair <MAC>, enter the PIN shown on the Minitel; trust <MAC>
 ./mtl -addr <MAC> term  # or let it scan for a name containing "MeshCore" (-name to change)
 ```
+
+The same documentation, in French, with pairing and troubleshooting: https://pix.github.io/3615meshcore/terminal.html
 
 ## Terminal keys
 

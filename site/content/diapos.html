@@ -1,10 +1,9 @@
-<!-- title: Diapositives et terminal | nav: 5 | label: Diapositives | desc: Créer des diapositives pour la page d'accueil de 3615 MESHCORE dans le navigateur (éditeur Web Bluetooth), et l'outil mtl : un terminal du PC sur le Minitel, les diapositives, la veille. -->
-<h1>Diapositives et terminal</h1>
+<!-- title: Diapositives | nav: 5 | label: Diapositives | desc: Créer des diapositives pour la page d'accueil de 3615 MESHCORE dans le navigateur (éditeur Web Bluetooth), et l'outil mtl : un terminal du PC sur le Minitel, les diapositives, la veille. -->
+<h1>Diapositives</h1>
 <p class="lede">La page d'accueil peut montrer, après ses quatre scènes, jusqu'à huit diapositives faites sur un ordinateur : une page Vidéotex en 40 colonnes, une page en 80 colonnes, ou les deux. On les dessine dans le navigateur et on les envoie au Minitel par Bluetooth.</p>
 <ol class="toc">
 <li><a href="#editeur">L'éditeur de diapositives</a></li>
 <li><a href="#mtl">L'outil mtl</a></li>
-<li><a href="#terminal">Un terminal du PC sur le Minitel</a></li>
 <li><a href="#reglages">Veille et historique</a></li>
 </ol>
 
@@ -28,16 +27,7 @@ mtl slide add 4 page.vdt               # une page Vidéotex telle quelle (40 col
 mtl slide list | get 3 | del 3 | show 3</pre>
 <p>Images <code>.png</code>, <code>.gif</code> et <code>.jpg</code>, avec <code>-dither</code>, <code>-contrast</code> et <code>-gamma</code> pour les photos. Les textes peuvent contenir des couleurs et des positions ANSI.</p>
 
-<h2 id="terminal">Un terminal du PC sur le Minitel</h2>
-<p><code>mtl term</code> lance un shell, ou un navigateur texte comme w3m, lynx ou elinks, et l'affiche sur le Minitel par Bluetooth. Le PC fait tourner un émulateur de terminal et n'envoie que ce qui change à l'écran. En 80 colonnes, il fait défiler le texte par le Minitel lui-même, pour tenir à 9600 bauds. <code>mtl term -native</code> laisse le programme parler directement au Minitel, avec sa propre description terminfo (<code>minitel1b</code>, <code>minitel1b-80</code>).</p>
-<p>Les touches du Minitel :</p>
-<ul>
-<li><b>ENVOI</b> : Entrée ; <b>CORRECTION</b> : effacement arrière ; <b>ANNULATION</b> : efface la ligne.</li>
-<li><b>GUIDE</b> : tabulation ; <b>SOMMAIRE</b> : Échap.</li>
-<li><b>RETOUR</b> et <b>SUITE</b> : page précédente et page suivante.</li>
-<li><b>RÉPÉTITION</b> : passe en 40 ou 80 colonnes ; le programme est redimensionné.</li>
-<li><b>CONNEXION/FIN</b> : rend la main au Minitel.</li>
-</ul>
+<p><code>mtl</code> fait aussi tourner un shell ou un navigateur texte du PC sur le Minitel : voir <a href="terminal.html">Le terminal du PC</a>.</p>
 
 <h2 id="reglages">Veille et historique</h2>
 <p>Réglages 17 sur le Minitel, ou <code>mtl saver</code> et <code>mtl keep</code> :</p>

@@ -1,4 +1,4 @@
-<!-- title: Le terminal du PC | nav: 7 | label: Terminal | desc: mtl term : un shell, w3m, elinks ou lynx du PC sur le Minitel par Bluetooth. Installation, appairage, touches, les deux modes, comment il tient à 9600 bauds, options et dépannage. -->
+<!-- title: Le terminal du PC | nav: 8 | label: Terminal | desc: mtl term : un shell, w3m, elinks ou lynx du PC sur le Minitel par Bluetooth. Installation, appairage, touches, les deux modes, comment il tient à 9600 bauds, options et dépannage. -->
 <h1>Le terminal du PC</h1>
 <p class="lede">Avec <code>mtl term</code>, le Minitel devient l'écran et le clavier d'un programme qui tourne sur votre ordinateur : un shell, un navigateur texte (w3m, elinks, lynx), une messagerie, htop… Les octets passent par le Bluetooth du XIAO, qui reste par ailleurs un compagnon MeshCore.</p>
 <ol class="toc">
@@ -9,6 +9,7 @@
 <li><a href="#modes">Les deux modes : émulateur ou terminfo du Minitel</a></li>
 <li><a href="#how">Comment ça tient à 9600 bauds</a></li>
 <li><a href="#web">Le Web en mode texte</a></li>
+<li><a href="#vtx">Les services Minitel : MiniPavi et les 3615</a></li>
 <li><a href="#options">Les options</a></li>
 <li><a href="#trouble">Dépannage</a></li>
 </ol>
@@ -109,6 +110,15 @@ bluetoothctl
 </ul>
 <pre>./mtl term -- elinks https://lite.duckduckgo.com/lite/</pre>
 <p>Dans elinks, les flèches vont de lien en lien, ENVOI suit le lien, RETOUR et SUITE font défiler, SOMMAIRE ouvre le menu. Les pages se lisent mieux en 80 colonnes : RÉPÉTITION bascule pendant la navigation.</p>
+
+<h2 id="vtx">Les services Minitel : MiniPavi et les 3615</h2>
+<p>Des passionnés font revivre des services Minitel sur Internet. <code>mtl vtx</code> y branche le Minitel comme autrefois sur la ligne téléphonique : les pages Vidéotex arrivent telles quelles, en 40 colonnes, et les touches de fonction partent comme le Minitel les envoie.</p>
+<pre>./mtl vtx                    # MiniPavi, la passerelle vers les services d'aujourd'hui
+./mtl vtx ws://3611.re/ws    # l'annuaire électronique (3611), recréé
+./mtl vtx hôte:port          # un autre service, en TCP ou ws:// / wss://</pre>
+<p>Les pages arrivent à 1200 bauds, la vitesse de l'époque, pour laquelle elles ont été faites. Plus vite, le Minitel perd des caractères pendant qu'il efface ou fait défiler l'écran, et les animations s'emballent (<code>-speed 4800</code> pour essayer plus vite).</p>
+<p>ENVOI, SUITE, RETOUR, SOMMAIRE, GUIDE, ANNULATION, CORRECTION et RÉPÉTITION vont au service. CONNEXION/FIN (ou Ctrl-C sur le PC) rend le Minitel au compagnon. Si le Bluetooth décroche, mtl se reconnecte : le service reste connecté et la page reste à l'écran.</p>
+<p><b>Sans PC ni mtl :</b> la page <a href="editeur/minipavi.html">3615 dans le navigateur</a> fait la même chose depuis Chrome ou Edge (ordinateur ou Android), par Web Bluetooth. Elle joint MiniPavi en WebSocket sécurisé (<code>wss://go.minipavi.fr:8181</code>). Une page https ne peut ouvrir que des services <code>wss://</code> : pour un service en <code>ws://</code> (comme le 3611) ou en TCP, il faut <code>mtl vtx</code>.</p>
 
 <h2 id="options">Les options</h2>
 <table>

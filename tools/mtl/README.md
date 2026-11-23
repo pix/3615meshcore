@@ -72,6 +72,16 @@ Flat-colour pixel art with hard edges (isometric scenes, icons) converts best, a
 
 There is no emulator. The program gets the Minitel's own terminfo entry: `minitel1b` in 40 col (Vidéotex), `minitel1b-80` in 80 col, or the one you name with `-term`. Its bytes go through as they are. Only UTF-8 text is converted to Minitel characters (SS2 accents in 40 col, SO…SI French letters in 80 col, the rest folded). The pty expands tabs, because a Vidéotex tab moves one column. Arrow and page keys are translated to the entry's key strings. The program is read only as fast as the Minitel draws, so it blocks rather than piling up output. The width is fixed for the session: RÉPÉTITION is undone, and ^L redraws.
 
+## Vidéotex services (`vtx`)
+
+```
+./mtl vtx                       # MiniPavi (go.minipavi.fr:516), the 3615 revival gateway
+./mtl vtx ws://3611.re/ws       # the 3611 directory re-creation
+./mtl vtx host:port | wss://...
+```
+
+The Minitel goes back on line as on the telephone network: no emulator, no pty. The service's bytes go through as they are, always in 40 columns. The node still drops PRO1/2/3, except START/STOP scrolling and lowercase, which pages use (both are put back when the session ends). The node paces the output to 1200 baud by default (`-speed 4800`, or `9600` for no pacing). The pages were made for that speed: faster, the Minitel loses characters while it clears or scrolls the screen, and animations run too fast. `-trace file` records every byte sent to the Minitel. The keys come back as the Minitel sends them: ENVOI, RETOUR, RÉPÉTITION, GUIDE, ANNULATION, SOMMAIRE, CORRECTION and SUITE as `SEP 13 41..48`, accents as SS2. CONNEXION/FIN or Ctrl-C ends it. TCP services get every telnet option refused. MiniPavi's `wss://` port (8181) reads the `Sec-WebSocket-Key` header name case-sensitively and Go sends it as `Sec-Websocket-Key`: it answers the accept of an empty key and is refused. Use its TCP port 516, which serves the same thing (browsers send the exact spelling: the web page `minipavi.html` of the slide designer uses 8181). A lost BLE link is reconnected; the service stays connected and the Minitel keeps its page.
+
 ## Why it keeps up at 9600 baud
 
 The Minitel takes about 960 characters a second. `mtl` keeps a model of what the Minitel shows and sends the difference:

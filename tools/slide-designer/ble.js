@@ -60,6 +60,29 @@
       this.onstate('connected');
     }
 
+    // the same device again, without the chooser (the link was lost)
+    async reconnect() {
+      const dev = this.device;
+      if (!dev) throw new Error('no device');
+      if (this.connected) return;
+      this.recentPseq = [];
+      this.pushes.length = 0;
+      this.onstate('connecting');
+      try {
+        const server = await dev.gatt.connect();
+        const svc = await server.getPrimaryService(NUS);
+        this.rx = await svc.getCharacteristic(NUS_RX);
+        this.tx = await svc.getCharacteristic(NUS_TX);
+        this.tx.addEventListener('characteristicvaluechanged', this._onNotify);
+        await this.tx.startNotifications();
+      } catch (e) {
+        this.rx = this.tx = null;
+        this.onstate('disconnected');
+        throw e;
+      }
+      this.onstate('connected');
+    }
+
     disconnect() {
       const d = this.device;
       this.rx = this.tx = null;

@@ -328,6 +328,9 @@ def build(out=DIST):
     # the slide designer (tools/slide-designer, copied to editeur/ above): a menu entry, no page
     pages.append({"file": "editeur/index.html", "title": "Éditeur de diapositives", "label": "Éditeur", "nav": "6",
                   "desc": "", "body": None, "link": True})
+    # the Vidéotex services page, beside it (tools/slide-designer/minipavi.html)
+    pages.append({"file": "editeur/minipavi.html", "title": "Services 3615 (MiniPavi)", "label": "MiniPavi", "nav": "7",
+                  "desc": "", "body": None, "link": True})
     pages.sort(key=lambda p: (p["nav"] is None, int(p["nav"]) if p["nav"] and p["nav"].isdigit() else 99))
 
     sizes = []

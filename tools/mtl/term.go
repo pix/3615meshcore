@@ -312,7 +312,7 @@ func openTerm(b *BLE) ([]byte, error) {
 	var err error
 	for i := 0; i < 3; i++ {
 		var r []byte
-		if r, err = b.Request('O', nil, 3*time.Second); err == nil {
+		if r, err = b.Request('O', openFlags, 3*time.Second); err == nil {
 			return r, nil
 		}
 		time.Sleep(time.Second)

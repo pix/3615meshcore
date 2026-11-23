@@ -48,6 +48,11 @@ func usage() {
                      -native: no emulator, TERM=minitel1b / minitel1b-80 (the device's termcap)
                      Minitel keys: ENVOI=Enter CORRECTION=Backspace ANNULATION=^U GUIDE=Tab
                      SOMMAIRE=Esc RETOUR/SUITE=PgUp/PgDn RÉPÉTITION=40/80 col CONNEXION/FIN=quit
+  vtx [-speed 1200] [-trace file] [host:port | ws://... | wss://...]
+                     a Vidéotex service (3615 revivals) on the Minitel, its keys as they
+                     are (ENVOI, SUITE...), paced to 1200 baud as the pages expect;
+                     default go.minipavi.fr:516 (MiniPavi);
+                     CONNEXION/FIN quits
   slide list | add <n> <file> [-cols 40|80|both] [-raw] | get <n> [-cols ..] [-o file]
         | del <n|all> [40|80] | show <n>
   slide preview <file>... [-cols 40|80|both] [-hold 10s]
@@ -127,6 +132,35 @@ func run(args []string, addr, name, usb string, verbose bool) error {
 			o.TermEnv = "xterm"
 		}
 		return RunTerm(b, o)
+	case "vtx":
+		if usb != "" {
+			return errors.New("vtx needs BLE")
+		}
+		fs := flag.NewFlagSet("vtx", flag.ExitOnError)
+		trace := fs.String("trace", "", "write every byte sent to the Minitel to this file")
+		speed := fs.Int("speed", 1200, "line speed to pace the pages to: 1200 (as on the phone line), 4800, 9600 (none)")
+		fs.Parse(args[1:])
+		if *trace != "" {
+			f, err := os.Create(*trace)
+			if err != nil {
+				return err
+			}
+			defer f.Close()
+			traceFile = f
+		}
+		if *speed < 300 || *speed > 9600 {
+			return errors.New("-speed: 300 to 9600")
+		}
+		target := vtxDefault
+		if fs.NArg() > 0 {
+			target = fs.Arg(0)
+		}
+		b, err := ConnectBLE(addr, name, verbose)
+		if err != nil {
+			return err
+		}
+		defer b.Close()
+		return RunVtx(b, target, *speed, verbose)
 	case "slide":
 		if len(args) >= 2 && args[1] == "encode" {
 			return slideEncode(args[2:])

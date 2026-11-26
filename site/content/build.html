@@ -17,7 +17,7 @@
 <table>
 <thead><tr><th>Pièce</th><th>Remarques</th></tr></thead>
 <tbody>
-<tr><td>Minitel 2</td><td>Mis au point et essayé sur un Minitel 2 Philips, ROM <code>Bv9</code>, le seul modèle testé à ce jour. Il faut la prise DIN à cinq broches « péri-informatique » à l'arrière. Le Minitel 1B a la même prise et le mode 80 colonnes, mais s'arrête à 4800 bauds alors que le micrologiciel veut 9600 : non testé.</td></tr>
+<tr><td>Minitel 2</td><td>Mis au point et essayé sur un Minitel 2 Philips, ROM <code>Bv9</code>, le seul modèle testé à ce jour. Il faut la prise DIN à cinq broches « péri-informatique » à l'arrière. Le Minitel 1B a la même prise et le mode 80 colonnes, mais s'arrête à 4800 bauds : le micrologiciel le reconnaît à l'identifiant de sa ROM et s'y règle tout seul (essayé en simulation, pas encore sur un vrai 1B).</td></tr>
 <tr><td>Seeed Studio XIAO nRF52840</td><td>Version simple ou Sense. Environnement du micrologiciel : <code>Xiao_nrf52_companion_minitel</code>.</td></tr>
 <tr><td>Wio-SX1262 pour XIAO</td><td>La radio LoRa (D1–D5, D8–D10), avec une antenne pour votre bande (868 MHz en Europe).</td></tr>
 <tr><td>Transistor NPN 2N2222A</td><td>En boîtier TO-92 ou TO-18. La plupart des 2N2222A/PN2222A en TO-92 sont E-B-C : vérifiez le vôtre au testeur de diode du multimètre.</td></tr>
@@ -91,7 +91,7 @@ pio run -e Xiao_nrf52_companion_minitel -t upload --upload-port /dev/ttyACM0</co
 <h2 id="boot">Premier démarrage</h2>
 <ol>
 <li>Branchez le câble DIN au Minitel, alimentez le XIAO, allumez le Minitel.</li>
-<li>Le Minitel démarre sur son répertoire local. Sortez-en avec <kbd class="k">Fnct</kbd> + <kbd class="k">Sommaire</kbd> (voir plus bas). Le micrologiciel essaie 9600, 1200, 4800 et 300 bauds toutes les 3 s, trouve le terminal, le passe à 9600 bauds, choisit 80 ou 40 colonnes et coupe l'écho local. La page d'accueil apparaît ; n'importe quelle touche fait entrer dans le service.</li>
+<li>Le Minitel démarre sur son répertoire local. Sortez-en avec <kbd class="k">Fnct</kbd> + <kbd class="k">Sommaire</kbd> (voir plus bas). Le micrologiciel essaie 9600, 1200, 4800 et 300 bauds toutes les 3 s, trouve le terminal, le passe à la vitesse la plus rapide qu'il accepte (9600 bauds pour un Minitel 2, 4800 pour un 1B), choisit 80 ou 40 colonnes et coupe l'écho local. La page d'accueil apparaît ; n'importe quelle touche fait entrer dans le service.</li>
 <li>Appairez l'application MeshCore du téléphone par Bluetooth si vous voulez l'utiliser à côté : le code d'appairage est tiré au hasard à chaque démarrage et s'affiche sur le Minitel quand le téléphone s'appaire ; un code fixe se choisit en Réglages 15 (<code>0</code> = de nouveau aléatoire).</li>
 <li>Réglez l'heure (Sommaire 6, ou laissez faire l'appli ou deux nœuds d'accord), le nom et la position du nœud (Réglages 1 et 2), et votre département pour les régions (Réglages 6).</li>
 <li>40 ou 80 colonnes : <kbd class="k">Répétition</kbd> sur n'importe quelle page, ou Réglages 10. Le choix est enregistré.</li>

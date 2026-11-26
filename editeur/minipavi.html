@@ -1,0 +1,102 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>3615 sur le Minitel</title>
+<link rel="stylesheet" href="style.css">
+<style>
+  body { display: block; overflow: auto; }
+  .wrap { max-width: 720px; margin: 0 auto; padding: 18px 16px 40px; }
+  .card { background: var(--panel); border: 1px solid var(--line); border-radius: var(--radius); padding: 14px 16px; margin: 14px 0; }
+  .card h2 { font-size: 14px; margin: 0 0 8px; display: flex; align-items: center; gap: 8px; }
+  .card h2 .n { display: inline-grid; place-items: center; width: 20px; height: 20px; border-radius: 50%; background: var(--accent-dim); color: var(--accent); font-size: 12px; }
+  .state { font-size: 12px; padding: 2px 8px; border-radius: 10px; background: var(--panel-2); color: var(--muted); }
+  .state.on { color: var(--ok); }
+  .state.err { color: var(--danger); }
+  input.url { flex: 1; min-width: 220px; }
+  #log { height: 180px; overflow: auto; background: #0f1217; border: 1px solid var(--line); border-radius: var(--radius); padding: 6px 8px; font: 12px/1.45 ui-monospace, Menlo, Consolas, monospace; white-space: pre-wrap; }
+  #log .err { color: var(--danger); }
+  #log .ok { color: var(--ok); }
+  .stats { font-size: 12px; color: var(--muted); }
+  .warn { border-color: #5a4220; background: #1d1810; }
+  ul.help { margin: 6px 0 0; padding-left: 18px; color: var(--muted); }
+  ul.help li { margin: 3px 0; }
+  a { color: var(--accent); }
+</style>
+</head>
+<body>
+<header class="top">
+  <div class="brand"><span class="mt">3615 MESHCORE</span><span class="sub">services Minitel</span></div>
+  <span class="grow"></span>
+  <a href="../index.html" class="small">Le site</a>&nbsp;·&nbsp;<a href="index.html" class="small">Éditeur de diapositives</a>
+</header>
+
+<div class="wrap">
+  <p class="muted">Le Minitel se connecte à <b>MiniPavi</b> et aux autres services Minitel d'aujourd'hui (3611, 3615co.de…) comme sur le réseau téléphonique : la page relie le service au Minitel par Bluetooth, sans émulateur. On tape sur le clavier du Minitel ; ENVOI, SOMMAIRE, RETOUR, SUITE… marchent comme à l'époque.</p>
+
+  <div id="noBle" class="card warn" hidden>
+    Ce navigateur n'a pas Web Bluetooth : utilisez Chrome ou Edge sur ordinateur, ou Chrome sur Android.
+  </div>
+
+  <section class="card">
+    <h2><span class="n">1</span> Le Minitel <span class="grow"></span><span id="bleState" class="state">non connecté</span></h2>
+    <div class="row">
+      <button id="btnBle" class="primary">Connecter</button>
+      <button id="btnBleOff" disabled>Déconnecter</button>
+      <span id="bleName" class="muted small"></span>
+    </div>
+    <p class="hint">Le nœud apparaît sous le nom « MeshCore-… ». La première fois, il demande un code : le Minitel l'affiche. Fermez l'application MeshCore du téléphone pendant ce temps (une seule connexion Bluetooth à la fois).</p>
+  </section>
+
+  <section class="card">
+    <h2><span class="n">2</span> Le service <span class="grow"></span><span id="svcState" class="state">raccroché</span></h2>
+    <div class="row">
+      <select id="preset">
+        <option value="wss://go.minipavi.fr:8181">MiniPavi : la passerelle des 3615</option>
+        <option value="wss://minitel.labbej.fr:8182">Passerelle LABBEJ27 (MiniPavi)</option>
+        <option value="wss://3611.re/ws">3611 : l'annuaire électronique</option>
+        <option value="wss://3615co.de/ws">3615co.de : le kiosque 3615</option>
+        <option value="wss://galaxy.microtel.fr:50123">Microtel Galaxy</option>
+        <optgroup label="ws:// : page ouverte en local, ou mtl vtx">
+          <option value="ws://mntl.joher.com:2018/?echo">3614 HACKER</option>
+        </optgroup>
+        <option value="">Autre adresse…</option>
+      </select>
+      <input id="url" class="url mono" spellcheck="false" value="wss://go.minipavi.fr:8181" aria-label="Adresse du service">
+    </div>
+    <div class="row">
+      <label for="speed">Vitesse</label>
+      <select id="speed">
+        <option value="12" selected>1200 bauds (comme le téléphone)</option>
+        <option value="48">4800 bauds</option>
+        <option value="96">9600 bauds (sans limite)</option>
+      </select>
+      <span class="grow"></span>
+      <button id="btnCall" class="primary" disabled>Appeler</button>
+      <button id="btnHang" disabled>Raccrocher</button>
+    </div>
+    <p class="hint">Les pages sont faites pour 1200 bauds : plus vite, le Minitel perd des caractères quand il efface ou fait défiler l'écran, et les animations vont trop vite. CONNEXION/FIN sur le Minitel raccroche aussi.</p>
+    <p class="stats" id="stats"></p>
+  </section>
+
+  <section class="card">
+    <h2>Journal</h2>
+    <div id="log" aria-live="polite"></div>
+  </section>
+
+  <section class="card">
+    <h2>Bon à savoir</h2>
+    <ul class="help">
+      <li>La page ne passe que par le navigateur : le service est joint en WebSocket sécurisé (<code>wss://</code>). Une page https ne peut pas ouvrir de <code>ws://</code> (comme 3614 HACKER) ni de connexion TCP : pour ces services-là, utilisez <code>mtl vtx</code> sur un PC, ou ouvrez cette page en local (<code>http://localhost</code>).</li>
+      <li>Si la liaison Bluetooth se coupe, la page se reconnecte toute seule : le service reste en ligne et le Minitel garde sa page.</li>
+      <li>Demande un firmware récent (la session Vidéotex de <code>mtl vtx</code>).</li>
+    </ul>
+  </section>
+</div>
+
+<script src="minitel.js"></script>
+<script src="ble.js"></script>
+<script src="minipavi.js"></script>
+</body>
+</html>

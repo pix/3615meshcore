@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Diapositives · 3615 MESHCORE</title>
+<meta name="description" content="Créer des diapositives pour la page d&#x27;accueil de 3615 MESHCORE dans le navigateur (éditeur Web Bluetooth), et l&#x27;outil mtl : un terminal du PC sur le Minitel, les diapositives, la veille.">
+<meta name="color-scheme" content="dark">
+<meta name="theme-color" content="#0c0d10">
+<link rel="preload" href="assets/fonts/minitel40.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="assets/css/site.css">
+<link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+</head>
+<body>
+<a class="skip" href="#main">Aller au contenu</a>
+<header class="top">
+<div class="svc"><a href="index.html">3615 MESHCORE</a><span class="here">Diapositives</span></div>
+<nav aria-label="Sommaire"><ul class="menu"><li><a href="index.html"><span class="n">SOMMAIRE</span></a></li><li><a href="screens.html"><span class="n">1</span>Ecrans</a></li><li><a href="features.html"><span class="n">2</span>Fonctions</a></li><li><a href="build.html"><span class="n">3</span>Montage</a></li><li><a href="reference.html"><span class="n">4</span>Référence</a></li><li><a href="diapos.html" aria-current="page"><span class="n">5</span>Diapositives</a></li><li><a href="editeur/index.html"><span class="n">6</span>Editeur</a></li><li><a href="editeur/minipavi.html"><span class="n">7</span>MiniPavi</a></li><li><a href="terminal.html"><span class="n">8</span>Terminal</a></li><li><a href="troubleshooting.html"><span class="n">9</span>Dépannage</a></li><li><a href="credits.html"><span class="n">10</span>Crédits</a></li></ul></nav>
+</header>
+<main id="main">
+<h1>Diapositives</h1>
+<p class="lede">La page d'accueil peut montrer, après ses quatre scènes, jusqu'à huit diapositives faites sur un ordinateur : une page Vidéotex en 40 colonnes, une page en 80 colonnes, ou les deux. On les dessine dans le navigateur et on les envoie au Minitel par Bluetooth.</p>
+<ol class="toc">
+<li><a href="#editeur">L'éditeur de diapositives</a></li>
+<li><a href="#mtl">L'outil mtl</a></li>
+<li><a href="#reglages">Veille et historique</a></li>
+</ol>
+
+<div class="warn"><p>Ces outils demandent un firmware récent (commandes <code>slide</code>, <code>saver</code>, <code>hist keep</code> et le terminal Bluetooth). Ils ne fonctionnent pas encore avec la version publiée.</p></div>
+
+<h2 id="editeur">L'éditeur de diapositives</h2>
+<p><a href="editeur/index.html"><b>Ouvrir l'éditeur</b></a> (Chrome ou Edge sur ordinateur, Chrome sur Android : il faut Web Bluetooth).</p>
+<ul>
+<li>Une grille de 40 ou 80 colonnes dans la police du Minitel : texte, accents, inverse, clignotement ; en 40 colonnes, double taille, couleurs (vues en niveaux de gris) et mosaïques à dessiner bloc par bloc.</li>
+<li>Import d'une image : en 40 colonnes, mosaïques en huit niveaux de gris ; en 80 colonnes, des caractères. Le pixel art aux aplats nets rend le mieux. Import et export de pages <code>.vdt</code>.</li>
+<li>Par Bluetooth : <b>aperçu sur le Minitel</b> sans rien enregistrer, envoi dans l'un des huit emplacements, relecture d'une diapositive déjà envoyée, suppression.</li>
+<li>Le projet se sauvegarde en fichier <code>.json</code> et dans le navigateur.</li>
+</ul>
+<p>Le XIAO demande un code à la première connexion : le Minitel l'affiche. Sous Linux, appairez-le d'abord avec <code>bluetoothctl</code> (<code>pair</code>, puis <code>trust</code>). Une seule appli à la fois : fermez l'application MeshCore du téléphone pendant ce temps.</p>
+
+<h2 id="mtl">L'outil mtl</h2>
+<p><code>mtl</code> (en Go, dans <code>tools/mtl</code> du dépôt) fait la même chose en ligne de commande, par Bluetooth ou par USB :</p>
+<pre>mtl slide preview page.vdt image.png   # sur le Minitel tout de suite, rien n'est enregistré
+mtl slide add 3 image.png              # emplacement 3, en 40 et en 80 colonnes
+mtl slide add 4 page.vdt               # une page Vidéotex telle quelle (40 colonnes)
+mtl slide list | get 3 | del 3 | show 3</pre>
+<p>Images <code>.png</code>, <code>.gif</code> et <code>.jpg</code>, avec <code>-dither</code>, <code>-contrast</code> et <code>-gamma</code> pour les photos. Les textes peuvent contenir des couleurs et des positions ANSI.</p>
+
+<p><code>mtl</code> fait aussi tourner un shell ou un navigateur texte du PC sur le Minitel : voir <a href="terminal.html">Le terminal du PC</a>.</p>
+
+<h2 id="reglages">Veille et historique</h2>
+<p>Réglages 17 sur le Minitel, ou <code>mtl saver</code> et <code>mtl keep</code> :</p>
+<ul>
+<li>retour à la page d'accueil, puis écran noir, après un délai sans toucher le clavier (0 = jamais) ;</li>
+<li>nombre de messages gardés par conversation, de 10 à 160 ;</li>
+<li>place libre dans la mémoire flash.</li>
+</ul>
+<figure class="shot"><figcaption><h3>Veille, historique, mémoire<span class="modes" role="group" aria-label="Colonnes"><button type="button" data-mode="80" aria-pressed="true">80 col.</button><button type="button" data-mode="40" aria-pressed="false">40 col.</button></span></h3><p>Réglages 17. Retour à l&#x27;accueil puis écran noir après un délai sans touche, messages gardés par conversation ; la mémoire flash utilisée et libre, la place de l&#x27;historique et des diapositives.</p></figcaption><div class="variant" data-mode="80"><div class="tube"><div class="mt mt80" role="group" aria-label="Veille, historique, mémoire, 80 colonnes"><div class="mr">                                                                                </div><div class="mr"><span class="f0 k7"> </span><span class="f0 k7 w">3615 MESHCORE</span><span class="f0 k7">                       </span><span class="f0 k7 b">168</span><span class="f0 k7"> non lus  BLE libre  4.15 V  [S] 13:13? </span></div><div class="mr"><span class="f0 k7 w"> Veille et mémoire </span><span class="u">                                                             </span></div><div class="mr">                                                                                </div><div class="mr">                                                                                </div><div class="mr">   <span class="f0 k7"> 1 </span> Page d'accueil après (sans touche)    <span class="w">10 min</span>                             </div><div class="mr">                                                                                </div><div class="mr">   <span class="f0 k7"> 2 </span> Ecran noir après (sans touche)        <span class="w">jamais</span>                             </div><div class="mr">                                                                                </div><div class="mr">   <span class="f0 k7"> 3 </span> Messages gardés par conversation      <span class="w">40</span>                                 </div><div class="mr">                                                                                </div><div class="mr">   <span class="f0 k7"> 4 </span> Effacer les diapositives du PC        <span class="w">2</span>                                  </div><div class="mr">                                                                                </div><div class="mr">                                                                                </div><div class="mr">   Mémoire flash : 180 Ko utilisés sur 2048 Ko, <span class="w">1868 Ko libres</span>                  </div><div class="mr">                                                                                </div><div class="mr">   Historique     : 13 fichiers, 60 Ko ; au plus 384 Ko (48 conv. de 40 msg)    </div><div class="mr">   Diapositives   : 2, 2 Ko (du PC : éditeur web ou outil mtl)                  </div><div class="mr">                                                                                </div><div class="mr">   Une touche rallume l'écran. Le compteur repart à chaque touche.              </div><div class="mr">                                                                                </div><div class="mr">                                                                                </div><div class="mr">                                                                                </div><div class="mr">Votre choix puis <span class="f0 k7"> ENVOI </span>   <span class="f0 k7"> RETOUR </span> réglages   <span class="f0 k7"> SOMMAIRE </span> menu                  </div><div class="mr">Votre choix : .<span class="f0 k7 cu" style="--cf:var(--c7);--cb:var(--c0)">.</span>                                                                </div></div></div></div><div class="variant" data-mode="40" hidden><div class="tube"><div class="mt mt40" role="group" aria-label="Veille, historique, mémoire, 40 colonnes"><div class="mr">                                        </div><div class="mr"><span class="f0 k7"> 3615 MESHCOR</span><span class="f0 k7 b">168</span><span class="f0 k7"> msg ble 4.1V [S]13:13? </span></div><div class="mr">                                        </div><div class="mr"><span class="f0 k7 dh"> </span><span class="f0 k7 dh">V</span><span class="f0 k7 dh">e</span><span class="f0 k7 dh">i</span><span class="f0 k7 dh">l</span><span class="f0 k7 dh">l</span><span class="f0 k7 dh">e</span><span class="f0 k7 dh">,</span><span class="f0 k7 dh"> </span><span class="f0 k7 dh">m</span><span class="f0 k7 dh">é</span><span class="f0 k7 dh">m</span><span class="f0 k7 dh">o</span><span class="f0 k7 dh">i</span><span class="f0 k7 dh">r</span><span class="f0 k7 dh">e</span><span class="f0 k7 dh"> </span>                       </div><div class="mr"><span class="m" aria-hidden="true">🬂🬂🬂🬂🬂🬂🬂🬂🬂🬂🬂🬂🬂🬂🬂🬂🬂🬂🬂🬂🬂🬂🬂🬂🬂🬂🬂🬂🬂🬂🬂🬂🬂🬂🬂🬂🬂🬂🬂🬂</span></div><div class="mr"><span class="f0 k7"> 1 </span> Accueil après        10 min         </div><div class="mr"><span class="f0 k7"> 2 </span> Ecran noir après     jamais         </div><div class="mr"><span class="f0 k7"> 3 </span> Messages par conv.   40             </div><div class="mr"><span class="f0 k7"> 4 </span> Effacer les diapos   2              </div><div class="mr"><span class="m" aria-hidden="true">🬭🬭🬭🬭🬭🬭🬭🬭🬭🬭🬭🬭🬭🬭🬭🬭🬭🬭🬭🬭🬭🬭🬭🬭🬭🬭🬭🬭🬭🬭🬭🬭🬭🬭🬭🬭🬭🬭🬭🬭</span></div><div class="mr"> Flash : 180/2048 Ko                    </div><div class="mr"> <span class="f0 k7">Libre : 1868 Ko</span>                        </div><div class="mr"> Historique : 13 fich. 60 Ko            </div><div class="mr">   au plus 384 Ko                       </div><div class="mr"> Diapos du PC : 2, 2 Ko                 </div><div class="mr">                                        </div><div class="mr">                                        </div><div class="mr">                                        </div><div class="mr">                                        </div><div class="mr">                                        </div><div class="mr">                                        </div><div class="mr">                                        </div><div class="mr">                                        </div><div class="mr">Choix + <span class="f0 k7"> ENVOI </span>  <span class="f0 k7"> RETOUR </span>               </div><div class="mr">Choix : .<span class="f0 k7 cu" style="--cf:var(--c7);--cb:var(--c0)">.</span>                              </div></div></div></div></figure>
+
+</main>
+<footer>
+<p>3615 MESHCORE : un compagnon MeshCore sur Minitel 2. Micrologiciel, outils et licences : voir les <a href="credits.html">crédits</a>.</p>
+<p>Projet indépendant, sans lien avec Orange, France Télécom ni le projet MeshCore. Le nom « Minitel » ne sert qu'à désigner le terminal.</p>
+</footer>
+<script src="assets/js/site.js" defer></script>
+</body>
+</html>
